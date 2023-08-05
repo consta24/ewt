@@ -1,7 +1,7 @@
 package ewt.msvc.identity.web.rest;
 
 
-import ewt.msvc.identity.security.SecurityUtils;
+import ewt.msvc.config.security.SecurityUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,5 +43,4 @@ public class TestResource {
             .map(jwt -> ResponseEntity.ok().body(jwt))
             .onErrorReturn(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred"));
     }
-
 }

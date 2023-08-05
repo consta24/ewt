@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ewt.msvc.feign</groupId>
+    <artifactId>ewt-msvc-feign</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>ewt-msvc-identity-feign-client</module>
+    </modules>
+
+    <parent>
+        <groupId>ewt.msvc.parent</groupId>
+        <artifactId>ewt-msvc-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <openapi.generator.skip>true</openapi.generator.skip>
+        <openapi.inputSpec>""</openapi.inputSpec>
+        <openapi.apiPackage>""</openapi.apiPackage>
+        <openapi.modelPackage>""</openapi.modelPackage>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>6.6.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${openapi.generator.skip}</skip>
+                            <inputSpec>${openapi.inputSpec}</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <library>spring-cloud</library>
+                            <skipValidateSpec>true</skipValidateSpec>
+                            <configOptions>
+                                <sourceFolder>src/main/java</sourceFolder>
+                                <apiPackage>${openapi.apiPackage}</apiPackage>
+                                <modelPackage>${openapi.modelPackage}</modelPackage>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <documentationProvider>source</documentationProvider>
+                                <parentArtifactId>ewt-msvc-parent</parentArtifactId>
+                                <parentGroupId>ewt.msvc.parent</parentGroupId>
+                                <parentVersion>0.0.1-SNAPSHOT</parentVersion>
+                                <openApiNullable>false</openApiNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+<!--            <plugin>-->
+<!--                <groupId>com.google.code.maven-replacer-plugin</groupId>-->
+<!--                <artifactId>replacer</artifactId>-->
+<!--                <version>1.5.3</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <phase>generate-sources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>-->
+<!--                                replace-->
+<!--                            </goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <includes>-->
+<!--                                <include>${project.basedir}/**/openapi/src/main/java/**/*.java</include>-->
+<!--                            </includes>-->
+<!--                            <regex>false</regex>-->
+<!--                            <replacements>-->
+<!--                                <replacement>-->
+<!--                                    -->
+<!--                                </replacement>-->
+<!--                            </replacements>-->
+<!--                        </configuration>-->
+<!--                        -->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+        </plugins>
+    </build>
+
+</project>

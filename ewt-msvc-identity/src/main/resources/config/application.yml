@@ -160,7 +160,7 @@ info:
 
 jhipster:
   clientApp:
-    name: 'ewtMicroserviceApp'
+    name: 'ewtMsvcIdentityApp'
   # cors:
   #   allowed-origins: "*"
   #   allowed-methods: "*"

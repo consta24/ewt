@@ -7,11 +7,12 @@
     <artifactId>ewt-msvc-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>ewt-parent</name>
+    <name>ewt-msvc-parent</name>
 
     <modules>
         <module>../ewt-msvc-identity</module>
         <module>../ewt-msvc-config</module>
+        <module>../ewt-msvc-product</module>
     </modules>
 
     <properties>
@@ -22,7 +23,7 @@
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <start-class>ewt.msvc.identity.EwtMsvcIdentityApp</start-class>
+        <start-class>ewt.msvc.product.EwtMsvcIdentityApp</start-class>
         <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx1G</argLine>
         <m2e.apt.activation>jdt_apt</m2e.apt.activation>
         <run.addResources>false</run.addResources>
@@ -30,7 +31,6 @@
         <spring-boot.version>3.1.1</spring-boot.version>
         <archunit-junit5.version>1.0.1</archunit-junit5.version>
         <blockhound-junit-platform.version>1.0.8.RELEASE</blockhound-junit-platform.version>
-        <checkstyle.version>10.12.1</checkstyle.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <git-commit-id-maven-plugin.version>6.0.0</git-commit-id-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
@@ -44,7 +44,6 @@
         <liquibase-plugin.username/>
         <liquibase.version>4.20.0</liquibase.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
         <maven-clean-plugin.version>3.3.1</maven-clean-plugin.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-eclipse-plugin.version>2.1</maven-eclipse-plugin.version>
@@ -59,7 +58,6 @@
         <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
         <micrometer-context-propagation.version>1.0.4</micrometer-context-propagation.version>
         <modernizer-maven-plugin.version>2.6.0</modernizer-maven-plugin.version>
-        <nohttp-checkstyle.version>0.0.11</nohttp-checkstyle.version>
         <profile.api-docs/>
         <profile.e2e/>
         <profile.no-liquibase/>
@@ -323,10 +321,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
@@ -435,36 +429,6 @@
                             <includeOnlyProperty>^git.branch$</includeOnlyProperty>
                         </includeOnlyProperties>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>${maven-checkstyle-plugin.version}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.puppycrawl.tools</groupId>
-                            <artifactId>checkstyle</artifactId>
-                            <version>${checkstyle.version}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>io.spring.nohttp</groupId>
-                            <artifactId>nohttp-checkstyle</artifactId>
-                            <version>${nohttp-checkstyle.version}</version>
-                        </dependency>
-                    </dependencies>
-                    <configuration>
-                        <configLocation>checkstyle.xml</configLocation>
-                        <includes>pom.xml,README.md</includes>
-                        <excludes>.git/**/*,target/**/*,node_modules/**/*,node/**/*</excludes>
-                        <sourceDirectories>./</sourceDirectories>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

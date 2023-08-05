@@ -16,6 +16,10 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <start-class>ewt.msvc.identity.EwtMsvcIdentityApp</start-class>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ewt.msvc.config</groupId>

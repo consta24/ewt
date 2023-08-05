@@ -1,4 +1,4 @@
-package ewt.msvc.product;
+package ewt.msvc.identity;
 
 
 import ewt.msvc.config.configuration.ApplicationProperties;
@@ -12,9 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
-import reactivefeign.spring.config.EnableReactiveFeignClients;
 import tech.jhipster.config.DefaultProfileUtil;
 import tech.jhipster.config.JHipsterConstants;
 
@@ -27,13 +25,13 @@ import java.util.Optional;
 @SpringBootApplication
 @EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
 @ComponentScan(basePackages = "ewt.msvc.*")
-public class EwtMsvcProductApp {
+public class EwtMsvcIdentityApp {
 
-    private static final Logger log = LoggerFactory.getLogger(EwtMsvcProductApp.class);
+    private static final Logger log = LoggerFactory.getLogger(EwtMsvcIdentityApp.class);
 
     private final Environment env;
 
-    public EwtMsvcProductApp(Environment env) {
+    public EwtMsvcIdentityApp(Environment env) {
         this.env = env;
     }
 
@@ -64,7 +62,7 @@ public class EwtMsvcProductApp {
      * @param args the command line arguments.
      */
     public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(EwtMsvcProductApp.class);
+        SpringApplication app = new SpringApplication(EwtMsvcIdentityApp.class);
         DefaultProfileUtil.addDefaultProfile(app);
         Environment env = app.run(args).getEnvironment();
         logApplicationStartup(env);

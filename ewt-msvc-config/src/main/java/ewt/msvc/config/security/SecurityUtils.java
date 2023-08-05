@@ -54,11 +54,12 @@ public final class SecurityUtils {
      */
     public static Mono<String> getCurrentUserJWT() {
         return ReactiveSecurityContextHolder
-            .getContext()
-            .map(SecurityContext::getAuthentication)
-            .filter(authentication -> authentication.getCredentials() instanceof String)
-            .map(authentication -> (String) authentication.getCredentials());
+                .getContext()
+                .map(SecurityContext::getAuthentication)
+                .filter(authentication -> authentication.getPrincipal() instanceof Jwt)
+                .map(authentication -> ((Jwt) authentication.getPrincipal()).getTokenValue());
     }
+
 
     /**
      * Check if a user is authenticated.

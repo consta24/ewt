@@ -1,4 +1,4 @@
-package ewt.msvc.product.security.jwt;
+package ewt.msvc.identity.security.jwt;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;

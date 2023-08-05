@@ -1,5 +1,4 @@
-package ewt.msvc.product.security.jwt;
-
+package ewt.msvc.identity.security.jwt;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

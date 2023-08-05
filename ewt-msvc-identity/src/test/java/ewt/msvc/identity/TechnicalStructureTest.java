@@ -1,4 +1,4 @@
-package ewt.msvc.product;
+package ewt.msvc.identity;
 
 import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.belongToAnyOf;
@@ -11,8 +11,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import ewt.msvc.config.configuration.ApplicationProperties;
 import ewt.msvc.config.configuration.Constants;
 
-
-@AnalyzeClasses(packagesOf = EwtMsvcProductApp.class, importOptions = DoNotIncludeTests.class)
+@AnalyzeClasses(packagesOf = EwtMsvcIdentityApp.class, importOptions = DoNotIncludeTests.class)
 class TechnicalStructureTest {
 
     // prettier-ignore
@@ -33,7 +32,7 @@ class TechnicalStructureTest {
         .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Service", "Security", "Web", "Config")
         .whereLayer("Domain").mayOnlyBeAccessedByLayers("Persistence", "Service", "Security", "Web", "Config")
 
-        .ignoreDependency(belongToAnyOf(EwtMsvcProductApp.class), alwaysTrue())
+        .ignoreDependency(belongToAnyOf(EwtMsvcIdentityApp.class), alwaysTrue())
         .ignoreDependency(alwaysTrue(), belongToAnyOf(
             Constants.class,
             ApplicationProperties.class

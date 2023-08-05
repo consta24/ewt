@@ -1,7 +1,7 @@
-package ewt.msvc.product.web.rest.errors;
+package ewt.msvc.identity.web.rest.errors;
 
 import ewt.msvc.config.web.rest.errors.ErrorConstants;
-import ewt.msvc.product.IntegrationTest;
+import ewt.msvc.identity.IntegrationTest;
 import org.hamcrest.core.AnyOf;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;

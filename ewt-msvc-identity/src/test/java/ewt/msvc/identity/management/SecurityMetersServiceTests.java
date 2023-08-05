@@ -1,4 +1,4 @@
-package ewt.msvc.product.management;
+package ewt.msvc.identity.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

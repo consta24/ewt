@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
     <name>ewt-msvc-product</name>
 
+
     <parent>
         <groupId>ewt.msvc.parent</groupId>
         <artifactId>ewt-msvc-parent</artifactId>
@@ -21,8 +22,16 @@
             <groupId>ewt.msvc.config</groupId>
             <artifactId>ewt-msvc-config</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
+
+    <properties>
+        <start-class>ewt.msvc.product.EwtMsvcProductApp</start-class>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
 
     <build>
         <pluginManagement>

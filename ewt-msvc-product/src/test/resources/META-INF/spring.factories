@@ -1,1 +1,0 @@
-org.springframework.test.context.ContextCustomizerFactory = ewt.msvc.product.config.SqlTestContainersSpringContextCustomizerFactory

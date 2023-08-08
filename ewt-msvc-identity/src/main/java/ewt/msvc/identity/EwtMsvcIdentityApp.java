@@ -1,8 +1,6 @@
 package ewt.msvc.identity;
 
 
-import ewt.msvc.config.configuration.ApplicationProperties;
-import ewt.msvc.config.configuration.CRLFLogConverter;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -23,7 +21,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 @SpringBootApplication
-@EnableConfigurationProperties({LiquibaseProperties.class, ApplicationProperties.class})
+@EnableConfigurationProperties({LiquibaseProperties.class})
 @ComponentScan(basePackages = "ewt.msvc.*")
 public class EwtMsvcIdentityApp {
 
@@ -39,19 +37,19 @@ public class EwtMsvcIdentityApp {
     public void initApplication() {
         Collection<String> activeProfiles = Arrays.asList(env.getActiveProfiles());
         if (
-            activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) &&
-                activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
+                activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) &&
+                        activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
         ) {
             log.error(
-                "You have misconfigured your application! It should not run " + "with both the 'dev' and 'prod' profiles at the same time."
+                    "You have misconfigured your application! It should not run " + "with both the 'dev' and 'prod' profiles at the same time."
             );
         }
         if (
-            activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) &&
-                activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_CLOUD)
+                activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) &&
+                        activeProfiles.contains(JHipsterConstants.SPRING_PROFILE_CLOUD)
         ) {
             log.error(
-                "You have misconfigured your application! It should not " + "run with both the 'dev' and 'cloud' profiles at the same time."
+                    "You have misconfigured your application! It should not " + "run with both the 'dev' and 'cloud' profiles at the same time."
             );
         }
     }
@@ -72,9 +70,9 @@ public class EwtMsvcIdentityApp {
         String protocol = Optional.ofNullable(env.getProperty("server.ssl.key-store")).map(key -> "https").orElse("http");
         String serverPort = env.getProperty("server.port");
         String contextPath = Optional
-            .ofNullable(env.getProperty("server.servlet.context-path"))
-            .filter(StringUtils::isNotBlank)
-            .orElse("/");
+                .ofNullable(env.getProperty("server.servlet.context-path"))
+                .filter(StringUtils::isNotBlank)
+                .orElse("/");
         String hostAddress = "localhost";
         try {
             hostAddress = InetAddress.getLocalHost().getHostAddress();
@@ -82,24 +80,24 @@ public class EwtMsvcIdentityApp {
             log.warn("The host name could not be determined, using `localhost` as fallback");
         }
         log.info(
-            CRLFLogConverter.CRLF_SAFE_MARKER,
-            """
+                "CRLF_SAFE",
+                """
 
-                ----------------------------------------------------------
-                \tApplication '{}' is running! Access URLs:
-                \tLocal: \t\t{}://localhost:{}{}
-                \tExternal: \t{}://{}:{}{}
-                \tProfile(s): \t{}
-                ----------------------------------------------------------""",
-            env.getProperty("spring.application.name"),
-            protocol,
-            serverPort,
-            contextPath,
-            protocol,
-            hostAddress,
-            serverPort,
-            contextPath,
-            env.getActiveProfiles().length == 0 ? env.getDefaultProfiles() : env.getActiveProfiles()
+                        ----------------------------------------------------------
+                        \tApplication '{}' is running! Access URLs:
+                        \tLocal: \t\t{}://localhost:{}{}
+                        \tExternal: \t{}://{}:{}{}
+                        \tProfile(s): \t{}
+                        ----------------------------------------------------------""",
+                env.getProperty("spring.application.name"),
+                protocol,
+                serverPort,
+                contextPath,
+                protocol,
+                hostAddress,
+                serverPort,
+                contextPath,
+                env.getActiveProfiles().length == 0 ? env.getDefaultProfiles() : env.getActiveProfiles()
         );
 
         String configServerStatus = env.getProperty("configserver.status");
@@ -107,10 +105,10 @@ public class EwtMsvcIdentityApp {
             configServerStatus = "Not found or not setup for this application";
         }
         log.info(
-            CRLFLogConverter.CRLF_SAFE_MARKER,
-            "\n----------------------------------------------------------\n\t" +
-                "Config Server: \t{}\n----------------------------------------------------------",
-            configServerStatus
+                "CRLF_SAFE",
+                "\n----------------------------------------------------------\n\t" +
+                        "Config Server: \t{}\n----------------------------------------------------------",
+                configServerStatus
         );
     }
 }

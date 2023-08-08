@@ -1,9 +1,0 @@
-# ===================================================================
-# Spring Boot configuration.
-#
-# This configuration is used for unit/integration tests with testcontainers database containers.
-#
-# To activate this configuration launch integration tests with the 'testcontainers' profile
-# ===================================================================
-
-spring:

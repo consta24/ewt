@@ -21,11 +21,13 @@ import {
   faRoad,
   faSave,
   faSearch,
-  faSignOutAlt,
+  faShirt,
   faSignInAlt,
+  faSignOutAlt,
   faSort,
   faSortDown,
   faSortUp,
+  faStore,
   faSync,
   faTachometerAlt,
   faTasks,
@@ -36,8 +38,7 @@ import {
   faUserPlus,
   faUsers,
   faUsersCog,
-  faWrench,
-  // jhipster-needle-add-icon-import
+  faWrench
 } from '@fortawesome/free-solid-svg-icons';
 
 export const fontAwesomeIcons = [
@@ -79,5 +80,6 @@ export const fontAwesomeIcons = [
   faUsers,
   faUsersCog,
   faWrench,
-  // jhipster-needle-add-icon-import
+  faStore,
+  faShirt
 ];

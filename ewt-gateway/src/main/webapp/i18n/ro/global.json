@@ -1,6 +1,6 @@
 {
   "global": {
-    "title": "Ewt-gateway",
+    "title": "EWT",
     "browsehappy": "Folosiți un browser <strong>vechi</strong>. Va rugăm <a href=\"http://browsehappy.com/?locale=en\"> să îl actualizați</a> pentru o experiență îmbunătațită.",
     "menu": {
       "home": "Acasă",
@@ -33,6 +33,10 @@
         "apidocs": "API",
         "database": "Bază de date",
         "jhipster-needle-menu-add-admin-element": "JHipster will add additional menu entries here (do not translate!)"
+      },
+      "store-admin": {
+        "main": "Management magazin",
+        "products": "Produse"
       },
       "services": {
         "main": "Servicii"

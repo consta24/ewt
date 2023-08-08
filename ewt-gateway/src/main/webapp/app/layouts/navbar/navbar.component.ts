@@ -14,13 +14,15 @@ import { LoginService } from 'app/login/login.service';
 import { ProfileService } from 'app/layouts/profiles/profile.service';
 import { EntityNavbarItems } from 'app/entities/entity-navbar-items';
 import NavbarItem from './navbar-item.model';
+import FindLanguageFromKeyPipe from "../../shared/language/find-language-from-key.pipe";
+import {NgSwitchCase} from "@angular/common";
 
 @Component({
   standalone: true,
   selector: 'jhi-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
-  imports: [RouterModule, SharedModule, HasAnyAuthorityDirective, ActiveMenuDirective],
+  imports: [RouterModule, SharedModule, HasAnyAuthorityDirective, ActiveMenuDirective, FindLanguageFromKeyPipe, NgSwitchCase],
 })
 export default class NavbarComponent implements OnInit {
   inProduction?: boolean;

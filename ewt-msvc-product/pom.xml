@@ -10,7 +10,6 @@
     <packaging>jar</packaging>
     <name>ewt-msvc-product</name>
 
-
     <parent>
         <groupId>ewt.msvc.parent</groupId>
         <artifactId>ewt-msvc-parent</artifactId>
@@ -22,7 +21,7 @@
             <groupId>ewt.msvc.config</groupId>
             <artifactId>ewt-msvc-config</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

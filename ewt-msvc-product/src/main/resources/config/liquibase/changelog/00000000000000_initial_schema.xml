@@ -4,10 +4,89 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="00000000000001" author="jhipster">
+    <!-- Product Table -->
+    <changeSet id="1" author="ewt">
+        <createTable tableName="product">
+            <column name="product_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1000)"/>
+
+            <!-- Audit columns -->
+            <column name="created_by" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="timestamp"/>
+            <column name="last_modified_by" type="varchar(50)"/>
+            <column name="last_modified_date" type="timestamp"/>
+        </createTable>
     </changeSet>
 
-    <changeSet author="jhipster" id="00000000000002" context="test">
+    <!-- Product Variant (SKU) Table -->
+    <changeSet id="2" author="ewt">
+        <createTable tableName="product_variant">
+            <column name="sku_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_product_variant_product" referencedTableName="product" referencedColumnNames="product_id"/>
+            </column>
+            <!-- ... Other SKU related columns (like stock, price) -->
+        </createTable>
+    </changeSet>
+
+    <!-- Product Attributes Table -->
+    <changeSet id="3" author="ewt">
+        <createTable tableName="product_attributes">
+            <column name="attribute_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="attribute_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Product Attribute Values Table -->
+    <changeSet id="4" author="ewt">
+        <createTable tableName="product_attribute_values">
+            <column name="value_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="attribute_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_attribute_values_attribute" referencedTableName="product_attributes" referencedColumnNames="attribute_id"/>
+            </column>
+            <column name="sku_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_attribute_values_sku" referencedTableName="product_variant" referencedColumnNames="sku_id"/>
+            </column>
+            <column name="value" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Product Variant Images Table -->
+    <changeSet id="5" author="ewt">
+        <createTable tableName="product_variant_images">
+            <column name="image_id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sku_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_variant_images_sku" referencedTableName="product_variant" referencedColumnNames="sku_id"/>
+            </column>
+            <column name="image_ref" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sequence" type="int"/>
+        </createTable>
+    </changeSet>
+
+
+
+    <changeSet author="jhipster" id="test" context="test">
         <createTable tableName="jhi_date_time_wrapper">
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints primaryKey="true" primaryKeyName="jhi_date_time_wrapperPK"/>

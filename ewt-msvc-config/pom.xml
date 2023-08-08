@@ -7,18 +7,6 @@
     <groupId>ewt.msvc.config</groupId>
     <artifactId>ewt-msvc-config</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
     <packaging>jar</packaging>
     <name>ewt-msvc-config</name>
 
@@ -27,11 +15,4 @@
         <artifactId>ewt-msvc-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-
-    <properties>
-        <start-class>""</start-class>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
 </project>

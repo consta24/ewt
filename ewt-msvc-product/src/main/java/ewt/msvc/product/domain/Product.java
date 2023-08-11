@@ -1,35 +1,34 @@
 package ewt.msvc.product.domain;
 
 
-import ewt.msvc.config.domain.AbstractAuditingEntity;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
+import java.io.Serial;
 import java.io.Serializable;
 
-@EqualsAndHashCode(callSuper = true)
-@Entity
-@Table(name = "product")
+@Table(value = "product", schema = "ewt_product")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Product extends AbstractAuditingEntity<Long> implements Serializable {
+public class Product implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
+    private Long id;
 
     @Size(max = 255)
     @NotNull
-    private String productName;
+    private String name;
 
     @Size(max = 1000)
     private String description;
-
-    @Override
-    public Long getId() {
-        return null;
-    }
 }

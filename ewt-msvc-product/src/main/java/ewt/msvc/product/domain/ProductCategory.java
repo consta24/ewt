@@ -1,5 +1,6 @@
 package ewt.msvc.product.domain;
 
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -12,12 +13,12 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.io.Serial;
 import java.io.Serializable;
 
-@Table(value = "product_attribute", schema = "ewt_product")
+@Table(value = "product_category", schema = "ewt_product")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductAttribute implements Serializable {
+public class ProductCategory implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -27,4 +28,7 @@ public class ProductAttribute implements Serializable {
     @Size(max = 255)
     @NotNull
     private String name;
+
+    @Size(max = 1000)
+    private String description;
 }

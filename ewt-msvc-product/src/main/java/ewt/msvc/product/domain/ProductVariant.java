@@ -1,44 +1,41 @@
 package ewt.msvc.product.domain;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
 
-@Entity
-@Table(name = "product_variant")
+@Table(value = "product_variant", schema = "ewt_product")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductVariant {
+public class ProductVariant implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
-    private String skuId;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @Size(max = 1000)
+    private String sku;
 
-    @OneToMany(mappedBy = "productVariant", cascade = CascadeType.ALL)
+    @Column("product_id")
     @NotNull
-    private Set<ProductAttributeValue> attributeValues;
+    private Long productId;
 
-    @PostPersist
-    public void generateSkuId() {
-        String base = "PROD" + product.getProductId() + "-";
+    @NotNull
+    private BigDecimal price;
 
-        String attributes = attributeValues.stream()
-                .map(av -> av.getValue().toUpperCase().replaceAll("[^A-Z]", ""))
-                .sorted()
-                .collect(Collectors.joining("-"));
-
-        this.skuId = base + attributes;
-    }
-
+    @NotNull
+    private Integer stock;
 }

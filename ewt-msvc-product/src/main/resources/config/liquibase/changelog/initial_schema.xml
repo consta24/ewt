@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Normal Tables -->
+
+    <!-- Product Table -->
+    <changeSet id="1" author="ewt">
+        <createTable tableName="product">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1000)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Product Variant (SKU) Table -->
+    <changeSet id="2" author="ewt">
+        <createTable tableName="product_variant">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(1000)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="product_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_product_variant_product" referencedTableName="product"
+                             referencedColumnNames="id"/>
+            </column>
+            <!-- ... Other SKU related columns (like stock, price) -->
+            <column name="price" type="decimal(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stock" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Product Attributes Table -->
+    <changeSet id="3" author="ewt">
+        <createTable tableName="product_attribute">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Product Attribute Values Table -->
+    <changeSet id="4" author="ewt">
+        <createTable tableName="product_attribute_value">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="attribute_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_attribute_values_attribute"
+                             referencedTableName="product_attribute" referencedColumnNames="id"/>
+            </column>
+            <column name="value" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Product Variant Images Table -->
+    <changeSet id="5" author="ewt">
+        <createTable tableName="product_variant_images">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(1000)">
+                <constraints nullable="false" foreignKeyName="fk_variant_images_sku"
+                             referencedTableName="product_variant" referencedColumnNames="sku"/>
+            </column>
+            <column name="ref" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sequence" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Product Category Table -->
+    <changeSet id="6" author="ewt">
+        <createTable tableName="product_category">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(1000)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Bridge Tables -->
+
+    <!-- Product to Attribute Bridge Table -->
+    <changeSet id="7" author="ewt">
+        <createTable tableName="product_attribute_bridge">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_product_attribute_bridge_product_id"
+                             referencedTableName="product" referencedColumnNames="id"/>
+            </column>
+            <column name="attribute_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_product_attribute_bridge_attribute_id"
+                             referencedTableName="product_attribute" referencedColumnNames="id"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Product Variant to Attribute Values Bridge Table -->
+    <changeSet id="8" author="ewt">
+        <createTable tableName="product_variant_attribute_values_bridge">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(1000)">
+                <constraints nullable="false" foreignKeyName="fk_product_variant_attribute_values_bridge_sku"
+                             referencedTableName="product_variant" referencedColumnNames="sku"/>
+            </column>
+            <column name="attribute_value_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="fk_product_variant_attribute_values_bridge_attribute_value_id"
+                             referencedTableName="product_attribute_value" referencedColumnNames="id"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Product To Category Bridge Table -->
+    <changeSet id="9" author="ewt">
+        <createTable tableName="product_category_bridge">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_product_category_bridge_product_id"
+                             referencedTableName="product" referencedColumnNames="id"/>
+            </column>
+            <column name="category_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_product_category_bridge_category_id"
+                             referencedTableName="product_category" referencedColumnNames="id"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

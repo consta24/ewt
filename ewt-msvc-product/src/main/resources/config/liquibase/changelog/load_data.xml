@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="load-product-attribute-data" author="ewt">
+        <loadData
+                file="config/liquibase/data/product_attribute.csv"
+                separator=","
+                tableName="product_attribute" schemaName="ewt_product">
+            <column name="id" type="NUMERIC"/>
+            <column name="name" type="STRING"/>
+        </loadData>
+    </changeSet>
+
+    <changeSet id="load-product-attribute-values-data" author="ewt">
+        <loadData
+                file="config/liquibase/data/product_attribute_values.csv"
+                separator=","
+                tableName="product_attribute_value" schemaName="ewt_product">
+            <column name="id" type="NUMERIC"/>
+            <column name="attribute_id" type="NUMERIC"/>
+            <column name="value" type="STRING"/>
+        </loadData>
+    </changeSet>
+
+    <changeSet id="load-product-category-data" author="ewt">
+        <loadData
+                file="config/liquibase/data/product_category.csv"
+                separator=","
+                tableName="product_category" schemaName="ewt_product">
+            <column name="id" type="NUMERIC"/>
+            <column name="name" type="STRING"/>
+            <column name="description" type="STRING"/>
+        </loadData>
+    </changeSet>
+</databaseChangeLog>

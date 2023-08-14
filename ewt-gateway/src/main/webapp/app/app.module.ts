@@ -11,25 +11,35 @@ import {NgbDateAdapter, NgbDatepickerConfig} from '@ng-bootstrap/ng-bootstrap';
 
 import {ApplicationConfigService} from 'app/core/config/application-config.service';
 import './config/dayjs';
-import {TranslationModule} from 'app/shared/language/translation.module';
 import {AppRoutingModule} from './app-routing.module';
 import {NgbDateDayjsAdapter} from './config/datepicker-adapter';
 import {fontAwesomeIcons} from './config/font-awesome-icons';
-import {httpInterceptorProviders} from 'app/core/interceptor/index';
-import MainComponent from './layouts/main/main.component';
-import MainModule from './layouts/main/main.module';
+import {httpInterceptorProviders} from './core/interceptor';
+import {MainComponent} from './layouts/main/main.component';
 import {AppPageTitleStrategy} from './app-page-title-strategy';
-import EwtRoutingModule from "./ewt/ewt-routing.module";
+import {SharedModule} from "./shared/shared.module";
+import {EwtRoutingModule} from "./ewt/ewt-routing.module";
+import {LoginModule} from "./login/login.module";
+import {HomeModule} from "./home/home.module";
+import {FooterComponent} from "./layouts/footer/footer.component";
+import {NavbarComponent} from "./layouts/navbar/navbar.component";
+import {ErrorComponent} from "./layouts/error/error.component";
+import {TranslationModule} from "./shared/language/translation.module";
 
 @NgModule({
   imports: [
     BrowserModule,
     AppRoutingModule,
-    // Set this to true to enable service worker (PWA)
-    ServiceWorkerModule.register('ngsw-worker.js', {enabled: false}),
-    HttpClientModule,
-    MainModule,
+    SharedModule,
     TranslationModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {enabled: false}),
+
+    HttpClientModule,
+
+    HomeModule,
+    LoginModule,
+
+    EwtRoutingModule
   ],
   providers: [
     Title,
@@ -38,6 +48,7 @@ import EwtRoutingModule from "./ewt/ewt-routing.module";
     httpInterceptorProviders,
     {provide: TitleStrategy, useClass: AppPageTitleStrategy},
   ],
+  declarations: [MainComponent, FooterComponent, NavbarComponent, ErrorComponent],
   bootstrap: [MainComponent],
 })
 export class AppModule {

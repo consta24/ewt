@@ -1,0 +1,60 @@
+<ewt-loading [isLoading]="isLoading"></ewt-loading>
+<div class="card" *ngIf="!isLoading">
+  <div class="card-header">
+    <div class="row">
+      <div class="col">
+        <h4 class="card-title"><strong>Product List</strong></h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="d-flex flex-column flex-md-row justify-content-between">
+        <div class="d-flex justify-content-end">
+          <button class="btn btn-primary" routerLink="/store-admin/products/add">Add product</button>
+        </div>
+        <div class="row g-0 flex-column flex-md-row">
+          <div class="col-12 col-md-auto mb-2 mb-md-0 mt-2 mt-md-0 d-flex justify-content-end">
+            <button class="btn btn-primary">Categories</button>
+            <button class="btn btn-primary ms-2">Attributes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row my-3">
+      <hr class="hr-legal" style="color: red"/>
+      <div *ngFor="let product of products">
+        <div class="row p-2">
+          <p>ID: {{product.id}}</p>
+          <p>Name: {{product.name}}</p>
+          <p>Description: {{product.description}}</p>
+          <hr class="hr-legal"/>
+          <strong>Categories</strong>
+          <div *ngFor="let category of product.productCategories">
+            <hr class="hr-legal"/>
+            <p>Category ID: {{category.id}}</p>
+            <p>Name: {{category.name}}</p>
+            <p>Description: {{category.description}}</p>
+          </div>
+          <hr class="hr-legal"/>
+          <strong>Attributes</strong>
+          <div *ngFor="let attribute of product.productAttributes">
+            <hr class="hr-legal"/>
+            <p>Attribute ID: {{attribute.name}}</p>
+            <p>Name: {{attribute.name}}</p>
+          </div>
+          <hr class="hr-legal"/>
+          <strong>Variants</strong>
+          <div *ngFor="let variant of product.productVariants">
+            <hr class="hr-legal"/>
+            <p>Variant ID: {{variant.id}}</p>
+            <p>Sku: {{variant.sku}}</p>
+            <p>Product ID: {{variant.productId}}</p>
+            <p>Price: {{variant.price}}</p>
+            <p>Stock: {{variant.stock}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

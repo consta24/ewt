@@ -1,28 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { HttpResponse, HttpHeaders } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest } from 'rxjs';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-
-import SharedModule from 'app/shared/shared.module';
-import { SortDirective, SortByDirective } from 'app/shared/sort';
-import { ITEMS_PER_PAGE } from 'app/config/pagination.constants';
-import { ASC, DESC, SORT } from 'app/config/navigation.constants';
-import { ItemCountComponent } from 'app/shared/pagination';
-import { AccountService } from 'app/core/auth/account.service';
-import { Account } from 'app/core/auth/account.model';
-import { UserManagementService } from '../service/user-management.service';
-import { User } from '../user-management.model';
-import UserManagementDeleteDialogComponent from '../delete/user-management-delete-dialog.component';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {HttpHeaders, HttpResponse} from '@angular/common/http';
+import {combineLatest} from 'rxjs';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {ITEMS_PER_PAGE} from 'app/config/pagination.constants';
+import {ASC, DESC, SORT} from 'app/config/navigation.constants';
+import {AccountService} from 'app/core/auth/account.service';
+import {Account} from 'app/core/auth/account.model';
+import {UserManagementService} from '../service/user-management.service';
+import {User} from '../user-management.model';
+import {UserManagementDeleteDialogComponent} from '../delete/user-management-delete-dialog.component';
 
 @Component({
-  standalone: true,
   selector: 'jhi-user-mgmt',
   templateUrl: './user-management.component.html',
-  imports: [RouterModule, SharedModule, SortDirective, SortByDirective, UserManagementDeleteDialogComponent, ItemCountComponent],
 })
-export default class UserManagementComponent implements OnInit {
+export class UserManagementComponent implements OnInit {
   currentAccount: Account | null = null;
   users: User[] | null = null;
   isLoading = false;
@@ -38,7 +31,8 @@ export default class UserManagementComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private modalService: NgbModal
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.accountService.identity().subscribe(account => (this.currentAccount = account));
@@ -46,7 +40,7 @@ export default class UserManagementComponent implements OnInit {
   }
 
   setActive(user: User, isActivated: boolean): void {
-    this.userService.update({ ...user, activated: isActivated }).subscribe(() => this.loadAll());
+    this.userService.update({...user, activated: isActivated}).subscribe(() => this.loadAll());
   }
 
   trackIdentity(_index: number, item: User): number {
@@ -54,7 +48,7 @@ export default class UserManagementComponent implements OnInit {
   }
 
   deleteUser(user: User): void {
-    const modalRef = this.modalService.open(UserManagementDeleteDialogComponent, { size: 'lg', backdrop: 'static' });
+    const modalRef = this.modalService.open(UserManagementDeleteDialogComponent, {size: 'lg', backdrop: 'static'});
     modalRef.componentInstance.user = user;
     // unsubscribe not needed because closed completes on modal close
     modalRef.closed.subscribe(reason => {

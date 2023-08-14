@@ -1,11 +1,9 @@
-import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import ErrorComponent from "../layouts/error/error.component";
-/* jhipster-needle-add-admin-module-import - JHipster will add admin modules imports here */
+import {NgModule} from '@angular/core';
+import {RouterModule} from '@angular/router';
+import {ErrorComponent} from "../layouts/error/error.component";
 
 @NgModule({
   imports: [
-    /* jhipster-needle-add-admin-module - JHipster will add admin modules here */
     RouterModule.forChild([
       {
         path: '',
@@ -17,17 +15,18 @@ import ErrorComponent from "../layouts/error/error.component";
       },
       {
         path: 'user-management',
-        loadChildren: () => import('./user-management/user-management.route'),
-        title: 'userManagement.home.title',
+        loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
+        data: {
+          pageTitle: 'userManagement.home.title'
+        }
       },
       {
         path: 'docs',
-        loadComponent: () => import('./docs/docs.component'),
-        title: 'global.menu.admin.apidocs',
+        loadChildren: () => import('./docs/docs.module').then(m => m.DocsModule),
       },
       {
         path: 'configuration',
-        loadComponent: () => import('./configuration/configuration.component'),
+        loadChildren: () => import('./configuration/configuration.module').then(m => m.ConfigurationModule),
         title: 'configuration.title',
       },
       {
@@ -50,8 +49,8 @@ import ErrorComponent from "../layouts/error/error.component";
         loadComponent: () => import('./gateway/gateway.component'),
         title: 'gateway.title',
       },
-      /* jhipster-needle-add-admin-route - JHipster will add admin routes here */
     ]),
   ],
 })
-export default class AdminRoutingModule {}
+export class AdminRoutingModule {
+}

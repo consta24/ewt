@@ -1,21 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
-
-import SharedModule from 'app/shared/shared.module';
-import { AccountService } from 'app/core/auth/account.service';
-import { Account } from 'app/core/auth/account.model';
-import { LANGUAGES } from 'app/config/language.constants';
+import {Component, OnInit} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {TranslateService} from '@ngx-translate/core';
+import {AccountService} from 'app/core/auth/account.service';
+import {Account} from 'app/core/auth/account.model';
+import {LANGUAGES} from 'app/config/language.constants';
 
 const initialAccount: Account = {} as Account;
 
 @Component({
   selector: 'jhi-settings',
-  standalone: true,
-  imports: [SharedModule, FormsModule, ReactiveFormsModule],
   templateUrl: './settings.component.html',
 })
-export default class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit {
   success = false;
   languages = LANGUAGES;
 
@@ -32,15 +28,16 @@ export default class SettingsComponent implements OnInit {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(5), Validators.maxLength(254), Validators.email],
     }),
-    langKey: new FormControl(initialAccount.langKey, { nonNullable: true }),
+    langKey: new FormControl(initialAccount.langKey, {nonNullable: true}),
 
-    activated: new FormControl(initialAccount.activated, { nonNullable: true }),
-    authorities: new FormControl(initialAccount.authorities, { nonNullable: true }),
-    imageUrl: new FormControl(initialAccount.imageUrl, { nonNullable: true }),
-    login: new FormControl(initialAccount.login, { nonNullable: true }),
+    activated: new FormControl(initialAccount.activated, {nonNullable: true}),
+    authorities: new FormControl(initialAccount.authorities, {nonNullable: true}),
+    imageUrl: new FormControl(initialAccount.imageUrl, {nonNullable: true}),
+    login: new FormControl(initialAccount.login, {nonNullable: true}),
   });
 
-  constructor(private accountService: AccountService, private translateService: TranslateService) {}
+  constructor(private accountService: AccountService, private translateService: TranslateService) {
+  }
 
   ngOnInit(): void {
     this.accountService.identity().subscribe(account => {

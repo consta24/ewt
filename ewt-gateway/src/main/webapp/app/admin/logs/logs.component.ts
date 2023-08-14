@@ -1,19 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import { finalize, map } from 'rxjs/operators';
+import {Component, OnInit} from '@angular/core';
+import {finalize, map} from 'rxjs/operators';
 
-import SharedModule from 'app/shared/shared.module';
-import { FormsModule } from '@angular/forms';
-import { SortDirective, SortByDirective } from 'app/shared/sort';
-import { Log, LoggersResponse, Level } from './log.model';
-import { LogsService } from './logs.service';
-import { GatewayRoutesService } from '../gateway/gateway-routes.service';
+import {SharedModule} from 'app/shared/shared.module';
+import {Level, Log, LoggersResponse} from './log.model';
+import {LogsService} from './logs.service';
+import {GatewayRoutesService} from '../gateway/gateway-routes.service';
 
 @Component({
   standalone: true,
   selector: 'jhi-logs',
   templateUrl: './logs.component.html',
   providers: [GatewayRoutesService],
-  imports: [SharedModule, FormsModule, SortDirective, SortByDirective],
+  imports: [SharedModule],
 })
 export default class LogsComponent implements OnInit {
   loggers?: Log[];
@@ -25,7 +23,8 @@ export default class LogsComponent implements OnInit {
   services: string[] = [];
   selectedService: string | undefined = undefined;
 
-  constructor(private logsService: LogsService, private gatewayRoutesService: GatewayRoutesService) {}
+  constructor(private logsService: LogsService, private gatewayRoutesService: GatewayRoutesService) {
+  }
 
   ngOnInit(): void {
     this.findAndExtractLoggers();

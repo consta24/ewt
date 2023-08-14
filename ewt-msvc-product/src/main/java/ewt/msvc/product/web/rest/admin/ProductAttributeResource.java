@@ -9,7 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/api/store-admin/product-attribute/")
+@RequestMapping("/api/store-admin/product-attribute")
 @RequiredArgsConstructor
 public class ProductAttributeResource {
 

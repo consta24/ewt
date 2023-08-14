@@ -1,15 +1,12 @@
-import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {NgModule} from '@angular/core';
+import {RouterModule} from '@angular/router';
 
-import { errorRoute } from './layouts/error/error.route';
-import { DEBUG_INFO_ENABLED } from 'app/app.constants';
-import { Authority } from 'app/config/authority.constants';
+import {errorRoute} from './layouts/error/error.route';
+import {DEBUG_INFO_ENABLED} from 'app/app.constants';
+import {Authority} from 'app/config/authority.constants';
+import {NavbarComponent} from './layouts/navbar/navbar.component';
 
-import HomeComponent from './home/home.component';
-import NavbarComponent from './layouts/navbar/navbar.component';
-import LoginComponent from './login/login.component';
-
-import { UserRouteAccessService } from 'app/core/auth/user-route-access.service';
+import {UserRouteAccessService} from 'app/core/auth/user-route-access.service';
 
 @NgModule({
   imports: [
@@ -17,13 +14,13 @@ import { UserRouteAccessService } from 'app/core/auth/user-route-access.service'
       [
         {
           path: '',
-          component: HomeComponent,
-          title: 'home.title',
+          component: NavbarComponent,
+          outlet: 'navbar'
         },
         {
           path: '',
-          component: NavbarComponent,
-          outlet: 'navbar',
+          loadChildren: () => import('./home/home.module').then(m => m.HomeModule),
+          title: 'home.title',
         },
         {
           path: 'admin',
@@ -31,31 +28,31 @@ import { UserRouteAccessService } from 'app/core/auth/user-route-access.service'
             authorities: [Authority.ADMIN],
           },
           canActivate: [UserRouteAccessService],
-          loadChildren: () => import('./admin/admin-routing.module'),
+          loadChildren: () => import('./admin/admin-routing.module').then(m => m.AdminRoutingModule),
         },
         {
           path: 'account',
-          loadChildren: () => import('./account/account.route'),
+          loadChildren: () => import('./account/account.module').then(m => m.AccountModule),
         },
         {
           path: 'login',
-          component: LoginComponent,
-          title: 'login.title',
+          loadChildren: () => import('./login/login.module').then(m => m.LoginModule),
         },
         {
           path: '',
-          loadChildren: () => import(`./entities/entity-routing.module`).then(({ EntityRoutingModule }) => EntityRoutingModule),
+          loadChildren: () => import(`./entities/entity-routing.module`).then(({EntityRoutingModule}) => EntityRoutingModule),
         },
         {
           path: '',
-          loadChildren: () => import(`./ewt/ewt-routing.module`),
+          loadChildren: () => import(`./ewt/ewt-routing.module`).then(m => m.EwtRoutingModule),
 
         },
         ...errorRoute,
       ],
-      { enableTracing: DEBUG_INFO_ENABLED, bindToComponentInputs: true }
+      {enableTracing: DEBUG_INFO_ENABLED, bindToComponentInputs: true}
     ),
   ],
   exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule {
+}

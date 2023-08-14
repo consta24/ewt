@@ -1,52 +1,102 @@
 package ewt.msvc.product.service;
 
+import ewt.msvc.product.domain.ProductVariant;
+import ewt.msvc.product.domain.bridge.ProductVariantAttributeValuesBridge;
+import ewt.msvc.product.repository.ProductRepository;
 import ewt.msvc.product.repository.ProductVariantRepository;
+import ewt.msvc.product.service.bridge.ProductVariantAttributeValuesBridgeService;
+import ewt.msvc.product.service.dto.ProductAttributeValueDTO;
 import ewt.msvc.product.service.dto.ProductVariantDTO;
 import ewt.msvc.product.service.mapper.ProductVariantMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductVariantService {
 
+    private final TransactionalOperator transactionalOperator;
+
     private final ProductVariantMapper productVariantMapper;
 
+    private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
 
-    private final ProductService productService;
+    private final ProductAttributeValueService productAttributeValueService;
+    private final ProductVariantAttributeValuesBridgeService productVariantAttributeValuesBridgeService;
+
+    public Mono<ProductVariantDTO> getProductVariant(String sku) {
+        return productVariantRepository.findBySku(sku)
+                .flatMap(this::populateProductVariantDTOWithAssociations);
+    }
 
     public Flux<ProductVariantDTO> getAllProductVariants(Long productId) {
-        return productService.validateProductId(productId)
-                .flatMapMany(validProduct -> {
-                    if (Boolean.FALSE.equals(validProduct)) {
-                        return Flux.error(new RuntimeException("Invalid product ID"));
+        return productVariantRepository.findAllByProductId(productId)
+                .flatMap(this::populateProductVariantDTOWithAssociations);
+    }
+
+    public Mono<ProductVariantDTO> saveProductVariant(Long productId, ProductVariantDTO productVariantDTO) {
+        return productVariantAttributeValuesBridgeService.validateAttributeValues(productVariantDTO.getProductAttributeValues())
+                .flatMap(validAttributeValues -> {
+                    if (Boolean.FALSE.equals(validAttributeValues)) {
+                        return Mono.error(new RuntimeException("Invalid attribute values IDs"));
                     }
-                    return productVariantRepository.findAllByProductId(productId);
+                    return generateSkuCode(productId, productVariantDTO);
                 })
-                .map(productVariantMapper::toDTO);
+                .flatMap(sku -> {
+                    productVariantDTO.setSku(sku);
+                    return productVariantRepository.save(productVariantMapper.toEntity(productVariantDTO));
+                })
+                .flatMap(savedProductVariant -> {
+                    Flux<ProductVariantAttributeValuesBridge> saveVariantAttributeValuesBridges =
+                            productVariantAttributeValuesBridgeService
+                                    .saveVariantAttributeValuesBridges(savedProductVariant.getSku(), productVariantDTO.getProductAttributeValues());
+
+                    return Flux.concat(saveVariantAttributeValuesBridges).then(Mono.just(savedProductVariant));
+                })
+                .map(savedProductVariant -> {
+                    ProductVariantDTO savedProductVariantDTO = productVariantMapper.toDTO(savedProductVariant);
+                    savedProductVariantDTO.setProductAttributeValues(new HashSet<>(productVariantDTO.getProductAttributeValues()));
+                    return savedProductVariantDTO;
+                })
+                .as(transactionalOperator::transactional);
     }
 
 
-    public Mono<ProductVariantDTO> saveProductVariant(ProductVariantDTO productVariantDTO) {
-        return productService.validateProductId(productVariantDTO.getProductId())
-                .flatMap(validProduct -> {
-                    if (Boolean.FALSE.equals(validProduct)) {
-                        return Mono.error(new RuntimeException("Invalid product ID"));
-                    }
-                    productVariantDTO.setSku(generateSkuCode());
-                    return productVariantRepository
-                            .save(productVariantMapper.toEntity(productVariantDTO))
-                            .map(productVariantMapper::toDTO);
+    private Mono<String> generateSkuCode(Long productId, ProductVariantDTO productVariantDTO) {
+        return productRepository.findById(productId)
+                .flatMap(product -> {
+                    String productNameFormatted = product.getName().toLowerCase().replace(" ", "-");
+
+                    Set<String> attributeValues = productVariantDTO.getProductAttributeValues()
+                            .stream()
+                            .map(ProductAttributeValueDTO::getValue)
+                            .map(String::toLowerCase)
+                            .collect(Collectors.toSet());
+
+                    String attributesFormatted = String.join("-", attributeValues);
+
+                    return Mono.just(productId + "-" + productNameFormatted + "-" + attributesFormatted);
                 });
     }
 
+    private Mono<ProductVariantDTO> populateProductVariantDTOWithAssociations(ProductVariant productVariant) {
+        Mono<Set<ProductAttributeValueDTO>> attributeValues = productVariantAttributeValuesBridgeService.findVariantAttributeValuesBridges(productVariant.getSku())
+                .flatMap(bridge -> productAttributeValueService.getAttributeValueById(bridge.getAttributeValueId()))
+                .collect(Collectors.toSet());
 
-    private String generateSkuCode() {
-        return UUID.randomUUID().toString();
+        return Mono.zip(attributeValues, attributeValues)
+                .map(tuple -> {
+                    ProductVariantDTO productVariantDTO = productVariantMapper.toDTO(productVariant);
+                    productVariantDTO.setProductAttributeValues(tuple.getT1());
+                    return productVariantDTO;
+                });
     }
 }

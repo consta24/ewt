@@ -7,7 +7,6 @@ import { faSort, faSortDown, faSortUp, IconDefinition } from '@fortawesome/free-
 import SortDirective from './sort.directive';
 
 @Directive({
-  standalone: true,
   selector: '[jhiSortBy]',
 })
 export default class SortByDirective<T> implements AfterContentInit, OnDestroy {

@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input} from '@angular/core';
 
-import SharedModule from 'app/shared/shared.module';
-import { GarbageCollector } from 'app/admin/metrics/metrics.model';
+import {SharedModule} from 'app/shared/shared.module';
+import {GarbageCollector} from 'app/admin/metrics/metrics.model';
 
 @Component({
   standalone: true,

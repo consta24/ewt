@@ -1,22 +1,17 @@
-import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
-import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
+import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
+import {HttpErrorResponse} from '@angular/common/http';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {TranslateService} from '@ngx-translate/core';
 
-import { EMAIL_ALREADY_USED_TYPE, LOGIN_ALREADY_USED_TYPE } from 'app/config/error.constants';
-import { RegisterService } from './register.service';
-import SharedModule from 'app/shared/shared.module';
-import PasswordStrengthBarComponent from '../password/password-strength-bar/password-strength-bar.component';
+import {EMAIL_ALREADY_USED_TYPE, LOGIN_ALREADY_USED_TYPE} from 'app/config/error.constants';
+import {RegisterService} from './register.service';
 
 @Component({
   selector: 'jhi-register',
-  standalone: true,
-  imports: [SharedModule, RouterModule, FormsModule, ReactiveFormsModule, PasswordStrengthBarComponent],
   templateUrl: './register.component.html',
 })
-export default class RegisterComponent implements AfterViewInit {
-  @ViewChild('login', { static: false })
+export class RegisterComponent implements AfterViewInit {
+  @ViewChild('login', {static: false})
   login?: ElementRef;
 
   doNotMatch = false;
@@ -49,7 +44,8 @@ export default class RegisterComponent implements AfterViewInit {
     }),
   });
 
-  constructor(private translateService: TranslateService, private registerService: RegisterService) {}
+  constructor(private translateService: TranslateService, private registerService: RegisterService) {
+  }
 
   ngAfterViewInit(): void {
     if (this.login) {
@@ -63,14 +59,14 @@ export default class RegisterComponent implements AfterViewInit {
     this.errorEmailExists = false;
     this.errorUserExists = false;
 
-    const { password, confirmPassword } = this.registerForm.getRawValue();
+    const {password, confirmPassword} = this.registerForm.getRawValue();
     if (password !== confirmPassword) {
       this.doNotMatch = true;
     } else {
-      const { login, email } = this.registerForm.getRawValue();
+      const {login, email} = this.registerForm.getRawValue();
       this.registerService
-        .save({ login, email, password, langKey: this.translateService.currentLang })
-        .subscribe({ next: () => (this.success = true), error: response => this.processError(response) });
+        .save({login, email, password, langKey: this.translateService.currentLang})
+        .subscribe({next: () => (this.success = true), error: response => this.processError(response)});
     }
   }
 

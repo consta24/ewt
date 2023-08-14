@@ -1,25 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
-import SharedModule from 'app/shared/shared.module';
-import { FormsModule } from '@angular/forms';
-import { SortDirective, SortByDirective } from 'app/shared/sort';
-import { ConfigurationService } from './configuration.service';
-import { Bean, PropertySource } from './configuration.model';
+import {ConfigurationService} from './configuration.service';
+import {Bean, PropertySource} from './configuration.model';
 
 @Component({
-  standalone: true,
   selector: 'jhi-configuration',
   templateUrl: './configuration.component.html',
-  imports: [SharedModule, FormsModule, SortDirective, SortByDirective],
 })
-export default class ConfigurationComponent implements OnInit {
+export class ConfigurationComponent implements OnInit {
   allBeans!: Bean[];
   beans: Bean[] = [];
   beansFilter = '';
   beansAscending = true;
   propertySources: PropertySource[] = [];
 
-  constructor(private configurationService: ConfigurationService) {}
+  constructor(private configurationService: ConfigurationService) {
+  }
 
   ngOnInit(): void {
     this.configurationService.getBeans().subscribe(beans => {

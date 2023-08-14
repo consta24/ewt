@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
-import SharedModule from 'app/shared/shared.module';
-import { Databases } from 'app/admin/metrics/metrics.model';
-import { filterNaN } from 'app/core/util/operators';
+import {SharedModule} from 'app/shared/shared.module';
+import {Databases} from 'app/admin/metrics/metrics.model';
+import {filterNaN} from 'app/core/util/operators';
 
 @Component({
   standalone: true,

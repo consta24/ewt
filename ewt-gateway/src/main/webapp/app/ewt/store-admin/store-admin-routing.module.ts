@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from "@angular/router";
-import ErrorComponent from "../../layouts/error/error.component";
+import {ErrorComponent} from "../../layouts/error/error.component";
 
 
 const storeAdminRoutes: Routes = [
@@ -14,11 +14,11 @@ const storeAdminRoutes: Routes = [
   },
   {
     path: 'products',
-    loadChildren: () => import('./products/products.module').then(m => m.ProductsModule)
+    loadChildren: () => import('./product/product.module').then(m => m.ProductModule)
   }
 ]
 @NgModule({
   imports: [RouterModule.forChild(storeAdminRoutes)],
 })
-export default class StoreAdminRoutingModule {
+export class StoreAdminRoutingModule {
 }

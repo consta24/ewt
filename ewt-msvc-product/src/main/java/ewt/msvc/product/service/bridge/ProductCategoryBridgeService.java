@@ -23,16 +23,16 @@ public class ProductCategoryBridgeService {
         return productCategoryBridgeRepository.findAllByProductId(productId);
     }
 
-    public Flux<ProductCategoryBridge> saveCategoryIds(Long productId, Set<ProductCategoryDTO> productCategories) {
+    public Flux<ProductCategoryBridge> saveCategoryBridges(Long productId, Set<ProductCategoryDTO> productCategories) {
         return Flux.fromIterable(productCategories)
                 .flatMap(productCategoryDTO -> productCategoryBridgeRepository.save(new ProductCategoryBridge(null, productId, productCategoryDTO.getId())));
     }
 
     public Flux<Void> deleteCategoryBridges(Long productId) {
-        return productCategoryBridgeRepository.deleteByProductId(productId);
+        return productCategoryBridgeRepository.deleteAllByProductId(productId);
     }
 
-    public Mono<Boolean> validateCategoryIds(Set<ProductCategoryDTO> productCategories) {
+    public Mono<Boolean> validateCategories(Set<ProductCategoryDTO> productCategories) {
         return Flux.fromIterable(productCategories)
                 .map(ProductCategoryDTO::getId)
                 .flatMap(productCategoryRepository::existsById)

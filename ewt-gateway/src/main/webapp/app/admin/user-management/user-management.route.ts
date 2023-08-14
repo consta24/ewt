@@ -4,9 +4,9 @@ import { of } from 'rxjs';
 
 import { IUser } from './user-management.model';
 import { UserManagementService } from './service/user-management.service';
-import UserManagementComponent from './list/user-management.component';
-import UserManagementDetailComponent from './detail/user-management-detail.component';
-import UserManagementUpdateComponent from './update/user-management-update.component';
+import {UserManagementComponent} from './list/user-management.component';
+import {UserManagementDetailComponent} from './detail/user-management-detail.component';
+import {UserManagementUpdateComponent} from './update/user-management-update.component';
 
 export const UserManagementResolve: ResolveFn<IUser | null> = (route: ActivatedRouteSnapshot) => {
   const login = route.paramMap.get('login');
@@ -16,7 +16,7 @@ export const UserManagementResolve: ResolveFn<IUser | null> = (route: ActivatedR
   return of(null);
 };
 
-const userManagementRoute: Routes = [
+export const userManagementRoute: Routes = [
   {
     path: '',
     component: UserManagementComponent,
@@ -46,5 +46,3 @@ const userManagementRoute: Routes = [
     },
   },
 ];
-
-export default userManagementRoute;

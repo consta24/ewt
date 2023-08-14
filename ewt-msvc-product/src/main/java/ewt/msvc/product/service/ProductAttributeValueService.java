@@ -23,6 +23,12 @@ public class ProductAttributeValueService {
                 .map(productAttributeValueMapper::toDTO);
     }
 
+
+    public Mono<ProductAttributeValueDTO> getAttributeValueById(Long attributeValueId) {
+        return productAttributeValueRepository.findById(attributeValueId)
+                .map(productAttributeValueMapper::toDTO);
+    }
+
     public Mono<ProductAttributeValueDTO> addAttributeValue(ProductAttributeValueDTO productAttributeValueDTO) {
         ProductAttributeValue productAttributeValue = productAttributeValueMapper.toEntity(productAttributeValueDTO);
         return productAttributeValueRepository.save(productAttributeValue)

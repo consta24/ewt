@@ -24,7 +24,7 @@ public class ProductResource {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ProductDTO> addProduct(@RequestBody ProductDTO productDTO) {
-        return productService.addProduct(productDTO);
+        return productService.saveProduct(productDTO);
     }
 
     @PutMapping("/{id}")

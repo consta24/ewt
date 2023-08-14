@@ -24,6 +24,6 @@ public class ProductVariantResource {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ProductVariantDTO> saveProductVariant(@PathVariable Long productId, @RequestBody ProductVariantDTO productVariantDTO) {
-        return productVariantService.saveProductVariant(productVariantDTO);
+        return productVariantService.saveProductVariant(productId, productVariantDTO);
     }
 }

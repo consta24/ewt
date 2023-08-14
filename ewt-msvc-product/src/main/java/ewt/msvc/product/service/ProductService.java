@@ -47,13 +47,13 @@ public class ProductService {
                 .flatMap(this::populateProductDTOWithAssociations);
     }
 
-    public Mono<ProductDTO> addProduct(ProductDTO productDTO) {
-        return productCategoryBridgeService.validateCategoryIds(productDTO.getProductCategories())
+    public Mono<ProductDTO> saveProduct(ProductDTO productDTO) {
+        return productCategoryBridgeService.validateCategories(productDTO.getProductCategories())
                 .flatMap(validCategories -> {
                     if (Boolean.FALSE.equals(validCategories)) {
                         return Mono.error(new RuntimeException("Invalid category IDs."));
                     }
-                    return productAttributeBridgeService.validateAttributeIds(productDTO.getProductAttributes());
+                    return productAttributeBridgeService.validateAttributes(productDTO.getProductAttributes());
                 })
                 .flatMap(validAttributes -> {
                     if (Boolean.FALSE.equals(validAttributes)) {
@@ -62,14 +62,14 @@ public class ProductService {
                     return productRepository.save(productMapper.toEntity(productDTO));
                 })
                 .flatMap(savedProduct -> {
-                    Flux<ProductCategoryBridge> saveCategoryIds =
+                    Flux<ProductCategoryBridge> saveCategoryBridges =
                             productCategoryBridgeService
-                                    .saveCategoryIds(savedProduct.getId(), productDTO.getProductCategories());
-                    Flux<ProductAttributeBridge> saveAttributeIds =
+                                    .saveCategoryBridges(savedProduct.getId(), productDTO.getProductCategories());
+                    Flux<ProductAttributeBridge> saveAttributeBridges =
                             productAttributeBridgeService
-                                    .saveAttributeIds(savedProduct.getId(), productDTO.getProductAttributes());
+                                    .saveAttributeBridges(savedProduct.getId(), productDTO.getProductAttributes());
 
-                    return Flux.concat(saveCategoryIds, saveAttributeIds)
+                    return Flux.concat(saveCategoryBridges, saveAttributeBridges)
                             .then(Mono.just(savedProduct));
                 })
                 .map(savedProduct -> {
@@ -89,12 +89,12 @@ public class ProductService {
                     existingProduct.setDescription(productDTO.getDescription());
                     return productRepository.save(existingProduct);
                 })
-                .then(productCategoryBridgeService.validateCategoryIds(productDTO.getProductCategories())
+                .then(productCategoryBridgeService.validateCategories(productDTO.getProductCategories())
                         .flatMap(validCategories -> {
                             if (Boolean.FALSE.equals(validCategories)) {
                                 return Mono.error(new RuntimeException("Invalid category IDs."));
                             }
-                            return productAttributeBridgeService.validateAttributeIds(productDTO.getProductAttributes());
+                            return productAttributeBridgeService.validateAttributes(productDTO.getProductAttributes());
                         })
                 )
                 .flatMap(validAttributes -> {
@@ -105,8 +105,8 @@ public class ProductService {
                     Flux<Void> deleteCategoryBridges = productCategoryBridgeService.deleteCategoryBridges(productDTO.getId());
                     Flux<Void> deleteAttributeBridges = productAttributeBridgeService.deleteAttributeBridges(productDTO.getId());
 
-                    Flux<ProductCategoryBridge> saveCategoryIds = productCategoryBridgeService.saveCategoryIds(productDTO.getId(), productDTO.getProductCategories());
-                    Flux<ProductAttributeBridge> saveAttributeIds = productAttributeBridgeService.saveAttributeIds(productDTO.getId(), productDTO.getProductAttributes());
+                    Flux<ProductCategoryBridge> saveCategoryIds = productCategoryBridgeService.saveCategoryBridges(productDTO.getId(), productDTO.getProductCategories());
+                    Flux<ProductAttributeBridge> saveAttributeIds = productAttributeBridgeService.saveAttributeBridges(productDTO.getId(), productDTO.getProductAttributes());
 
                     return Flux.concat(deleteCategoryBridges, deleteAttributeBridges, saveCategoryIds, saveAttributeIds).then();
                 })

@@ -26,7 +26,7 @@ public class ProductVariantImage implements Serializable {
     @Id
     private Long id;
 
-    @Column("sku_id")
+    @Column("sku")
     @Size(max = 1000)
     @NotNull
     private String sku;

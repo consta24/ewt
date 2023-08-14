@@ -8,6 +8,7 @@ import {
   faCalendarAlt,
   faCheck,
   faCloud,
+  faCloudUploadAlt,
   faCogs,
   faDatabase,
   faEye,
@@ -16,6 +17,7 @@ import {
   faHome,
   faList,
   faLock,
+  faMinus,
   faPencilAlt,
   faPlus,
   faRoad,
@@ -81,5 +83,7 @@ export const fontAwesomeIcons = [
   faUsersCog,
   faWrench,
   faStore,
-  faShirt
+  faShirt,
+  faMinus,
+  faCloudUploadAlt
 ];

@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {Component, OnInit} from '@angular/core';
+import {HttpErrorResponse} from '@angular/common/http';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
-import SharedModule from 'app/shared/shared.module';
-import { HealthService } from './health.service';
-import { Health, HealthDetails, HealthStatus } from './health.model';
+import {SharedModule} from 'app/shared/shared.module';
+import {HealthService} from './health.service';
+import {Health, HealthDetails, HealthStatus} from './health.model';
 import HealthModalComponent from './modal/health-modal.component';
 
 @Component({
@@ -16,7 +16,8 @@ import HealthModalComponent from './modal/health-modal.component';
 export default class HealthComponent implements OnInit {
   health?: Health;
 
-  constructor(private modalService: NgbModal, private healthService: HealthService) {}
+  constructor(private modalService: NgbModal, private healthService: HealthService) {
+  }
 
   ngOnInit(): void {
     this.refresh();

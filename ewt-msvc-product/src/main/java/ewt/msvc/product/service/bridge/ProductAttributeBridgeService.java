@@ -23,16 +23,16 @@ public class ProductAttributeBridgeService {
         return productAttributeBridgeRepository.findAllByProductId(productId);
     }
 
-    public Flux<ProductAttributeBridge> saveAttributeIds(Long productId, Set<ProductAttributeDTO> productAttributes) {
+    public Flux<ProductAttributeBridge> saveAttributeBridges(Long productId, Set<ProductAttributeDTO> productAttributes) {
         return Flux.fromIterable(productAttributes)
                 .flatMap(productAttributeDTO -> productAttributeBridgeRepository.save(new ProductAttributeBridge(null, productId, productAttributeDTO.getId())));
     }
 
     public Flux<Void> deleteAttributeBridges(Long productId) {
-        return productAttributeBridgeRepository.deleteByProductId(productId);
+        return productAttributeBridgeRepository.deleteAllByProductId(productId);
     }
 
-    public Mono<Boolean> validateAttributeIds(Set<ProductAttributeDTO> productAttributes) {
+    public Mono<Boolean> validateAttributes(Set<ProductAttributeDTO> productAttributes) {
         return Flux.fromIterable(productAttributes)
                 .map(ProductAttributeDTO::getId)
                 .flatMap(productAttributeRepository::existsById)

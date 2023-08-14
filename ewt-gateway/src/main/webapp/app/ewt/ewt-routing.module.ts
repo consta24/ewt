@@ -11,5 +11,5 @@ const ewtRoutes: Routes = [
 @NgModule({
   imports: [RouterModule.forChild(ewtRoutes)],
 })
-export default class EwtRoutingModule {
+export class EwtRoutingModule {
 }

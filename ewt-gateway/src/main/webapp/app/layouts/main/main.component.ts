@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
   templateUrl: './main.component.html',
   providers: [AppPageTitleStrategy],
 })
-export default class MainComponent implements OnInit {
+export class MainComponent implements OnInit {
   private renderer: Renderer2;
 
   constructor(

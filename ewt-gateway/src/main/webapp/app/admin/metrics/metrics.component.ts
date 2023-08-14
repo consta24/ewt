@@ -1,18 +1,20 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { combineLatest } from 'rxjs';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {combineLatest} from 'rxjs';
 
-import SharedModule from 'app/shared/shared.module';
-import { MetricsService } from './metrics.service';
-import { Metrics, Thread } from './metrics.model';
-import { JvmMemoryComponent } from './blocks/jvm-memory/jvm-memory.component';
-import { JvmThreadsComponent } from './blocks/jvm-threads/jvm-threads.component';
-import { MetricsCacheComponent } from './blocks/metrics-cache/metrics-cache.component';
-import { MetricsDatasourceComponent } from './blocks/metrics-datasource/metrics-datasource.component';
-import { MetricsEndpointsRequestsComponent } from './blocks/metrics-endpoints-requests/metrics-endpoints-requests.component';
-import { MetricsGarbageCollectorComponent } from './blocks/metrics-garbagecollector/metrics-garbagecollector.component';
-import { MetricsModalThreadsComponent } from './blocks/metrics-modal-threads/metrics-modal-threads.component';
-import { MetricsRequestComponent } from './blocks/metrics-request/metrics-request.component';
-import { MetricsSystemComponent } from './blocks/metrics-system/metrics-system.component';
+import {SharedModule} from 'app/shared/shared.module';
+import {MetricsService} from './metrics.service';
+import {Metrics, Thread} from './metrics.model';
+import {JvmMemoryComponent} from './blocks/jvm-memory/jvm-memory.component';
+import {JvmThreadsComponent} from './blocks/jvm-threads/jvm-threads.component';
+import {MetricsCacheComponent} from './blocks/metrics-cache/metrics-cache.component';
+import {MetricsDatasourceComponent} from './blocks/metrics-datasource/metrics-datasource.component';
+import {
+  MetricsEndpointsRequestsComponent
+} from './blocks/metrics-endpoints-requests/metrics-endpoints-requests.component';
+import {MetricsGarbageCollectorComponent} from './blocks/metrics-garbagecollector/metrics-garbagecollector.component';
+import {MetricsModalThreadsComponent} from './blocks/metrics-modal-threads/metrics-modal-threads.component';
+import {MetricsRequestComponent} from './blocks/metrics-request/metrics-request.component';
+import {MetricsSystemComponent} from './blocks/metrics-system/metrics-system.component';
 
 @Component({
   standalone: true,
@@ -37,7 +39,8 @@ export default class MetricsComponent implements OnInit {
   threads?: Thread[];
   updatingMetrics = true;
 
-  constructor(private metricsService: MetricsService, private changeDetector: ChangeDetectorRef) {}
+  constructor(private metricsService: MetricsService, private changeDetector: ChangeDetectorRef) {
+  }
 
   ngOnInit(): void {
     this.refresh();

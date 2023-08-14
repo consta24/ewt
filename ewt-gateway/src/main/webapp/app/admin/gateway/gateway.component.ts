@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import SharedModule from 'app/shared/shared.module';
+import {SharedModule} from 'app/shared/shared.module';
 import { GatewayRoutesService } from './gateway-routes.service';
 import { GatewayRoute } from './gateway-route.model';
 

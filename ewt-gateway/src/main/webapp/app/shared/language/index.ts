@@ -1,2 +1,2 @@
-export { default as TranslateDirective } from './translate.directive';
-export { default as FindLanguageFromKeyPipe } from './find-language-from-key.pipe';
+export {TranslateDirective} from './translate.directive';
+export {FindLanguageFromKeyPipe} from './find-language-from-key.pipe';

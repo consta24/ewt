@@ -11,6 +11,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -34,4 +35,6 @@ public class ProductVariantDTO implements Serializable {
 
     @NotNull
     private Integer stock;
+
+    private Set<ProductAttributeValueDTO> productAttributeValues;
 }

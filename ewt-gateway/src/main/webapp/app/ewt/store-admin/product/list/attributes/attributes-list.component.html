@@ -1,0 +1,138 @@
+<ewt-loading [isLoading]="isLoading"></ewt-loading>
+
+<div class="d-flex justify-content-end my-3">
+  <button type="button" class="btn btn-danger me-2" routerLink="/store-admin/products">Back</button>
+  <button type="button" class="btn btn-primary" (click)="toggleAttributeAdd()">Add attribute</button>
+</div>
+<div *ngIf="attributeAddToggle" class="card my-3">
+  <div class="card-header">
+    <div class="row">
+      <div class="col d-flex align-items-center">
+        <h4 class="card-title"><strong>Add attribute</strong></h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <form [formGroup]="attributeForm" (ngSubmit)="submitForm()">
+      <div class="form-group">
+        <label for="name">Attribute Name</label>
+        <input id="name" type="text" formControlName="name" class="form-control"/>
+
+        <label *ngIf="valuesFormArray.length">Attribute Values</label>
+        <div formArrayName="values" *ngFor="let valueCtrl of valuesFormArray.controls; let i = index"
+             [class.ng-invalid]="false">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <input [formControlName]="i" type="text" class="form-control"/>
+            <button type="button" class="btn btn-danger ml-2" (click)="removeValue(i)">
+              <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="valuesFormArray.hasError('duplicateValue')">
+          <small class="text-danger">Duplicate values detected.</small>
+        </div>
+        <div *ngIf="valuesFormArray.hasError('invalidCharacters')">
+          <small class="text-danger">Invalid characters or numbers detected.</small>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+          <button type="button" class="btn btn-secondary" (click)="addValue()">Add value</button>
+        </div>
+      </div>
+      <div class="row my-3">
+        <hr class="hr-legal"/>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="attributeForm.invalid">Save attribute</button>
+    </form>
+  </div>
+</div>
+<div class="card" *ngIf="!isLoading">
+  <div class="card-header">
+    <div class="row">
+      <div class="col">
+        <h4 class="card-title"><strong>Attributes List</strong></h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div *ngFor="let attribute of attributes">
+        <div class="row my-1">
+          <div class="col-8 d-flex align-items-center">
+            <p class="no-font-space"><strong>{{attribute.name}}</strong></p>
+          </div>
+          <div class="col-4 d-flex justify-content-end">
+            <button class="btn btn-info me-1">
+              <fa-icon icon="edit" [fixedWidth]="true"></fa-icon>
+            </button>
+            <button
+              [class]="isAttributeLinkedToProducts(attribute.id!) ? 'btn btn-warning me-1' : 'btn btn-danger me-1'"
+              (click)="deleteOrExpandAttribute(attribute.id!)">
+              <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
+            </button>
+            <button class="btn btn-primary" (click)="toggleAttributeValues(attribute.id!)">
+              <fa-icon [icon]="(expandedAttributeId === attribute.id) ? 'caret-up' : 'caret-down'"
+                       [fixedWidth]="true"></fa-icon>
+            </button>
+          </div>
+          <div *ngIf="expandedAttributeIdProducts === attribute.id" class="my-2">
+            <small class="text-danger">
+              To delete this attribute, first delete or modify all associated products.
+            </small>
+            <div class="border p-2">
+              <div *ngFor="let product of linkedProducts.get(attribute.id!)">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="col-8 d-flex align-items-center">
+                    <p class="no-font-space">{{product.name}}</p>
+                  </div>
+                  <div class="col-4 d-flex justify-content-end">
+                    <button class="btn btn-info me-1">
+                      <fa-icon icon="edit" [fixedWidth]="true"></fa-icon>
+                    </button>
+                    <button class="btn btn-danger">
+                      <fa-icon icon="trash" [fixedWidth]="true"
+                               (click)="deleteProduct(attribute.id!, product.id)"></fa-icon>
+                    </button>
+                  </div>
+                </div>
+                <hr class="hr-legal my-1"/>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="expandedAttributeId === attribute.id" class="my-2">
+            <div class="d-flex justify-content-end">
+              <strong class="no-font-space">Attribute Values</strong>
+            </div>
+            <div class="border p-2">
+              <div *ngFor="let attributeValue of attributeValues" class="p-1">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="col-8 d-flex align-items-center">
+                    <p class="no-font-space">{{attributeValue.value}}</p>
+                  </div>
+                  <div class="col-4 d-flex justify-content-end">
+                    <button class="btn btn-info me-1">
+                      <fa-icon icon="edit" [fixedWidth]="true"></fa-icon>
+                    </button>
+                    <button class="btn btn-danger" *ngIf="!isAttributeLinkedToProducts(attribute.id!)"
+                            (click)="deleteAttributeValue(attribute.id!, attributeValue.id!)">
+                      <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
+                    </button>
+                  </div>
+                </div>
+                <hr class="hr-legal my-1"/>
+              </div>
+              <div class="d-flex align-items-center">
+                <input type="text" class="form-control" [(ngModel)]="attributeValue"/>
+                <button class="btn btn-secondary" (click)="addAttributeValue(attribute.id!, attributeValue)">
+                  <fa-icon icon="plus" [fixedWidth]="true"></fa-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr class="hr-legal"/>
+      </div>
+    </div>
+  </div>
+</div>

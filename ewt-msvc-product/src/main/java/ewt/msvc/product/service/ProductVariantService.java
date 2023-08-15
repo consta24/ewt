@@ -43,6 +43,9 @@ public class ProductVariantService {
     }
 
     public Mono<ProductVariantDTO> saveProductVariant(Long productId, ProductVariantDTO productVariantDTO) {
+        if (productVariantDTO.getProductId() == null) {
+            productVariantDTO.setProductId(productId);
+        }
         return productVariantAttributeValuesBridgeService.validateAttributeValues(productVariantDTO.getProductAttributeValues())
                 .flatMap(validAttributeValues -> {
                     if (Boolean.FALSE.equals(validAttributeValues)) {
@@ -67,6 +70,14 @@ public class ProductVariantService {
                     return savedProductVariantDTO;
                 })
                 .as(transactionalOperator::transactional);
+    }
+
+    public Flux<Void> deleteVariantsForProduct(Long productId) {
+        return productVariantRepository.findAllByProductId(productId)
+                .flatMap(productVariant ->
+                        productVariantAttributeValuesBridgeService.deleteVariantAttributeValuesBridges(productVariant.getSku())
+                                .then(productVariantRepository.delete(productVariant))
+                );
     }
 
 

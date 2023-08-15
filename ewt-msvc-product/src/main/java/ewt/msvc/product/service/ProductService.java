@@ -57,7 +57,7 @@ public class ProductService {
                 })
                 .flatMap(validAttributes -> {
                     if (Boolean.FALSE.equals(validAttributes)) {
-                        return Mono.error(new RuntimeException("Invalid variants IDs."));
+                        return Mono.error(new RuntimeException("Invalid attributes IDs."));
                     }
                     return productRepository.save(productMapper.toEntity(productDTO));
                 })
@@ -72,15 +72,22 @@ public class ProductService {
                     return Flux.concat(saveCategoryBridges, saveAttributeBridges)
                             .then(Mono.just(savedProduct));
                 })
-                .map(savedProduct -> {
-                    ProductDTO savedProductDTO = productMapper.toDTO(savedProduct);
-                    savedProductDTO.setProductVariants(new HashSet<>(productDTO.getProductVariants()));
-                    savedProductDTO.setProductCategories(new HashSet<>(productDTO.getProductCategories()));
-                    savedProductDTO.setProductAttributes(new HashSet<>(productDTO.getProductAttributes()));
-                    return savedProductDTO;
-                })
+                .flatMap(savedProduct -> Flux.fromIterable(productDTO.getProductVariants())
+                        .flatMap(variant -> {
+                            variant.setProductId(savedProduct.getId());
+                            return productVariantService.saveProductVariant(savedProduct.getId(), variant);
+                        })
+                        .collectList()
+                        .map(savedVariants -> {
+                            ProductDTO savedProductDTO = productMapper.toDTO(savedProduct);
+                            savedProductDTO.setProductVariants(new HashSet<>(savedVariants));
+                            savedProductDTO.setProductCategories(new HashSet<>(productDTO.getProductCategories()));
+                            savedProductDTO.setProductAttributes(new HashSet<>(productDTO.getProductAttributes()));
+                            return savedProductDTO;
+                        }))
                 .as(transactionalOperator::transactional);
     }
+
 
     public Mono<ProductDTO> updateProduct(Long id, ProductDTO productDTO) {
         return productRepository.findById(id)
@@ -118,8 +125,9 @@ public class ProductService {
     public Mono<Void> deleteProduct(Long id) {
         Flux<Void> deleteCategoryBridges = productCategoryBridgeService.deleteCategoryBridges(id);
         Flux<Void> deleteAttributeBridges = productAttributeBridgeService.deleteAttributeBridges(id);
+        Flux<Void> deleteVariants = productVariantService.deleteVariantsForProduct(id);
 
-        return Flux.concat(deleteCategoryBridges, deleteAttributeBridges)
+        return Flux.concat(deleteCategoryBridges, deleteAttributeBridges, deleteVariants)
                 .then(productRepository.deleteById(id))
                 .as(transactionalOperator::transactional);
     }
@@ -144,9 +152,5 @@ public class ProductService {
                     productDTO.setProductVariants(tuple.getT3());
                     return productDTO;
                 });
-    }
-
-    public Mono<Boolean> validateProductId(Long productId) {
-        return productRepository.existsById(productId);
     }
 }

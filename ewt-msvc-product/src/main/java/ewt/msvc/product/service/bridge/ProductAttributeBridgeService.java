@@ -23,6 +23,10 @@ public class ProductAttributeBridgeService {
         return productAttributeBridgeRepository.findAllByProductId(productId);
     }
 
+    public Flux<ProductAttributeBridge> findAttributeBridgesByAttributeId(Long attributeId) {
+        return productAttributeBridgeRepository.findAllByAttributeId(attributeId);
+    }
+
     public Flux<ProductAttributeBridge> saveAttributeBridges(Long productId, Set<ProductAttributeDTO> productAttributes) {
         return Flux.fromIterable(productAttributes)
                 .flatMap(productAttributeDTO -> productAttributeBridgeRepository.save(new ProductAttributeBridge(null, productId, productAttributeDTO.getId())));
@@ -37,9 +41,5 @@ public class ProductAttributeBridgeService {
                 .map(ProductAttributeDTO::getId)
                 .flatMap(productAttributeRepository::existsById)
                 .all(Boolean::booleanValue);
-    }
-
-    public Mono<Boolean> validateAttributeId(Long attributeId) {
-        return productAttributeRepository.existsById(attributeId);
     }
 }

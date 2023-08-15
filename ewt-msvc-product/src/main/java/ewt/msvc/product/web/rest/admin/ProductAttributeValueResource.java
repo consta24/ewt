@@ -72,4 +72,9 @@ public class ProductAttributeValueResource {
         }
         return productAttributeValueService.deleteAttributeValue(attributeId, id);
     }
+
+    @GetMapping("/{id}/linked")
+    public Mono<Boolean> isAttributeValueLinkedToVariants(@PathVariable Long attributeId, @PathVariable Long id) {
+        return productAttributeValueService.isAttributeValueLinkedToVariants(id);
+    }
 }

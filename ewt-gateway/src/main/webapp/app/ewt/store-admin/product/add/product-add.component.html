@@ -13,11 +13,10 @@
         <div class="form-group">
           <label>Categories</label>
           <ng-select
-            formControlName="categories"
+            formControlName="productCategories"
             class="mb-3"
             [items]="categoriesOption"
             bindLabel="name"
-            bindValue="id"
             notFoundText="No results"
             loadingText="Loading..."
             placeholder="Select product categories"
@@ -37,7 +36,7 @@
           <ng-select
             id="attributes"
             [items]="attributesOption"
-            formControlName="attributes"
+            formControlName="productAttributes"
             bindLabel="name"
             notFoundText="No results"
             loadingText="Loading..."
@@ -47,8 +46,8 @@
           ></ng-select>
 
           <strong>Product Variants</strong>
-          <div class="border p-3 my-3" formArrayName="variants"
-               *ngFor="let variant of variants.controls; let variantIndex = index" [class.ng-invalid]="false">
+          <div class="border p-3 my-3" formArrayName="productVariants"
+               *ngFor="let variant of productVariants.controls; let variantIndex = index" [class.ng-invalid]="false">
             <p>Variant {{variantIndex + 1}}</p>
             <hr class="hr-legal"/>
             <div [formGroupName]="variantIndex" [class.ng-invalid]="false">
@@ -69,7 +68,7 @@
                   <label>{{ selectedAttribute.name }}</label>
                   <ng-select
                     [id]="'attributeValue-' + variantIndex + '-' + attributeIndex"
-                    [items]="attributeValuesOptions.get(selectedAttribute.id) ?? []"
+                    [items]="attributeValuesOptions.get(selectedAttribute.id!) ?? []"
                     bindLabel="value"
                     notFoundText="Could not find attribute values"
                     loadingText="Loading..."
@@ -112,7 +111,7 @@
 
       <div class="d-flex justify-content-end">
         <button type="button" class="btn btn-danger me-3" routerLink="/store-admin/products">Cancel</button>
-        <button type="submit" class="btn btn-primary">Add product</button>
+        <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">Add product</button>
       </div>
     </form>
   </div>

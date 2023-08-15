@@ -6,11 +6,14 @@ import {
   faBell,
   faBook,
   faCalendarAlt,
+  faCaretDown,
+  faCaretUp,
   faCheck,
   faCloud,
   faCloudUploadAlt,
   faCogs,
   faDatabase,
+  faEdit,
   faEye,
   faFlag,
   faHeart,
@@ -35,12 +38,13 @@ import {
   faTasks,
   faThList,
   faTimes,
+  faTrash,
   faTrashAlt,
   faUser,
   faUserPlus,
   faUsers,
   faUsersCog,
-  faWrench
+  faWrench,
 } from '@fortawesome/free-solid-svg-icons';
 
 export const fontAwesomeIcons = [
@@ -85,5 +89,9 @@ export const fontAwesomeIcons = [
   faStore,
   faShirt,
   faMinus,
-  faCloudUploadAlt
+  faCloudUploadAlt,
+  faCaretDown,
+  faCaretUp,
+  faEdit,
+  faTrash
 ];

@@ -18,19 +18,57 @@ export class ProductService {
   constructor(private applicationConfigService: ApplicationConfigService, private httpClient: HttpClient) {
   }
 
+
+  //PRODUCTS
+  public addProduct(product: IProduct) {
+    return this.httpClient.post<IProduct>(`${this.productUrl}`, product);
+  }
+
   public getProducts() {
     return this.httpClient.get<IProduct[]>(`${this.productUrl}`);
   }
 
+  public deleteProduct(productId: number) {
+    return this.httpClient.delete<void>(`${this.productUrl}/${productId}`);
+  }
+
+  //CATEGORIES
   public getCategories() {
     return this.httpClient.get<IProductCategory[]>(`${this.productCategoryUrl}`);
   }
 
+
+  //ATTRIBUTES
   public getAttributes() {
     return this.httpClient.get<IProductAttribute[]>(`${this.productAttributeUrl}`);
   }
 
+  public isAttributeLinkedToProducts(attributeId: number) {
+    return this.httpClient.get<boolean>(`${this.productAttributeUrl}/${attributeId}/linked`);
+  }
+
+  public addAttribute(attribute: IProductAttribute) {
+    return this.httpClient.post<IProductAttribute>(`${this.productAttributeUrl}`, attribute);
+  }
+
+  public deleteAttribute(attributeId: number) {
+    return this.httpClient.delete<void>(`${this.productAttributeUrl}/${attributeId}`)
+  }
+
+  public getProductsForAttribute(attributeId: number) {
+    return this.httpClient.get<IProduct[]>(`${this.productAttributeUrl}/${attributeId}/products`);
+  }
+
+  //ATTRIBUTE VALUES
   public getAttributeValues(attributeId: number) {
     return this.httpClient.get<IProductAttributeValue[]>(`${this.productAttributeUrl}/${attributeId}/values`);
+  }
+
+  public addAttributeValue(attributeId: number, value: IProductAttributeValue) {
+    return this.httpClient.post<IProductAttributeValue>(`${this.productAttributeUrl}/${attributeId}/values`, value);
+  }
+
+  public deleteAttributeValue(attributeId: number, attributeValueId: number) {
+    return this.httpClient.delete(`${this.productAttributeUrl}/${attributeId}/values/${attributeValueId}`);
   }
 }

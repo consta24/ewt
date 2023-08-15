@@ -2,6 +2,7 @@ package ewt.msvc.product.web.rest.admin;
 
 import ewt.msvc.product.service.ProductAttributeService;
 import ewt.msvc.product.service.dto.ProductAttributeDTO;
+import ewt.msvc.product.service.dto.ProductDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -35,5 +36,15 @@ public class ProductAttributeResource {
     @DeleteMapping("/{id}")
     public Mono<Void> deleteAttribute(@PathVariable Long id) {
         return productAttributeService.deleteAttribute(id);
+    }
+
+    @GetMapping("/{id}/linked")
+    public Mono<Boolean> isAttributeLinkedToProducts(@PathVariable Long id) {
+        return productAttributeService.isAttributeLinkedToProducts(id);
+    }
+
+    @GetMapping("/{id}/products")
+    public Flux<ProductDTO> getProductsForAttribute(@PathVariable Long id) {
+        return productAttributeService.getProductsForAttribute(id);
     }
 }

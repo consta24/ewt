@@ -23,7 +23,6 @@ export class ProductAddComponent implements OnInit {
   attributeValuesOptions: Map<number, IProductAttributeValue[]> = new Map();
 
   selectedAttributes: IProductAttribute[] = [];
-  selectedAttributeValues: IProductAttributeValue[] = [];
 
   images: string[] = [];
 
@@ -34,7 +33,7 @@ export class ProductAddComponent implements OnInit {
   }
 
   submitForm() {
-    console.log(this.productForm.value);
+    this.productService.addProduct(this.productForm.value).subscribe();
   }
 
   ngOnInit(): void {
@@ -56,15 +55,15 @@ export class ProductAddComponent implements OnInit {
 
   private initForm(): void {
     this.productForm = this.fb.group({
-      categories: [null, Validators.required],
+      productCategories: [null, Validators.required],
       name: [null, Validators.required],
       description: [null, Validators.maxLength(500)],
-      attributes: [null, Validators.required],
-      variants: this.fb.array([
+      productAttributes: [null, Validators.required],
+      productVariants: this.fb.array([
         this.fb.group({
           price: [null, Validators.required],
           stock: [null, Validators.required],
-          attributeValues: this.fb.array([]),
+          productAttributeValues: this.fb.array([]),
           images: this.fb.array([])
         })
       ])
@@ -75,19 +74,19 @@ export class ProductAddComponent implements OnInit {
 
   private createVariantFormGroup(): FormGroup {
     const attributeValuesArray = this.fb.array(
-      (this.productForm.get('attributes')?.value || []).map(() => this.fb.control(null, Validators.required))
+      (this.productForm.get('productAttributes')?.value || []).map(() => this.fb.control(null, Validators.required))
     );
 
     return this.fb.group({
       price: [null, Validators.required],
       stock: [null, Validators.required],
-      attributeValues: attributeValuesArray,
+      productAttributeValues: attributeValuesArray,
       images: this.fb.array([])
     });
   }
 
   private addFormListeners() {
-    this.productForm.get('attributes')?.valueChanges.subscribe(attributes => {
+    this.productForm.get('productAttributes')?.valueChanges.subscribe(attributes => {
       this.onAttributeSelectionChange(attributes);
     })
   }
@@ -95,10 +94,10 @@ export class ProductAddComponent implements OnInit {
   onAttributeSelectionChange(selectedAttributes: IProductAttribute[]): void {
     this.selectedAttributes = selectedAttributes;
 
-    const variants = this.productForm.get('variants') as FormArray;
+    const variants = this.productForm.get('productVariants') as FormArray;
 
     for (const variant of variants.controls) {
-      const attributeValuesArray = variant.get('attributeValues') as FormArray;
+      const attributeValuesArray = variant.get('productAttributeValues') as FormArray;
 
       for (let i = attributeValuesArray.length - 1; i >= 0; i--) {
         const existingAttrId = attributeValuesArray.at(i).value ? attributeValuesArray.at(i).value.attributeId : null;
@@ -113,9 +112,9 @@ export class ProductAddComponent implements OnInit {
           attributeValuesArray.push(attributeValueControl);
         }
 
-        if (!this.attributeValuesOptions.has(attr.id)) {
-          this.productService.getAttributeValues(attr.id).subscribe(data => {
-            this.attributeValuesOptions.set(attr.id, data);
+        if (!this.attributeValuesOptions.has(attr.id!)) {
+          this.productService.getAttributeValues(attr.id!).subscribe(data => {
+            this.attributeValuesOptions.set(attr.id!, data);
           });
         }
       }
@@ -128,12 +127,12 @@ export class ProductAddComponent implements OnInit {
   }
 
   addVariant(): void {
-    this.variants.push(this.createVariantFormGroup());
+    this.productVariants.push(this.createVariantFormGroup());
   }
 
   removeVariant(): void {
-    if (this.variants.length > 1) {
-      this.variants.removeAt(this.variants.length - 1);
+    if (this.productVariants.length > 1) {
+      this.productVariants.removeAt(this.productVariants.length - 1);
     }
   }
 
@@ -178,17 +177,13 @@ export class ProductAddComponent implements OnInit {
     this.images.splice(index, 1);
   }
 
-  get variants(): FormArray {
-    return this.productForm.get('variants') as FormArray;
-  }
-
-  get attributeValues(): FormArray {
-    return this.productForm.get('variants') as FormArray;
+  get productVariants(): FormArray {
+    return this.productForm.get('productVariants') as FormArray;
   }
 
   getAttributeValueControl(variantIndex: number, attributeIndex: number): FormControl {
-    const variantFormGroup = this.variants.at(variantIndex) as FormGroup;
-    const attributeValueFormArray = variantFormGroup.get('attributeValues') as FormArray;
+    const variantFormGroup = this.productVariants.at(variantIndex) as FormGroup;
+    const attributeValueFormArray = variantFormGroup.get('productAttributeValues') as FormArray;
     return attributeValueFormArray.at(attributeIndex) as FormControl;
   }
 }

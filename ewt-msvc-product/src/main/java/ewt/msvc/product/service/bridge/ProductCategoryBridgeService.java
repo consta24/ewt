@@ -38,8 +38,4 @@ public class ProductCategoryBridgeService {
                 .flatMap(productCategoryRepository::existsById)
                 .all(Boolean::booleanValue);
     }
-
-    public Mono<Boolean> validateCategoryId(Long categoryId) {
-        return productCategoryRepository.existsById(categoryId);
-    }
 }

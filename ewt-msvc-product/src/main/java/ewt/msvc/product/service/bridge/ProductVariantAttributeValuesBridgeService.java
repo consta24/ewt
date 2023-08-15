@@ -23,6 +23,10 @@ public class ProductVariantAttributeValuesBridgeService {
         return productVariantAttributeValuesBridgeRepository.findAllBySku(sku);
     }
 
+    public Flux<ProductVariantAttributeValuesBridge> findVariantAttributeValuesBridgesByAttributeValueId(Long attributeValueId) {
+        return productVariantAttributeValuesBridgeRepository.findAllByAttributeValueId(attributeValueId);
+    }
+
     public Flux<ProductVariantAttributeValuesBridge> saveVariantAttributeValuesBridges(String sku, Set<ProductAttributeValueDTO> productAttributeValues) {
         return Flux.fromIterable(productAttributeValues)
                 .flatMap(productAttributeValueDTO -> productVariantAttributeValuesBridgeRepository.save(new ProductVariantAttributeValuesBridge(null, sku, productAttributeValueDTO.getId())));

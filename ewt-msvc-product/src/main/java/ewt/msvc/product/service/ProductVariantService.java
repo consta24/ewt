@@ -48,7 +48,7 @@ public class ProductVariantService {
                     if (Boolean.FALSE.equals(validAttributeValues)) {
                         return Mono.error(new RuntimeException("Invalid attribute values IDs"));
                     }
-                    return generateSkuCode(productId, productVariantDTO);
+                    return generateSkuCode(productVariantDTO);
                 })
                 .flatMap(sku -> {
                     productVariantDTO.setSku(sku);
@@ -74,6 +74,63 @@ public class ProductVariantService {
                 .as(transactionalOperator::transactional);
     }
 
+    public Mono<Void> deleteProductVariant(ProductVariantDTO productVariantDTO) {
+        return productVariantRepository.findBySku(productVariantDTO.getSku())
+                .flatMap(productVariant ->
+                        productVariantAttributeValuesBridgeService.deleteVariantAttributeValuesBridges(productVariant.getSku())
+                                .thenMany(productVariantImageService.deleteAllImagesBySku(productVariant.getSku()))
+                                .then(productVariantRepository.delete(productVariant))
+                )
+                .then();
+    }
+
+    public Mono<ProductVariantDTO> updateProductVariant(ProductVariantDTO productVariantDTO) {
+        return productVariantAttributeValuesBridgeService.validateAttributeValues(productVariantDTO.getVariantAttributeValues())
+                .flatMap(validAttributeValues -> {
+                    if (Boolean.FALSE.equals(validAttributeValues)) {
+                        return Mono.error(new RuntimeException("Invalid attribute values IDs"));
+                    }
+                    return generateSkuCode(productVariantDTO);
+                })
+                .flatMap(updatedSku -> productVariantRepository.findBySku(productVariantDTO.getSku())
+                        .switchIfEmpty(Mono.error(new RuntimeException("SKU not found: " + productVariantDTO.getSku())))
+                        .flatMap(existingVariant -> {
+                            Flux<Void> deleteOldSkuVariantImages = productVariantImageService.deleteAllImagesBySku(productVariantDTO.getSku());
+                            Flux<Void> deleteOldSkuAttributeValuesBridges = productVariantAttributeValuesBridgeService.deleteVariantAttributeValuesBridges(productVariantDTO.getSku());
+
+                            return Flux.concat(deleteOldSkuVariantImages, deleteOldSkuAttributeValuesBridges)
+                                    .then(Mono.defer(() -> {
+                                        existingVariant.setSku(updatedSku);
+                                        existingVariant.setProductId(productVariantDTO.getProductId());
+                                        existingVariant.setStock(productVariantDTO.getStock());
+                                        existingVariant.setPrice(productVariantDTO.getPrice());
+                                        return productVariantRepository.save(existingVariant);
+                                    }));
+                        }))
+                .flatMap(updatedVariant -> {
+                    Flux<Void> deleteVariantImages = productVariantImageService.deleteAllImagesBySku(updatedVariant.getSku());
+                    Flux<Void> deleteAttributeValuesBridges = productVariantAttributeValuesBridgeService.deleteVariantAttributeValuesBridges(updatedVariant.getSku());
+
+                    return Flux.concat(deleteVariantImages, deleteAttributeValuesBridges)
+                            .then(Mono.defer(() -> {
+                                Flux<ProductVariantImageDTO> saveProductVariantImages =
+                                        productVariantImageService.saveProductVariantImages(updatedVariant.getSku(), productVariantDTO.getVariantImages());
+                                Flux<ProductVariantAttributeValuesBridge> saveVariantAttributeValuesBridges =
+                                        productVariantAttributeValuesBridgeService.saveVariantAttributeValuesBridges(updatedVariant.getSku(), productVariantDTO.getVariantAttributeValues());
+
+                                return Flux.concat(saveVariantAttributeValuesBridges, saveProductVariantImages).then(Mono.just(updatedVariant));
+                            }));
+                })
+                .map(updatedProductVariant -> {
+                    ProductVariantDTO updatedProductVariantDTO = productVariantMapper.toDTO(updatedProductVariant);
+                    updatedProductVariantDTO.setVariantAttributeValues(new HashSet<>(productVariantDTO.getVariantAttributeValues()));
+                    updatedProductVariantDTO.setVariantImages(new HashSet<>(productVariantDTO.getVariantImages()));
+                    return updatedProductVariantDTO;
+                })
+                .as(transactionalOperator::transactional);
+    }
+
+
     public Flux<Void> deleteVariantsForProduct(Long productId) {
         return productVariantRepository.findAllByProductId(productId)
                 .flatMap(productVariant ->
@@ -85,8 +142,8 @@ public class ProductVariantService {
     }
 
 
-    private Mono<String> generateSkuCode(Long productId, ProductVariantDTO productVariantDTO) {
-        return productRepository.findById(productId)
+    private Mono<String> generateSkuCode(ProductVariantDTO productVariantDTO) {
+        return productRepository.findById(productVariantDTO.getProductId())
                 .flatMap(product -> {
                     String productNameFormatted = product.getName().toLowerCase().replace(" ", "-");
 
@@ -98,7 +155,7 @@ public class ProductVariantService {
 
                     String attributesFormatted = String.join("-", attributeValues);
 
-                    return Mono.just(productId + "-" + productNameFormatted + "-" + attributesFormatted);
+                    return Mono.just(productVariantDTO.getProductId() + "-" + productNameFormatted + "-" + attributesFormatted);
                 });
     }
 

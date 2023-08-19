@@ -35,7 +35,7 @@ public class ProductVariantImageService {
     private final ProductVariantImageRepository productVariantImageRepository;
 
 
-    public Mono<byte[]> getProductVariantImageByRef(String ref) {
+    public Mono<String> getProductVariantImageByRef(String ref) {
         String[] parts = ref.split("/");
         if (parts.length != 2) {
             return Mono.error(new RuntimeException("Invalid ref format"));
@@ -58,7 +58,10 @@ public class ProductVariantImageService {
                 future.thenAccept(response -> {
                     try {
                         byte[] imageBytes = IOUtils.toByteArray(response);
-                        sink.success(imageBytes);
+                        String contentType = response.headers().get("Content-Type");  // Make sure this is the correct way to get headers in your version of the MinIO client.
+                        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+                        String fullData = "data:" + contentType + ";base64," + base64Image;
+                        sink.success(fullData);
                     } catch (IOException e) {
                         sink.error(e);
                     }
@@ -71,6 +74,7 @@ public class ProductVariantImageService {
             }
         });
     }
+
 
 
     public Flux<ProductVariantImageDTO> getAllProductVariantImages(String sku) {

@@ -8,18 +8,24 @@ import ewt.msvc.product.service.dto.ProductAttributeValueDTO;
 import ewt.msvc.product.service.dto.ProductVariantDTO;
 import ewt.msvc.product.service.mapper.ProductAttributeValueMapper;
 import ewt.msvc.product.service.mapper.ProductVariantMapper;
+import ewt.msvc.product.service.util.Base64Util;
 import ewt.msvc.product.service.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Base64;
+import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
 public class ProductAttributeValueService {
 
     private final ApplicationContext context;
+    private final TransactionalOperator transactionalOperator;
 
     private final ProductAttributeValueMapper productAttributeValueMapper;
     private final ProductVariantMapper productVariantMapper;
@@ -28,6 +34,7 @@ public class ProductAttributeValueService {
     private final ProductVariantRepository productVariantRepository;
 
     private final ProductVariantAttributeValuesBridgeService productVariantAttributeValuesBridgeService;
+    private final ProductVariantImageService productVariantImageService;
 
 
     public Flux<ProductAttributeValueDTO> getAttributeValues(Long attributeId) {
@@ -73,14 +80,38 @@ public class ProductAttributeValueService {
                         .map(ProductVariantDTO::getProductId)
                         .distinct()
                         .flatMap(this::updateAssociatedProduct)
-                        .then(Mono.just(productAttributeValueMapper.toDTO(savedAttributeValue))));
+                        .then(Mono.just(productAttributeValueMapper.toDTO(savedAttributeValue))))
+                .as(transactionalOperator::transactional);
     }
 
     private Mono<Void> updateAssociatedProduct(Long productId) {
         ProductService productService = context.getBean(ProductService.class);
 
         return productService.getProduct(productId)
-                .flatMap(productDTO -> productService.updateProduct(productId, productDTO))
+                .flatMap(productDTO -> Flux.fromIterable(productDTO.getProductVariants())
+                        .flatMap(variant -> Flux.fromIterable(variant.getVariantImages())
+                                .flatMap(variantImage -> {
+                                    if (!Base64Util.isLikelyBase64(variantImage.getRef())) {
+                                        return productVariantImageService.getProductVariantImageByRef(variantImage.getRef())
+                                                .map(imageData -> {
+                                                    variantImage.setId(null);
+                                                    variantImage.setRef(imageData);
+                                                    return variantImage;
+                                                });
+                                    } else {
+                                        return Mono.just(variantImage);
+                                    }
+                                })
+                                .collectList()
+                                .map(transformedVariantImages -> {
+                                    variant.setVariantImages(new HashSet<>(transformedVariantImages));
+                                    return variant;
+                                }))
+                        .collectList()
+                        .flatMap(transformedVariants -> {
+                            productDTO.setProductVariants(new HashSet<>(transformedVariants));
+                            return productService.updateProduct(productId, productDTO);
+                        }))
                 .then();
     }
 

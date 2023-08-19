@@ -100,6 +100,8 @@ export class ProductAddComponent implements OnInit {
       productAttributes: [null, Validators.required],
       productVariants: this.fb.array([
         this.fb.group({
+          id: [null],
+          sku: [null],
           price: [null, Validators.required],
           stock: [null, Validators.required],
           variantAttributeValues: this.fb.array([]),
@@ -160,6 +162,8 @@ export class ProductAddComponent implements OnInit {
             const variantFormGroup = this.createVariantFormGroup();
 
             variantFormGroup.patchValue({
+              id:  variant.id,
+              sku: variant.sku,
               price: variant.price,
               stock: variant.stock,
             });
@@ -229,6 +233,8 @@ export class ProductAddComponent implements OnInit {
     );
 
     return this.fb.group({
+      id: [null],
+      sku: [null],
       price: [null, Validators.required],
       stock: [null, Validators.required],
       variantAttributeValues: attributeValuesArray,

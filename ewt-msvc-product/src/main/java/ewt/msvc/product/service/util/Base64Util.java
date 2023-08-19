@@ -1,9 +1,15 @@
 package ewt.msvc.product.service.util;
 
+import java.util.regex.Pattern;
+
 public class Base64Util {
 
     private Base64Util() {
 
+    }
+
+    public static boolean isLikelyBase64(String s) {
+        return (s.length() % 4 == 0) && Pattern.matches("^[A-Za-z0-9+/]*[=]{0,3}$", s);
     }
 
     public static String getContentTypeFromBase64(String base64) {

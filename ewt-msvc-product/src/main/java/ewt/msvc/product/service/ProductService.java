@@ -120,20 +120,17 @@ public class ProductService {
                 .thenMany(Flux.fromIterable(productDTO.getProductVariants())
                         .flatMap(variant -> {
                             variant.setProductId(id);
-
                             if (variant.getId() != null) {
-                                // Variant has an ID, update it
                                 return productVariantService.updateProductVariant(variant);
                             } else {
-                                // Variant has no ID, create a new one
                                 return productVariantService.saveProductVariant(id, variant);
                             }
                         })
                 )
-                .thenMany(productVariantService.getAllProductVariants(id)  // fetch all variants of this product
-                        .filter(existingVariant -> productDTO.getProductVariants().stream() // filter out variants not present in updated list
+                .thenMany(productVariantService.getAllProductVariants(id)
+                        .filter(existingVariant -> productDTO.getProductVariants().stream()
                                 .noneMatch(variantDTO -> variantDTO.getId().equals(existingVariant.getId())))
-                        .flatMap(productVariantService::deleteProductVariant)  // delete the filtered variants
+                        .flatMap(productVariantService::deleteProductVariant)
                 )
                 .then(productRepository.save(productMapper.toEntity(productDTO)))
                 .map(productMapper::toDTO)

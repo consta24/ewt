@@ -36,5 +36,7 @@ public class ProductVariantDTO implements Serializable {
     @NotNull
     private Integer stock;
 
-    private Set<ProductAttributeValueDTO> productAttributeValues;
+    private Set<ProductAttributeValueDTO> variantAttributeValues;
+
+    private Set<ProductVariantImageDTO> variantImages;
 }

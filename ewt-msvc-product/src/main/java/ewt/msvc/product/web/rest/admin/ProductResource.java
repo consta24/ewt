@@ -16,6 +16,11 @@ public class ProductResource {
 
     private final ProductService productService;
 
+    @GetMapping("/{id}")
+    public Mono<ProductDTO> getProduct(@PathVariable Long id) {
+        return this.productService.getProduct(id);
+    }
+
     @GetMapping
     public Flux<ProductDTO> getAllProducts() {
         return productService.getAllProducts();

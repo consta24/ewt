@@ -1,5 +1,6 @@
 package ewt.msvc.product.service.dto;
 
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

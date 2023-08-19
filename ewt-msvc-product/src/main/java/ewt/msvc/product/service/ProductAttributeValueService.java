@@ -2,11 +2,15 @@ package ewt.msvc.product.service;
 
 import ewt.msvc.product.domain.ProductAttributeValue;
 import ewt.msvc.product.repository.ProductAttributeValueRepository;
+import ewt.msvc.product.repository.ProductVariantRepository;
 import ewt.msvc.product.service.bridge.ProductVariantAttributeValuesBridgeService;
 import ewt.msvc.product.service.dto.ProductAttributeValueDTO;
+import ewt.msvc.product.service.dto.ProductVariantDTO;
 import ewt.msvc.product.service.mapper.ProductAttributeValueMapper;
+import ewt.msvc.product.service.mapper.ProductVariantMapper;
 import ewt.msvc.product.service.util.StringUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -15,9 +19,13 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ProductAttributeValueService {
 
+    private final ApplicationContext context;
+
     private final ProductAttributeValueMapper productAttributeValueMapper;
+    private final ProductVariantMapper productVariantMapper;
 
     private final ProductAttributeValueRepository productAttributeValueRepository;
+    private final ProductVariantRepository productVariantRepository;
 
     private final ProductVariantAttributeValuesBridgeService productVariantAttributeValuesBridgeService;
 
@@ -59,11 +67,22 @@ public class ProductAttributeValueService {
                     if (Boolean.TRUE.equals(exists)) {
                         return Mono.error(new RuntimeException("Attribute value with the name " + updatedAttributeValue.getValue() + " already exists for the given attributeId."));
                     }
-                    return productAttributeValueRepository.save(updatedAttributeValue)
-                            .map(productAttributeValueMapper::toDTO);
-                });
+                    return productAttributeValueRepository.save(updatedAttributeValue);
+                })
+                .flatMap(savedAttributeValue -> getVariantsForAttributeValueId(savedAttributeValue.getId())
+                        .map(ProductVariantDTO::getProductId)
+                        .distinct()
+                        .flatMap(this::updateAssociatedProduct)
+                        .then(Mono.just(productAttributeValueMapper.toDTO(savedAttributeValue))));
     }
 
+    private Mono<Void> updateAssociatedProduct(Long productId) {
+        ProductService productService = context.getBean(ProductService.class);
+
+        return productService.getProduct(productId)
+                .flatMap(productDTO -> productService.updateProduct(productId, productDTO))
+                .then();
+    }
 
     public Mono<Void> deleteAttributeValue(Long attributeId, Long id) {
         return isAttributeValueLinkedToVariants(id)
@@ -79,5 +98,11 @@ public class ProductAttributeValueService {
     public Mono<Boolean> isAttributeValueLinkedToVariants(Long attributeValueId) {
         return productVariantAttributeValuesBridgeService.findVariantAttributeValuesBridgesByAttributeValueId(attributeValueId)
                 .hasElements();
+    }
+
+    public Flux<ProductVariantDTO> getVariantsForAttributeValueId(Long attributeValueId) {
+        return productVariantAttributeValuesBridgeService.findVariantAttributeValuesBridgesByAttributeValueId(attributeValueId)
+                .flatMap(bridge -> productVariantRepository.findBySku(bridge.getSku()))
+                .map(productVariantMapper::toDTO);
     }
 }

@@ -2,6 +2,7 @@ package ewt.msvc.product.web.rest.admin;
 
 import ewt.msvc.product.service.ProductCategoryService;
 import ewt.msvc.product.service.dto.ProductCategoryDTO;
+import ewt.msvc.product.service.dto.ProductDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,16 @@ public class ProductCategoryResource {
     @GetMapping
     public Flux<ProductCategoryDTO> getAllProductCategories() {
         return productCategoryService.getAllProductCategories();
+    }
+
+    @GetMapping("/{id}/linked")
+    public Mono<Boolean> isCategoryLinkedToProducts(@PathVariable Long id) {
+        return productCategoryService.isCategoryLinkedToProducts(id);
+    }
+
+    @GetMapping("/{id}/products")
+    public Flux<ProductDTO> getProductsForCategoryId(@PathVariable Long id) {
+        return productCategoryService.getProductsForCategoryId(id);
     }
 
     @PostMapping

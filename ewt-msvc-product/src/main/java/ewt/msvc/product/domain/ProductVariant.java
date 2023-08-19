@@ -27,6 +27,7 @@ public class ProductVariant implements Serializable {
     private Long id;
 
     @Size(max = 1000)
+    @NotNull
     private String sku;
 
     @Column("product_id")

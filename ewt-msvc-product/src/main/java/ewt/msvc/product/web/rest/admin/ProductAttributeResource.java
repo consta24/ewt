@@ -21,6 +21,17 @@ public class ProductAttributeResource {
         return productAttributeService.getAllAttributes();
     }
 
+    @GetMapping("/{id}/linked")
+    public Mono<Boolean> isAttributeLinkedToProducts(@PathVariable Long id) {
+        return productAttributeService.isAttributeLinkedToProducts(id);
+    }
+
+    @GetMapping("/{id}/products")
+    public Flux<ProductDTO> getProductsForAttributeId(@PathVariable Long id) {
+        return productAttributeService.getProductsForAttributeId(id);
+    }
+
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<ProductAttributeDTO> addAttribute(@RequestBody ProductAttributeDTO productAttributeDTO) {
@@ -36,15 +47,5 @@ public class ProductAttributeResource {
     @DeleteMapping("/{id}")
     public Mono<Void> deleteAttribute(@PathVariable Long id) {
         return productAttributeService.deleteAttribute(id);
-    }
-
-    @GetMapping("/{id}/linked")
-    public Mono<Boolean> isAttributeLinkedToProducts(@PathVariable Long id) {
-        return productAttributeService.isAttributeLinkedToProducts(id);
-    }
-
-    @GetMapping("/{id}/products")
-    public Flux<ProductDTO> getProductsForAttribute(@PathVariable Long id) {
-        return productAttributeService.getProductsForAttribute(id);
     }
 }

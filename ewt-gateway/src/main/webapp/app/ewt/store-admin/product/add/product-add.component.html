@@ -3,7 +3,8 @@
   <div class="card-header">
     <div class="row">
       <div class="col">
-        <h4 class="card-title"><strong>Add product</strong></h4>
+        <h4 class="card-title" *ngIf="!editedProduct"><strong>Add product</strong></h4>
+        <h4 class="card-title" *ngIf="editedProduct"><strong>Update product</strong></h4>
       </div>
     </div>
   </div>
@@ -58,7 +59,7 @@
               <label for="stock">Stock</label>
               <input id="stock" type="number" formControlName="stock" class="form-control mb-3"/>
 
-              <strong>Product attributes</strong>
+              <strong>Variant attribute values</strong>
               <div class="border p-3">
                 <div *ngIf="!selectedAttributes.length">
                   <p class="d-flex justify-content-center text-danger">Please select attributes to choose their
@@ -68,50 +69,55 @@
                   <label>{{ selectedAttribute.name }}</label>
                   <ng-select
                     [id]="'attributeValue-' + variantIndex + '-' + attributeIndex"
-                    [items]="attributeValuesOptions.get(selectedAttribute.id!) ?? []"
+                    [items]="this.attributeValuesOptions.get(selectedAttribute.id!) ?? []"
                     bindLabel="value"
                     notFoundText="Could not find attribute values"
                     loadingText="Loading..."
                     placeholder="Select value"
-                    (change)="onAttributeValueSelectionChange($event, variantIndex, attributeIndex)"
                     [formControl]="getAttributeValueControl(variantIndex, attributeIndex)">
                   </ng-select>
                 </div>
 
               </div>
-              <div class="file-drop" (dragover)="onImageDragOver($event)" (drop)="onImageDrop($event)">
+              <div class="file-drop" (dragover)="onImageDragOver($event)" (drop)="onImageDrop($event, variantIndex)">
                 <p>
                   <fa-icon icon="cloud-upload-alt"></fa-icon>
                   <span>Drag and drop pictures here, or use the</span>
                   <a (click)="imageInput.click()">link</a>
                   <input #imageInput type="file" accept="image/*" style="display: none;" multiple
-                         (change)="onFilesSelected($event)"/>
+                         (change)="onImagesSelected($event, variantIndex)"/>
                 </p>
               </div>
 
-              <div class="file-preview-container" cdkDropList (cdkDropListDropped)="onDrop($event)">
-                <div class="image-container" *ngFor="let img of images; let i = index" cdkDrag>
+              <div class="file-preview-container" cdkDropList (cdkDropListDropped)="onDrop($event, variantIndex)">
+                <div class="image-container" *ngFor="let img of variantImages[variantIndex]; let imageIndex = index" cdkDrag>
                   <div *cdkDragPlaceholder class="image-placeholder"></div>
-                  <span class="sequence-label">{{i + 1}}</span>
-                  <span class="remove-image-btn" (click)="removeImage(i)">&times;</span>
+                  <span class="sequence-label">{{imageIndex + 1}}</span>
+                  <span class="remove-image-btn" (click)="removeImage(variantIndex, imageIndex)">&times;</span>
                   <img [src]="img" alt="Preview" height="100" width="100">
                 </div>
               </div>
 
             </div>
           </div>
+          <div *ngIf="productForm.hasError('duplicateCombination')">
+            <small class="text-danger d-flex justify-content-end">
+              Combination of attribute values must be unique across all product variants.
+            </small>
+          </div>
           <button type="button" class="btn btn-secondary" (click)="addVariant()">
             <fa-icon icon="plus" [fixedWidth]="true"></fa-icon>
           </button>
-          <button type="button" class="btn btn-secondary" (click)="removeVariant()">
+          <button type="button" class="btn btn-secondary" *ngIf="productVariants.controls.length > 1" (click)="removeVariant()">
             <fa-icon icon="minus" [fixedWidth]="true"></fa-icon>
           </button>
         </div>
       </div>
 
       <div class="d-flex justify-content-end">
-        <button type="button" class="btn btn-danger me-3" routerLink="/store-admin/products">Cancel</button>
-        <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">Add product</button>
+        <button type="button" class="btn btn-danger me-2" (click)="goBack()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid" *ngIf="!editedProduct">Add product</button>
+        <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid" *ngIf="editedProduct">Update product</button>
       </div>
     </form>
   </div>

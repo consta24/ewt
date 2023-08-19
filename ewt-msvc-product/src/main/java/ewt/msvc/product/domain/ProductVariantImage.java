@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -29,6 +30,7 @@ public class ProductVariantImage implements Serializable {
     @Column("sku")
     @Size(max = 1000)
     @NotNull
+    @Unique
     private String sku;
 
     @Size(max = 1000)

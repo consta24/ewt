@@ -60,6 +60,10 @@ Browser Upgrade Prompt
 Generic styles
 ========================================================================== */
 
+.badge-min-width {
+  min-width: 75px;
+}
+
 .no-font-space {
   margin: 0;
   padding: 0;

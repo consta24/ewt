@@ -1,0 +1,135 @@
+<ewt-loading [isLoading]="isLoading"></ewt-loading>
+
+<div class="d-flex justify-content-end my-3">
+  <button type="button" class="btn btn-danger me-2" routerLink="/store-admin/products">Back</button>
+  <button type="button" class="btn btn-primary" (click)="toggleCategoryAdd()">Add category</button>
+</div>
+<div *ngIf="categoryAddToggle" class="card my-3">
+  <div class="card-header">
+    <div class="row">
+      <div class="col d-flex align-items-center">
+        <h4 class="card-title"><strong>Add category</strong></h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <form [formGroup]="categoryAddForm" (ngSubmit)="submitAddForm()">
+      <div class="form-group">
+        <label for="name">Category Name</label>
+        <input id="name" type="text" formControlName="name" class="form-control"/>
+
+        <label for="description">Category Description</label>
+        <textarea id="description" type="text" formControlName="description" class="form-control"></textarea>
+      </div>
+      <div class="row my-3">
+        <hr class="hr-legal"/>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="categoryAddForm.invalid">Save category</button>
+    </form>
+  </div>
+</div>
+<div class="card" *ngIf="!isLoading">
+  <div class="card-header">
+    <div class="row">
+      <div class="col">
+        <h4 class="card-title"><strong>Categories</strong></h4>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div *ngFor="let category of categories">
+        <div class="row my-1">
+          <div class="col-8 d-flex flex-column">
+            <p class="no-font-space"><strong>{{category.name}}</strong></p>
+            <small class="no-font-space">{{category.description}}</small>
+          </div>
+          <div class="col-4 d-flex justify-content-end">
+            <button type="button" class="btn btn-info me-1">
+              <fa-icon icon="edit" [fixedWidth]="true" (click)="toggleEdit(category)"></fa-icon>
+            </button>
+            <button
+              type="button"
+              [class]="isCategoryLinkedToProducts(category.id) ? 'btn btn-warning me-1' : 'btn btn-danger me-1'"
+              (click)="deleteOrExpandCategory(category.id)">
+              <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
+            </button>
+          </div>
+          <div *ngIf="expandedCategoryIdEdit === category.id" class="my-2">
+            <div class="p-2">
+              <div *ngIf="isCategoryLinkedToProducts(category.id)">
+                <small class="text-danger">
+                  The following products will be affected by editing this category:
+                </small>
+                <div class="border p-2">
+                  <div *ngFor="let product of linkedProducts.get(category.id)">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="col-8 d-flex align-items-center">
+                        <p class="no-font-space">{{product.name}}</p>
+                      </div>
+                      <div class="col-4 d-flex justify-content-end">
+                        <button class="btn btn-info me-1">
+                          <fa-icon icon="edit" [fixedWidth]="true" (click)="goToEdit(product.id)"></fa-icon>
+                        </button>
+                        <button class="btn btn-danger">
+                          <fa-icon icon="trash" [fixedWidth]="true"
+                                   (click)="deleteProduct(category.id, product.id)"></fa-icon>
+                        </button>
+                      </div>
+                    </div>
+                    <hr class="hr-legal my-1"/>
+                  </div>
+                </div>
+              </div>
+              <form [formGroup]="categoryEditForm" (ngSubmit)="submitEditForm()" class="my-2">
+                <strong>Update category</strong>
+                <div class="border p-2">
+
+                  <label for="name-edit">Name</label>
+                  <input id="name-edit" type="text" class="form-control" formControlName="name"/>
+
+                  <label for="description">Description</label>
+                  <textarea id="description-edit" class="form-control" formControlName="description"></textarea>
+
+                  <hr class="hr-legal"/>
+
+                  <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary" [disabled]="categoryEditForm.invalid">Update category
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div *ngIf="expandedCategoryIdDelete === category.id" class="my-2">
+            <div class="p-2">
+              <small class="text-danger">
+                For category deletion, first delete or modify all associated products.
+              </small>
+              <div class="border p-2">
+                <div *ngFor="let product of linkedProducts.get(category.id)">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="col-8 d-flex align-items-center">
+                      <p class="no-font-space">{{product.name}}</p>
+                    </div>
+                    <div class="col-4 d-flex justify-content-end">
+                      <button class="btn btn-info me-1">
+                        <fa-icon icon="edit" [fixedWidth]="true" (click)="goToEdit(product.id)"></fa-icon>
+                      </button>
+                      <button class="btn btn-danger">
+                        <fa-icon icon="trash" [fixedWidth]="true"
+                                 (click)="deleteProduct(category.id, product.id)"></fa-icon>
+                      </button>
+                    </div>
+                  </div>
+                  <hr class="hr-legal my-1"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr class="row hr-legal"/>
+      </div>
+    </div>
+  </div>
+</div>

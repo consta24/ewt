@@ -1,11 +1,11 @@
 export interface IProductAttribute {
-  id: number | null;
+  id: number;
   name: string;
 }
 
 export class ProductAttribute implements IProductAttribute {
   constructor(
-    public id: number | null,
+    public id: number,
     public name: string,
   ) {
     this.id = id;

@@ -1,12 +1,12 @@
 export interface IProductAttributeValue {
-  id: number | null;
+  id: number;
   attributeId: number;
   value: string;
 }
 
 export class ProductAttributeValue implements IProductAttributeValue {
   constructor(
-    public id: number | null,
+    public id: number,
     public attributeId: number,
     public value: string,
   ) {

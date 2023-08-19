@@ -7,6 +7,7 @@ import ewt.msvc.product.repository.ProductVariantRepository;
 import ewt.msvc.product.service.bridge.ProductVariantAttributeValuesBridgeService;
 import ewt.msvc.product.service.dto.ProductAttributeValueDTO;
 import ewt.msvc.product.service.dto.ProductVariantDTO;
+import ewt.msvc.product.service.dto.ProductVariantImageDTO;
 import ewt.msvc.product.service.mapper.ProductVariantMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,11 +32,7 @@ public class ProductVariantService {
 
     private final ProductAttributeValueService productAttributeValueService;
     private final ProductVariantAttributeValuesBridgeService productVariantAttributeValuesBridgeService;
-
-    public Mono<ProductVariantDTO> getProductVariant(String sku) {
-        return productVariantRepository.findBySku(sku)
-                .flatMap(this::populateProductVariantDTOWithAssociations);
-    }
+    private final ProductVariantImageService productVariantImageService;
 
     public Flux<ProductVariantDTO> getAllProductVariants(Long productId) {
         return productVariantRepository.findAllByProductId(productId)
@@ -46,7 +43,7 @@ public class ProductVariantService {
         if (productVariantDTO.getProductId() == null) {
             productVariantDTO.setProductId(productId);
         }
-        return productVariantAttributeValuesBridgeService.validateAttributeValues(productVariantDTO.getProductAttributeValues())
+        return productVariantAttributeValuesBridgeService.validateAttributeValues(productVariantDTO.getVariantAttributeValues())
                 .flatMap(validAttributeValues -> {
                     if (Boolean.FALSE.equals(validAttributeValues)) {
                         return Mono.error(new RuntimeException("Invalid attribute values IDs"));
@@ -58,15 +55,20 @@ public class ProductVariantService {
                     return productVariantRepository.save(productVariantMapper.toEntity(productVariantDTO));
                 })
                 .flatMap(savedProductVariant -> {
+                    Flux<ProductVariantImageDTO> saveProductVariantImages =
+                            productVariantImageService
+                                    .saveProductVariantImages(savedProductVariant.getSku(), productVariantDTO.getVariantImages());
+
                     Flux<ProductVariantAttributeValuesBridge> saveVariantAttributeValuesBridges =
                             productVariantAttributeValuesBridgeService
-                                    .saveVariantAttributeValuesBridges(savedProductVariant.getSku(), productVariantDTO.getProductAttributeValues());
+                                    .saveVariantAttributeValuesBridges(savedProductVariant.getSku(), productVariantDTO.getVariantAttributeValues());
 
-                    return Flux.concat(saveVariantAttributeValuesBridges).then(Mono.just(savedProductVariant));
+                    return Flux.concat(saveVariantAttributeValuesBridges, saveProductVariantImages).then(Mono.just(savedProductVariant));
                 })
                 .map(savedProductVariant -> {
                     ProductVariantDTO savedProductVariantDTO = productVariantMapper.toDTO(savedProductVariant);
-                    savedProductVariantDTO.setProductAttributeValues(new HashSet<>(productVariantDTO.getProductAttributeValues()));
+                    savedProductVariantDTO.setVariantAttributeValues(new HashSet<>(productVariantDTO.getVariantAttributeValues()));
+                    savedProductVariantDTO.setVariantImages(new HashSet<>(productVariantDTO.getVariantImages()));
                     return savedProductVariantDTO;
                 })
                 .as(transactionalOperator::transactional);
@@ -76,7 +78,9 @@ public class ProductVariantService {
         return productVariantRepository.findAllByProductId(productId)
                 .flatMap(productVariant ->
                         productVariantAttributeValuesBridgeService.deleteVariantAttributeValuesBridges(productVariant.getSku())
+                                .thenMany(productVariantImageService.deleteAllImagesBySku(productVariant.getSku()))
                                 .then(productVariantRepository.delete(productVariant))
+                                .then(Mono.empty())
                 );
     }
 
@@ -86,10 +90,10 @@ public class ProductVariantService {
                 .flatMap(product -> {
                     String productNameFormatted = product.getName().toLowerCase().replace(" ", "-");
 
-                    Set<String> attributeValues = productVariantDTO.getProductAttributeValues()
+                    Set<String> attributeValues = productVariantDTO.getVariantAttributeValues()
                             .stream()
                             .map(ProductAttributeValueDTO::getValue)
-                            .map(String::toLowerCase)
+                            .map(value -> value.toLowerCase().replace(" ", "_"))
                             .collect(Collectors.toSet());
 
                     String attributesFormatted = String.join("-", attributeValues);
@@ -98,15 +102,20 @@ public class ProductVariantService {
                 });
     }
 
+
     private Mono<ProductVariantDTO> populateProductVariantDTOWithAssociations(ProductVariant productVariant) {
         Mono<Set<ProductAttributeValueDTO>> attributeValues = productVariantAttributeValuesBridgeService.findVariantAttributeValuesBridges(productVariant.getSku())
                 .flatMap(bridge -> productAttributeValueService.getAttributeValueById(bridge.getAttributeValueId()))
                 .collect(Collectors.toSet());
 
-        return Mono.zip(attributeValues, attributeValues)
+        Mono<Set<ProductVariantImageDTO>> variantImages = productVariantImageService.getAllProductVariantImages(productVariant.getSku())
+                .collect(Collectors.toSet());
+
+        return Mono.zip(attributeValues, variantImages)
                 .map(tuple -> {
                     ProductVariantDTO productVariantDTO = productVariantMapper.toDTO(productVariant);
-                    productVariantDTO.setProductAttributeValues(tuple.getT1());
+                    productVariantDTO.setVariantAttributeValues(tuple.getT1());
+                    productVariantDTO.setVariantImages(tuple.getT2());
                     return productVariantDTO;
                 });
     }

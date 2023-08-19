@@ -94,7 +94,7 @@ public class ProductService {
                 .flatMap(existingProduct -> {
                     existingProduct.setName(productDTO.getName());
                     existingProduct.setDescription(productDTO.getDescription());
-                    return productRepository.save(existingProduct);
+                    return Mono.just(existingProduct);
                 })
                 .then(productCategoryBridgeService.validateCategories(productDTO.getProductCategories())
                         .flatMap(validCategories -> {
@@ -112,15 +112,35 @@ public class ProductService {
                     Flux<Void> deleteCategoryBridges = productCategoryBridgeService.deleteCategoryBridges(productDTO.getId());
                     Flux<Void> deleteAttributeBridges = productAttributeBridgeService.deleteAttributeBridges(productDTO.getId());
 
-                    Flux<ProductCategoryBridge> saveCategoryIds = productCategoryBridgeService.saveCategoryBridges(productDTO.getId(), productDTO.getProductCategories());
-                    Flux<ProductAttributeBridge> saveAttributeIds = productAttributeBridgeService.saveAttributeBridges(productDTO.getId(), productDTO.getProductAttributes());
+                    Flux<ProductCategoryBridge> saveCategoryBridges = productCategoryBridgeService.saveCategoryBridges(productDTO.getId(), productDTO.getProductCategories());
+                    Flux<ProductAttributeBridge> saveAttributeBridges = productAttributeBridgeService.saveAttributeBridges(productDTO.getId(), productDTO.getProductAttributes());
 
-                    return Flux.concat(deleteCategoryBridges, deleteAttributeBridges, saveCategoryIds, saveAttributeIds).then();
+                    return Flux.concat(deleteCategoryBridges, deleteAttributeBridges, saveCategoryBridges, saveAttributeBridges).then();
                 })
+                .thenMany(Flux.fromIterable(productDTO.getProductVariants())
+                        .flatMap(variant -> {
+                            variant.setProductId(id);
+
+                            if (variant.getId() != null) {
+                                // Variant has an ID, update it
+                                return productVariantService.updateProductVariant(variant);
+                            } else {
+                                // Variant has no ID, create a new one
+                                return productVariantService.saveProductVariant(id, variant);
+                            }
+                        })
+                )
+                .thenMany(productVariantService.getAllProductVariants(id)  // fetch all variants of this product
+                        .filter(existingVariant -> productDTO.getProductVariants().stream() // filter out variants not present in updated list
+                                .noneMatch(variantDTO -> variantDTO.getId().equals(existingVariant.getId())))
+                        .flatMap(productVariantService::deleteProductVariant)  // delete the filtered variants
+                )
                 .then(productRepository.save(productMapper.toEntity(productDTO)))
                 .map(productMapper::toDTO)
                 .as(transactionalOperator::transactional);
     }
+
+
 
     public Mono<Void> deleteProduct(Long id) {
         Flux<Void> deleteCategoryBridges = productCategoryBridgeService.deleteCategoryBridges(id);

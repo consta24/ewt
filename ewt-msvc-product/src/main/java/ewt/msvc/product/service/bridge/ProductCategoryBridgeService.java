@@ -23,6 +23,10 @@ public class ProductCategoryBridgeService {
         return productCategoryBridgeRepository.findAllByProductId(productId);
     }
 
+    public Flux<ProductCategoryBridge> findCategoryBridgesByCategoryId(Long categoryId) {
+        return productCategoryBridgeRepository.findAllByCategoryId(categoryId);
+    }
+
     public Flux<ProductCategoryBridge> saveCategoryBridges(Long productId, Set<ProductCategoryDTO> productCategories) {
         return Flux.fromIterable(productCategories)
                 .flatMap(productCategoryDTO -> productCategoryBridgeRepository.save(new ProductCategoryBridge(null, productId, productCategoryDTO.getId())));

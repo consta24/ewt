@@ -71,7 +71,7 @@ public class ProductAttributeService {
                 .hasElements();
     }
 
-    public Flux<ProductDTO> getProductsForAttribute(Long attributeId) {
+    public Flux<ProductDTO> getProductsForAttributeId(Long attributeId) {
         return productAttributeBridgeService.findAttributeBridgesByAttributeId(attributeId)
                 .flatMap(bridge -> productRepository.findById(bridge.getProductId()))
                 .map(productMapper::toDTO);

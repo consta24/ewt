@@ -2,8 +2,12 @@ package ewt.msvc.product.service;
 
 import ewt.msvc.product.domain.ProductCategory;
 import ewt.msvc.product.repository.ProductCategoryRepository;
+import ewt.msvc.product.repository.ProductRepository;
+import ewt.msvc.product.service.bridge.ProductCategoryBridgeService;
 import ewt.msvc.product.service.dto.ProductCategoryDTO;
+import ewt.msvc.product.service.dto.ProductDTO;
 import ewt.msvc.product.service.mapper.ProductCategoryMapper;
+import ewt.msvc.product.service.mapper.ProductMapper;
 import ewt.msvc.product.service.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,8 +19,12 @@ import reactor.core.publisher.Mono;
 public class ProductCategoryService {
 
     private final ProductCategoryMapper productCategoryMapper;
+    private final ProductMapper productMapper;
 
     private final ProductCategoryRepository productCategoryRepository;
+    private final ProductRepository productRepository;
+
+    private final ProductCategoryBridgeService productCategoryBridgeService;
 
     public Flux<ProductCategoryDTO> getAllProductCategories() {
         return productCategoryRepository.findAll().map(productCategoryMapper::toDTO);
@@ -39,12 +47,29 @@ public class ProductCategoryService {
     }
 
     public Mono<Void> deleteProductCategory(Long id) {
-        return productCategoryRepository.deleteById(id);
+        return isCategoryLinkedToProducts(id)
+                .flatMap(isLinked -> {
+                    if (Boolean.TRUE.equals(isLinked)) {
+                        return Mono.error(new RuntimeException("Category is linked to products and cannot be deleted."));
+                    }
+                    return productCategoryRepository.deleteById(id);
+                });
     }
 
     public Mono<ProductCategoryDTO> getCategoryById(Long categoryId) {
         return productCategoryRepository.findById(categoryId)
                 .map(productCategoryMapper::toDTO);
+    }
+
+    public Mono<Boolean> isCategoryLinkedToProducts(Long categoryId) {
+        return productCategoryBridgeService.findCategoryBridgesByCategoryId(categoryId)
+                .hasElements();
+    }
+
+    public Flux<ProductDTO> getProductsForCategoryId(Long categoryId) {
+        return productCategoryBridgeService.findCategoryBridgesByCategoryId(categoryId)
+                .flatMap(bridge -> productRepository.findById(bridge.getProductId()))
+                .map(productMapper::toDTO);
     }
 }
 

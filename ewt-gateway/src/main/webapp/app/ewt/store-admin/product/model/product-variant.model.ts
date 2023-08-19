@@ -1,4 +1,5 @@
 import {IProductAttributeValue} from "./product-attribute-value.model";
+import {IProductVariantImage} from "./product-variant-image.model";
 
 export interface IProductVariant {
   id: number;
@@ -6,5 +7,6 @@ export interface IProductVariant {
   productId: number;
   price: number;
   stock: number;
-  productAttributeValues: IProductAttributeValue[];
+  variantAttributeValues: IProductAttributeValue[];
+  variantImages: IProductVariantImage[];
 }

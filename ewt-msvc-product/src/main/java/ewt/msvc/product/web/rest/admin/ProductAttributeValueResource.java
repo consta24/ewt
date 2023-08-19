@@ -3,6 +3,7 @@ package ewt.msvc.product.web.rest.admin;
 import ewt.msvc.config.web.rest.errors.BadRequestAlertException;
 import ewt.msvc.product.service.ProductAttributeValueService;
 import ewt.msvc.product.service.dto.ProductAttributeValueDTO;
+import ewt.msvc.product.service.dto.ProductVariantDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -49,6 +50,17 @@ public class ProductAttributeValueResource {
         return productAttributeValueService.addAttributeValue(productAttributeValueDTO);
     }
 
+    @GetMapping("/{id}/linked")
+    public Mono<Boolean> isAttributeValueLinkedToVariants(@PathVariable Long attributeId, @PathVariable Long id) {
+        return productAttributeValueService.isAttributeValueLinkedToVariants(id);
+    }
+
+    @GetMapping("/{id}/variants")
+    public Flux<ProductVariantDTO> getVariantsForAttributeValueId(@PathVariable Long attributeId, @PathVariable Long id) {
+        return productAttributeValueService.getVariantsForAttributeValueId(id);
+    }
+
+
     @PutMapping("/{id}")
     public Mono<ProductAttributeValueDTO> updateAttributeValue(@PathVariable Long attributeId,
                                                                @PathVariable Long id,
@@ -71,10 +83,5 @@ public class ProductAttributeValueResource {
             throw new BadRequestAlertException(ATTRIBUTE_VALUE_ID_CANNOT_BE_NULL, ENTITY_NAME, ATTRIBUTE_VALUE_ID_CANNOT_BE_NULL_KEY);
         }
         return productAttributeValueService.deleteAttributeValue(attributeId, id);
-    }
-
-    @GetMapping("/{id}/linked")
-    public Mono<Boolean> isAttributeValueLinkedToVariants(@PathVariable Long attributeId, @PathVariable Long id) {
-        return productAttributeValueService.isAttributeValueLinkedToVariants(id);
     }
 }

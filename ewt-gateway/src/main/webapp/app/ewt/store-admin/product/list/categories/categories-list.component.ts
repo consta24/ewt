@@ -37,10 +37,6 @@ export class CategoriesListComponent implements OnInit {
   }
 
   private fetchCategories() {
-    this.expandedCategoryIdEdit = null;
-    this.expandedCategoryIdDelete = null;
-    this.linkedProducts.clear();
-
     this.productService.getCategories().pipe(
       switchMap(categories => {
         const linkedCheckObservables = categories.map(category =>
@@ -53,6 +49,9 @@ export class CategoriesListComponent implements OnInit {
       })
     ).subscribe(categories => {
       categories.sort((a, b) => a.id - b.id);
+      this.expandedCategoryIdEdit = null;
+      this.expandedCategoryIdDelete = null;
+      this.linkedProducts.clear();
       this.categories = categories;
       this.isLoading = false;
     });
@@ -118,8 +117,8 @@ export class CategoriesListComponent implements OnInit {
   }
 
   private fetchLinkedProducts(categoryId: number) {
-    this.linkedProducts.clear();
     this.productService.getProductsForCategory(categoryId).subscribe(products => {
+      this.linkedProducts.clear();
       this.linkedProducts.set(categoryId, products);
       this.expandedCategoryIdDelete = categoryId;
     });
@@ -148,8 +147,8 @@ export class CategoriesListComponent implements OnInit {
   }
 
   private handleToggleEdit(category: IProductCategory) {
-    this.linkedProducts.clear();
     this.productService.getProductsForCategory(category.id).subscribe(products => {
+      this.linkedProducts.clear();
       this.linkedProducts.set(category.id, products);
       this.initEditForm(category);
       this.expandedCategoryIdDelete = null;

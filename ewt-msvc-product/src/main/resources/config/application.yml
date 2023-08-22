@@ -141,6 +141,8 @@ spring:
   output:
     ansi:
       console-available: true
+  codec:
+    max-in-memory-size: 10485760
 
 server:
   servlet:

@@ -21,9 +21,21 @@ public class ProductVariantResource {
         return productVariantService.getAllProductVariants(productId);
     }
 
+    @GetMapping("{sku}/canDelete")
+    public Mono<Boolean> canDeleteVariant(@PathVariable Long productId) {
+        return productVariantService.canDeleteVariant(productId);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<ProductVariantDTO> saveProductVariant(@PathVariable Long productId, @RequestBody ProductVariantDTO productVariantDTO) {
+    public Mono<ProductVariantDTO> saveProductVariant(@PathVariable Long productId,
+                                                      @RequestBody ProductVariantDTO productVariantDTO) {
         return productVariantService.saveProductVariant(productId, productVariantDTO);
+    }
+
+    @DeleteMapping("{sku}")
+    public Mono<Void> deleteProductVariant(@PathVariable Long productId,
+                                           @PathVariable String sku) {
+        return productVariantService.deleteProductVariant(sku);
     }
 }

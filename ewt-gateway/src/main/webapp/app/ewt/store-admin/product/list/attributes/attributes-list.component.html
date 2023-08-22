@@ -1,137 +1,229 @@
-<ewt-loading [isLoading]="isLoading"></ewt-loading>
-
+<div class="row">
+  <div class="col">
+    <h4 class="text-center"><strong>Attributes</strong></h4>
+  </div>
+  <div>
+    <hr class="hr-legal"/>
+  </div>
+</div>
 <div class="d-flex justify-content-end my-3">
   <button type="button" class="btn btn-danger me-2" routerLink="/store-admin/products">Back</button>
   <button type="button" class="btn btn-primary" (click)="toggleAttributeAdd()">Add attribute</button>
 </div>
-<div *ngIf="attributeAddToggle" class="card my-3">
-  <div class="card-header">
-    <div class="row">
-      <div class="col d-flex align-items-center">
-        <h4 class="card-title"><strong>Add attribute</strong></h4>
-      </div>
-    </div>
-  </div>
-  <div class="card-body">
-    <form [formGroup]="attributeForm" (ngSubmit)="submitForm()">
-      <div class="form-group">
-        <label for="name">Attribute Name</label>
-        <input id="name" type="text" formControlName="name" class="form-control"/>
+<div *ngIf="attributeAddToggle" class="border my-3 p-3">
+  <form [formGroup]="attributeForm" (ngSubmit)="submitForm()">
+    <div class="form-group">
+      <label for="name">Attribute Name</label>
+      <input id="name" type="text" formControlName="name" class="form-control"/>
 
-        <label *ngIf="valuesFormArray.length">Attribute Values</label>
-        <div formArrayName="values" *ngFor="let valueGroup of valuesFormArray.controls; let i = index"
+      <label *ngIf="valuesFormArray.length">Attribute Values</label>
+      <div formArrayName="values" *ngFor="let valueGroup of valuesFormArray.controls; let i = index"
+           [class.ng-invalid]="false">
+        <div [formGroupName]="i" class="d-flex justify-content-between align-items-center mb-2"
              [class.ng-invalid]="false">
-          <div [formGroupName]="i" class="d-flex justify-content-between align-items-center mb-2"
-               [class.ng-invalid]="false">
-            <input formControlName="value" type="text" class="form-control" placeholder="Value"/>
-            <button type="button" class="btn btn-danger ml-2" (click)="removeValue(i)">
-              <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
-            </button>
-          </div>
-        </div>
-
-
-        <div *ngIf="valuesFormArray.hasError('duplicateValue')">
-          <small class="text-danger">Duplicate values detected.</small>
-        </div>
-        <div *ngIf="valuesFormArray.hasError('invalidCharacters')">
-          <small class="text-danger">Invalid characters or numbers detected.</small>
-        </div>
-
-        <div class="d-flex justify-content-end mt-3">
-          <button type="button" class="btn btn-secondary" (click)="addValue()">Add value</button>
+          <input formControlName="value" type="text" class="form-control" placeholder="Value"/>
+          <button type="button" class="btn btn-danger ml-2" (click)="removeValue(i)">
+            <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
+          </button>
         </div>
       </div>
-      <div class="row my-3">
-        <hr class="hr-legal"/>
+
+
+      <div *ngIf="valuesFormArray.hasError('duplicateValue')">
+        <small class="text-danger">Duplicate values detected.</small>
       </div>
-      <button type="submit" class="btn btn-primary" [disabled]="attributeForm.invalid">Save attribute</button>
-    </form>
-  </div>
-</div>
-<div class="card" *ngIf="!isLoading">
-  <div class="card-header">
-    <div class="row">
-      <div class="col">
-        <h4 class="card-title"><strong>Attributes</strong></h4>
+
+      <div class="d-flex justify-content-end mt-3">
+        <button type="button" class="btn btn-secondary" (click)="addValue()">Add value</button>
       </div>
     </div>
+    <div class="row my-3">
+      <hr class="hr-legal"/>
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="attributeForm.invalid">Save attribute</button>
+  </form>
+</div>
+<ewt-loading [isLoading]="isLoading"></ewt-loading>
+<div class="row my-3" *ngIf="!isLoading && !attributes.length">
+  <hr class="hr-legal"/>
+  <div class="text-center mb-3">
+    <strong>There are no attributes available.</strong>
   </div>
-  <div class="card-body">
-    <div class="row">
-      <div *ngFor="let attribute of attributes">
-        <div class="row my-1">
-          <div class="col-8 d-flex align-items-center">
-            <p class="no-font-space"><strong>{{attribute.name}}</strong></p>
-          </div>
-          <div class="col-4 d-flex justify-content-end">
-            <button type="button" class="btn btn-info me-1">
-              <fa-icon icon="edit" [fixedWidth]="true"></fa-icon>
-            </button>
-            <button
-              type="button"
-              [class]="isAttributeLinkedToProducts(attribute.id) ? 'btn btn-warning me-1' : 'btn btn-danger me-1'"
-              (click)="deleteOrExpandAttribute(attribute.id)">
-              <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
-            </button>
-            <button type="button" class="btn btn-primary" (click)="toggleAttributeValues(attribute.id)">
-              <fa-icon [icon]="(expandedAttributeIdAttributeValues === attribute.id) ? 'caret-up' : 'caret-down'"
-                       [fixedWidth]="true"></fa-icon>
-            </button>
-          </div>
-          <div *ngIf="expandedAttributeIdDelete === attribute.id" class="my-2">
-            <div class="p-2">
-              <small class="text-danger">
-                For attribute deletion, first delete or modify all associated products.
-              </small>
-              <div class="border p-2">
-                <div *ngFor="let product of linkedProducts.get(attribute.id)">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div class="col-8 d-flex align-items-center">
-                      <p class="no-font-space">{{product.name}}</p>
+  <hr class="hr-legal"/>
+</div>
+<div *ngIf="!isLoading && attributes.length">
+  <div class="row">
+    <div *ngFor="let attribute of attributes">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="row my-1">
+            <div class="col-8 d-flex align-items-center">
+              <p class="no-font-space"><strong>{{attribute.name}}</strong></p>
+            </div>
+            <div class="col-4 d-flex justify-content-end">
+              <button type="button" class="btn btn-info me-1">
+                <fa-icon icon="edit" [fixedWidth]="true" (click)="toggleAttributeEdit(attribute)"></fa-icon>
+              </button>
+              <button
+                type="button"
+                [class]="isAttributeLinkedToProducts(attribute.id) ? 'btn btn-warning me-1' : 'btn btn-danger me-1'"
+                (click)="deleteOrExpandAttribute(attribute.id)">
+                <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
+              </button>
+              <button type="button" class="btn btn-primary" (click)="toggleAttributeValues(attribute.id)">
+                <fa-icon [icon]="(expandedAttributeIdAttributeValues === attribute.id) ? 'caret-up' : 'caret-down'"
+                         [fixedWidth]="true"></fa-icon>
+              </button>
+            </div>
+            <div *ngIf="expandedAttributeIdEdit === attribute.id">
+              <div class="p-2">
+                <div *ngIf="isAttributeLinkedToProducts(attribute.id)">
+                  <small class="text-danger">
+                    The following products will be affected by editing this attribute:
+                  </small>
+                  <div class="border p-2">
+                    <div *ngFor="let product of linkedProducts.get(attribute.id)">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="col-8 d-flex align-items-center">
+                          <p class="no-font-space">{{product.name}}</p>
+                        </div>
+                        <div class="col-4 d-flex justify-content-end">
+                          <button type="button" class="btn btn-info me-1">
+                            <fa-icon icon="edit" [fixedWidth]="true"
+                                     (click)="goToEdit(product.id)"></fa-icon>
+                          </button>
+                          <button type="button" class="btn btn-danger">
+                            <fa-icon icon="trash" [fixedWidth]="true"
+                                     (click)="deleteProduct(attribute.id, product.id)"></fa-icon>
+                          </button>
+                        </div>
+                      </div>
+                      <hr class="hr-legal my-1"/>
                     </div>
-                    <div class="col-4 d-flex justify-content-end">
-                      <button type="button" class="btn btn-info me-1">
-                        <fa-icon icon="edit" [fixedWidth]="true" (click)="goToEdit(product.id)"></fa-icon>
-                      </button>
-                      <button type="button" class="btn btn-danger">
-                        <fa-icon icon="trash" [fixedWidth]="true"
-                                 (click)="deleteProduct(attribute.id, product.id)"></fa-icon>
+                  </div>
+                </div>
+                <form [formGroup]="attributeEditForm" (ngSubmit)="submitAttributeEditForm()"
+                      class="my-2">
+                  <strong>Update attribute</strong>
+                  <div class="border p-2">
+                    <label for="name-edit">Name</label>
+                    <input id="name-edit" type="text" class="form-control" formControlName="name"/>
+
+                    <hr class="hr-legal"/>
+
+                    <div class="d-flex justify-content-end">
+                      <button type="submit" class="btn btn-primary" [disabled]="attributeEditForm.invalid">
+                        Update attribute
                       </button>
                     </div>
                   </div>
-                  <hr class="hr-legal my-1"/>
+                </form>
+              </div>
+            </div>
+            <div *ngIf="expandedAttributeIdDelete === attribute.id" class="my-2">
+              <div class="p-2">
+                <small class="text-danger">
+                  For attribute deletion, first delete or modify all associated products.
+                </small>
+                <div class="border p-2">
+                  <div *ngFor="let product of linkedProducts.get(attribute.id)">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="col-8 d-flex align-items-center">
+                        <p class="no-font-space">{{product.name}}</p>
+                      </div>
+                      <div class="col-4 d-flex justify-content-end">
+                        <button type="button" class="btn btn-info me-1">
+                          <fa-icon icon="edit" [fixedWidth]="true" (click)="goToEdit(product.id)"></fa-icon>
+                        </button>
+                        <button type="button" class="btn btn-danger">
+                          <fa-icon icon="trash" [fixedWidth]="true"
+                                   (click)="deleteProduct(attribute.id, product.id)"></fa-icon>
+                        </button>
+                      </div>
+                    </div>
+                    <hr class="hr-legal my-1"/>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div *ngIf="expandedAttributeIdAttributeValues === attribute.id" class="my-2">
-            <div class="p-2">
-              <strong class="no-font-space">Attribute Values</strong>
-              <div class="border p-2">
-                <div *ngFor="let attributeValue of attributeValues">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div class="col-8 d-flex align-items-center">
-                      <p class="no-font-space">{{attributeValue.value}}</p>
+            <div *ngIf="expandedAttributeIdAttributeValues === attribute.id" class="my-2">
+              <div class="p-2">
+                <strong class="no-font-space">Attribute Values</strong>
+                <div class="border p-2">
+                  <div *ngFor="let attributeValue of attributeValues">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="col-8 d-flex align-items-center">
+                        <p class="no-font-space">{{attributeValue.value}}</p>
+                      </div>
+                      <div class="col-4 d-flex justify-content-end">
+                        <button type="button" class="btn btn-info me-1">
+                          <fa-icon icon="edit" [fixedWidth]="true"
+                                   (click)="toggleAttributeValueEdit(attributeValue)"></fa-icon>
+                        </button>
+                        <button
+                          type="button"
+                          [class]="isAttributeValueLinkedToVariants(attributeValue.id) ? 'btn btn-warning me-1' : 'btn btn-danger me-1'"
+                          (click)="deleteOrExpandAttributeValue(attribute.id, attributeValue.id)">
+                          <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
+                        </button>
+                      </div>
                     </div>
-                    <div class="col-4 d-flex justify-content-end">
-                      <button type="button" class="btn btn-info me-1">
-                        <fa-icon icon="edit" [fixedWidth]="true"
-                                 (click)="toggleAttributeValueEdit(attributeValue)"></fa-icon>
-                      </button>
-                      <button
-                        type="button"
-                        [class]="isAttributeValueLinkedToVariants(attributeValue.id) ? 'btn btn-warning me-1' : 'btn btn-danger me-1'"
-                        (click)="deleteOrExpandAttributeValue(attribute.id, attributeValue.id)">
-                        <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
-                      </button>
+                    <div *ngIf="expandedAttributeValueIdEdit === attributeValue.id">
+                      <div class="p-2">
+                        <div *ngIf="isAttributeValueLinkedToVariants(attributeValue.id)">
+                          <small class="text-danger">
+                            The following variants will be affected by editing this attribute value:
+                          </small>
+                          <div class="border p-2">
+                            <div *ngFor="let variant of linkedVariants.get(attributeValue.id)">
+                              <div class="d-flex justify-content-between align-items-center">
+                                <div class="col-8 d-flex align-items-center">
+                                  <p class="no-font-space">{{variant.sku}}</p>
+                                </div>
+                                <div class="col-4 d-flex justify-content-end">
+                                  <button type="button" class="btn btn-info me-1">
+                                    <fa-icon icon="edit" [fixedWidth]="true"
+                                             (click)="goToEdit(variant.productId)"></fa-icon>
+                                  </button>
+                                  <button type="button" class="btn btn-warning" *ngIf="!canDeleteVariant(variant.id)">
+                                    <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
+                                  </button>
+                                  <button type="button" class="btn btn-danger" *ngIf="canDeleteVariant(variant.id)">
+                                    <fa-icon icon="trash" [fixedWidth]="true"
+                                             (click)="deleteVariant(attribute.id, attributeValue.id, variant.productId, variant.sku)"></fa-icon>
+                                  </button>
+                                </div>
+                              </div>
+                              <div *ngIf="!canDeleteVariant(variant.id)" class="d-flex justify-content-end">
+                                <small class="no-font-space text-danger">Cannot delete last variant of a product</small>
+                              </div>
+                              <hr class="hr-legal my-1"/>
+                            </div>
+                          </div>
+                        </div>
+                        <form [formGroup]="attributeValueEditForm" (ngSubmit)="submitAttributeValueEditForm()"
+                              class="my-2">
+                          <strong>Update attribute value</strong>
+                          <div class="border p-2">
+                            <label for="value">Value</label>
+                            <input id="value" type="text" class="form-control" formControlName="value"/>
+
+                            <hr class="hr-legal"/>
+
+                            <div class="d-flex justify-content-end">
+                              <button type="submit" class="btn btn-primary" [disabled]="attributeValueEditForm.invalid">
+                                Update attribute value
+                              </button>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
                     </div>
-                  </div>
-                  <div *ngIf="expandedAttributeValueIdEdit === attributeValue.id">
-                    <div class="p-2">
-                      <div *ngIf="isAttributeValueLinkedToVariants(attributeValue.id)">
+
+                    <div *ngIf="expandedAttributeValueIdDelete === attributeValue.id">
+                      <div class="p-2">
                         <small class="text-danger">
-                          The following variants will be affected by editing this attribute value:
+                          For attribute value deletion, first delete or modify all associated product variants.
                         </small>
                         <div class="border p-2">
                           <div *ngFor="let variant of linkedVariants.get(attributeValue.id)">
@@ -144,76 +236,37 @@
                                   <fa-icon icon="edit" [fixedWidth]="true"
                                            (click)="goToEdit(variant.productId)"></fa-icon>
                                 </button>
-                                <button type="button" class="btn btn-danger">
+                                <button type="button" class="btn btn-warning" *ngIf="!canDeleteVariant(variant.id)">
+                                  <fa-icon icon="trash" [fixedWidth]="true"></fa-icon>
+                                </button>
+                                <button type="button" class="btn btn-danger" *ngIf="canDeleteVariant(variant.id)">
                                   <fa-icon icon="trash" [fixedWidth]="true"
                                            (click)="deleteVariant(attribute.id, attributeValue.id, variant.productId, variant.sku)"></fa-icon>
                                 </button>
                               </div>
                             </div>
+                            <div *ngIf="!canDeleteVariant(variant.id)" class="d-flex justify-content-end">
+                              <small class="no-font-space text-danger">Cannot delete last variant of a product</small>
+                            </div>
                             <hr class="hr-legal my-1"/>
                           </div>
                         </div>
                       </div>
-                      <form [formGroup]="attributeValueEditForm" (ngSubmit)="submitAttributeValueEditForm()"
-                            class="my-2">
-                        <strong>Update attribute value</strong>
-                        <div class="border p-2">
-                          <label for="value">Value</label>
-                          <input id="value" type="text" class="form-control" formControlName="value"/>
-
-                          <hr class="hr-legal"/>
-
-                          <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary" [disabled]="attributeValueEditForm.invalid">
-                              Update attribute value
-                            </button>
-                          </div>
-                        </div>
-                      </form>
                     </div>
+                    <hr class="hr-legal my-1"/>
                   </div>
-
-                  <div *ngIf="expandedAttributeValueIdDelete === attributeValue.id">
-                    <div class="p-2">
-                      <small class="text-danger">
-                        For attribute value deletion, first delete or modify all associated product variants.
-                      </small>
-                      <div class="border p-2">
-                        <div *ngFor="let variant of linkedVariants.get(attributeValue.id)">
-                          <div class="d-flex justify-content-between align-items-center">
-                            <div class="col-8 d-flex align-items-center">
-                              <p class="no-font-space">{{variant.sku}}</p>
-                            </div>
-                            <div class="col-4 d-flex justify-content-end">
-                              <button type="button" class="btn btn-info me-1">
-                                <fa-icon icon="edit" [fixedWidth]="true"
-                                         (click)="goToEdit(variant.productId)"></fa-icon>
-                              </button>
-                              <button type="button" class="btn btn-danger">
-                                <fa-icon icon="trash" [fixedWidth]="true"
-                                         (click)="deleteVariant(attribute.id, attributeValue.id, variant.productId, variant.sku)"></fa-icon>
-                              </button>
-                            </div>
-                          </div>
-                          <hr class="hr-legal my-1"/>
-                        </div>
-                      </div>
-                    </div>
+                  <div class="d-flex align-items-center">
+                    <input type="text" class="form-control" [(ngModel)]="attributeValue"/>
+                    <button type="button" class="btn btn-secondary"
+                            (click)="addAttributeValue(attribute.id, attributeValue)">
+                      <fa-icon icon="plus" [fixedWidth]="true"></fa-icon>
+                    </button>
                   </div>
-                  <hr class="hr-legal my-1"/>
-                </div>
-                <div class="d-flex align-items-center">
-                  <input type="text" class="form-control" [(ngModel)]="attributeValue"/>
-                  <button type="button" class="btn btn-secondary"
-                          (click)="addAttributeValue(attribute.id, attributeValue)">
-                    <fa-icon icon="plus" [fixedWidth]="true"></fa-icon>
-                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <hr class="hr-legal"/>
       </div>
     </div>
   </div>

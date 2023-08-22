@@ -1,5 +1,6 @@
 import {
   faArrowLeft,
+  faArrowRight,
   faAsterisk,
   faBan,
   faBars,
@@ -8,6 +9,7 @@ import {
   faCalendarAlt,
   faCaretDown,
   faCaretUp,
+  faCartShopping,
   faCheck,
   faCloud,
   faCloudUploadAlt,
@@ -27,6 +29,7 @@ import {
   faSave,
   faSearch,
   faShirt,
+  faShop,
   faSignInAlt,
   faSignOutAlt,
   faSort,
@@ -93,5 +96,8 @@ export const fontAwesomeIcons = [
   faCaretDown,
   faCaretUp,
   faEdit,
-  faTrash
+  faTrash,
+  faCartShopping,
+  faShop,
+  faArrowRight
 ];

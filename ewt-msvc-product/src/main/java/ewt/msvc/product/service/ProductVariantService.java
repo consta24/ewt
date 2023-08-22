@@ -74,8 +74,8 @@ public class ProductVariantService {
                 .as(transactionalOperator::transactional);
     }
 
-    public Mono<Void> deleteProductVariant(ProductVariantDTO productVariantDTO) {
-        return productVariantRepository.findBySku(productVariantDTO.getSku())
+    public Mono<Void> deleteProductVariant(String sku) {
+        return productVariantRepository.findBySku(sku)
                 .flatMap(productVariant ->
                         productVariantAttributeValuesBridgeService.deleteVariantAttributeValuesBridges(productVariant.getSku())
                                 .thenMany(productVariantImageService.deleteAllImagesBySku(productVariant.getSku()))
@@ -175,5 +175,11 @@ public class ProductVariantService {
                     productVariantDTO.setVariantImages(tuple.getT2());
                     return productVariantDTO;
                 });
+    }
+
+    public Mono<Boolean> canDeleteVariant(Long productId) {
+        return productVariantRepository.findAllByProductId(productId)
+                .count()
+                .map(variantCount -> variantCount > 1);
     }
 }

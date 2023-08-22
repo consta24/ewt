@@ -8,6 +8,7 @@ import {IProductAttribute} from "../model/product-attribute.model";
 import {IProductAttributeValue} from "../model/product-attribute-value.model";
 import {Observable} from "rxjs";
 import {IProductVariant} from "../model/product-variant.model";
+import {createRequestOption} from "../../../../core/request/request-util";
 
 @Injectable({
   providedIn: 'root'
@@ -26,8 +27,9 @@ export class ProductService {
     return this.httpClient.get<IProduct>(`${this.productUrl}/${productId}`);
   }
 
-  public getProducts() {
-    return this.httpClient.get<IProduct[]>(`${this.productUrl}`);
+  public getProducts(req: any) {
+    let options = createRequestOption(req);
+    return this.httpClient.get<IProduct[]>(`${this.productUrl}`, {params: options, observe: "response"});
   }
 
   public addProduct(product: IProduct) {
@@ -49,6 +51,10 @@ export class ProductService {
       params: params,
       responseType: "blob"
     });
+  }
+
+  public canDeleteVariant(productId: number, sku: string) {
+    return this.httpClient.get<boolean>(`${this.productUrl}/${productId}/variant/${sku}/canDelete`);
   }
 
   public deleteVariant(productId: number, sku: string) {
@@ -98,7 +104,7 @@ export class ProductService {
   }
 
   public updateAttribute(attribute: IProductAttribute) {
-    return this.httpClient.put<IProductAttribute>(`${this.productCategoryUrl}/${attribute.id}`, attribute);
+    return this.httpClient.put<IProductAttribute>(`${this.productAttributeUrl}/${attribute.id}`, attribute);
   }
 
   public deleteAttribute(attributeId: number) {

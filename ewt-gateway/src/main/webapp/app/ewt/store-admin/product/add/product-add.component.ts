@@ -356,6 +356,15 @@ export class ProductAddComponent implements OnInit {
   }
 
 
+  goBack() {
+    if (this.fromAttributes) {
+      this.router.navigate(["store-admin/products/attributes"]).then();
+    } else {
+      this.router.navigate(["store-admin/products"]).then();
+    }
+  }
+
+
   get productVariants(): FormArray {
     return this.productForm.get('productVariants') as FormArray;
   }
@@ -368,13 +377,5 @@ export class ProductAddComponent implements OnInit {
     const variantFormGroup = this.productVariants.at(variantIndex) as FormGroup;
     const attributeValueFormArray = variantFormGroup.get('variantAttributeValues') as FormArray;
     return attributeValueFormArray.at(attributeIndex) as FormControl;
-  }
-
-  goBack() {
-    if (this.fromAttributes) {
-      this.router.navigate(["store-admin/products/attributes"]).then();
-    } else {
-      this.router.navigate(["store-admin/products"]).then();
-    }
   }
 }

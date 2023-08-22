@@ -1,0 +1,9 @@
+.hover-product:hover {
+  transition: 0.2s;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.hover-product img:hover {
+  transition: 0.2s;
+  opacity: 0.8;
+}

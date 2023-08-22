@@ -4,6 +4,7 @@ import ewt.msvc.product.domain.Product;
 import ewt.msvc.product.domain.bridge.ProductAttributeBridge;
 import ewt.msvc.product.domain.bridge.ProductCategoryBridge;
 import ewt.msvc.product.repository.ProductRepository;
+import ewt.msvc.product.repository.query.ProductRepositoryQuery;
 import ewt.msvc.product.service.bridge.ProductAttributeBridgeService;
 import ewt.msvc.product.service.bridge.ProductCategoryBridgeService;
 import ewt.msvc.product.service.dto.ProductAttributeDTO;
@@ -12,6 +13,7 @@ import ewt.msvc.product.service.dto.ProductDTO;
 import ewt.msvc.product.service.dto.ProductVariantDTO;
 import ewt.msvc.product.service.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
@@ -30,6 +32,7 @@ public class ProductService {
     private final ProductMapper productMapper;
 
     private final ProductRepository productRepository;
+    private final ProductRepositoryQuery productRepositoryQuery;
 
     private final ProductCategoryService productCategoryService;
     private final ProductAttributeService productAttributeService;
@@ -37,13 +40,17 @@ public class ProductService {
     private final ProductCategoryBridgeService productCategoryBridgeService;
     private final ProductAttributeBridgeService productAttributeBridgeService;
 
+    public Mono<Long> count() {
+        return productRepository.count();
+    }
+
     public Mono<ProductDTO> getProduct(Long productId) {
         return productRepository.findById(productId)
                 .flatMap(this::populateProductDTOWithAssociations);
     }
 
-    public Flux<ProductDTO> getAllProducts() {
-        return productRepository.findAll()
+    public Flux<ProductDTO> getAllProducts(Pageable pageable) {
+        return productRepositoryQuery.findAllBy(pageable)
                 .flatMap(this::populateProductDTOWithAssociations);
     }
 
@@ -127,16 +134,10 @@ public class ProductService {
                             }
                         })
                 )
-                .thenMany(productVariantService.getAllProductVariants(id)
-                        .filter(existingVariant -> productDTO.getProductVariants().stream()
-                                .noneMatch(variantDTO -> variantDTO.getId().equals(existingVariant.getId())))
-                        .flatMap(productVariantService::deleteProductVariant)
-                )
                 .then(productRepository.save(productMapper.toEntity(productDTO)))
                 .map(productMapper::toDTO)
                 .as(transactionalOperator::transactional);
     }
-
 
 
     public Mono<Void> deleteProduct(Long id) {

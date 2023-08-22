@@ -11,7 +11,7 @@ import {
   Validators
 } from "@angular/forms";
 import {IProductAttributeValue} from "../../model/product-attribute-value.model";
-import {forkJoin, of, switchMap} from "rxjs";
+import {forkJoin, Observable, of, switchMap} from "rxjs";
 import {map, tap} from "rxjs/operators";
 import {IProduct} from "../../model/product.model";
 import {Router} from "@angular/router";
@@ -25,27 +25,32 @@ export class AttributesListComponent implements OnInit {
 
   isLoading = true;
   attributes: IProductAttribute[] = [];
+  attributeValues: IProductAttributeValue[] = [];
+
   attributeAddToggle = false;
 
-  attributeValues: IProductAttributeValue[] = [];
-  expandedAttributeIdAttributeValues: number | null = null;
   attributeValue: string = '';
 
   attributeForm!: FormGroup;
+  attributeEditForm!: FormGroup;
+  attributeValueEditForm!: FormGroup;
 
-  expandedAttributeIdDelete: number | null = null;
   linkedProducts = new Map<number, IProduct[]>();
-
   linkedVariants = new Map<number, IProductVariant[]>();
+
+  expandedAttributeIdEdit: number | null = null;
+  expandedAttributeIdDelete: number | null = null;
+  expandedAttributeIdAttributeValues: number | null = null;
+
   expandedAttributeValueIdDelete: number | null = null;
   expandedAttributeValueIdEdit: number | null = null;
+
+  variantsToRemovable = new Map<number, boolean>();
 
   private linkedAttributes: Map<number, boolean> = new Map();
   private linkedAttributeValues: Map<number, boolean> = new Map();
 
-
   constructor(private router: Router, private fb: FormBuilder, private productService: ProductService) {
-
   }
 
   ngOnInit(): void {
@@ -65,8 +70,7 @@ export class AttributesListComponent implements OnInit {
       })
     ).subscribe(attributes => {
       attributes.sort((a, b) => a.id - b.id);
-      this.expandedAttributeIdAttributeValues = null;
-      this.expandedAttributeIdDelete = null;
+      this.unexpandAll();
       this.linkedProducts.clear();
       this.attributes = attributes;
       this.isLoading = false;
@@ -88,7 +92,6 @@ export class AttributesListComponent implements OnInit {
 
       const valueSet = new Set<string>();
       let hasDuplicate = false;
-      let hasInvalidCharacters = false;
 
       for (let ctrl of control.controls) {
         if (!(ctrl instanceof FormGroup)) {
@@ -101,22 +104,14 @@ export class AttributesListComponent implements OnInit {
           hasDuplicate = true;
         }
         valueSet.add(value);
-
-        if (/[0-9~`!@#$%^&*()_\-+={}[\]|\\:;"'<>,.?/]+/.test(value)) {
-          hasInvalidCharacters = true;
-        }
       }
 
       if (hasDuplicate) {
         return {duplicateValue: true};
       }
-      if (hasInvalidCharacters) {
-        return {invalidCharacters: true};
-      }
       return null;
     };
   }
-
 
   addValue(): void {
     this.valuesFormArray.push(
@@ -132,7 +127,7 @@ export class AttributesListComponent implements OnInit {
   }
 
   toggleAttributeAdd() {
-    if(!this.attributeAddToggle) {
+    if (!this.attributeAddToggle) {
       this.initForm();
     }
     this.attributeAddToggle = !this.attributeAddToggle;
@@ -154,8 +149,8 @@ export class AttributesListComponent implements OnInit {
         this.initForm();
         this.fetchAttributes();
       },
-      error: err => {
-        console.error('Error occurred while saving attribute values:', err);
+      error: () => {
+        //TODO:
       }
     });
   }
@@ -179,9 +174,10 @@ export class AttributesListComponent implements OnInit {
   }
 
   private fetchLinkedProducts(attributeId: number) {
+    this.linkedProducts.clear();
     this.productService.getProductsForAttribute(attributeId).subscribe(products => {
-      this.linkedProducts.clear();
       this.linkedProducts.set(attributeId, products);
+      this.unexpandAll();
       this.expandedAttributeIdDelete = attributeId;
     });
   }
@@ -215,8 +211,6 @@ export class AttributesListComponent implements OnInit {
   private fetchAttributeValues(attributeId: number) {
     this.productService.getAttributeValues(attributeId).pipe(
       switchMap(values => {
-        this.expandedAttributeIdAttributeValues = attributeId;
-
         if (!values.length) {
           return of({values: [], linkedChecks: []});
         }
@@ -231,12 +225,18 @@ export class AttributesListComponent implements OnInit {
           map(linkedChecks => ({values, linkedChecks}))
         );
       }),
-    ).subscribe(result => {
-      result.values.sort((a, b) => a.id - b.id);
-      this.expandedAttributeValueIdEdit = null;
-      this.expandedAttributeValueIdDelete = null;
-      this.attributeValues = result.values;
-    });
+    ).subscribe({
+        next: (result) => {
+          result.values.sort((a, b) => a.id - b.id);
+          this.unexpandAll();
+          this.attributeValue = '';
+          this.expandedAttributeIdAttributeValues = attributeId;
+          this.attributeValues = result.values;
+        }, error: () => {
+          //TODO:
+        }
+      }
+    );
   }
 
 
@@ -249,7 +249,6 @@ export class AttributesListComponent implements OnInit {
       this.expandedAttributeValueIdDelete = null;
       return;
     }
-    this.expandedAttributeValueIdEdit = null;
     if (this.isAttributeValueLinkedToVariants(attributeValueId)) {
       this.fetchLinkedVariants(attributeId, attributeValueId);
       return;
@@ -260,10 +259,23 @@ export class AttributesListComponent implements OnInit {
   }
 
   private fetchLinkedVariants(attributeId: number, attributeValueId: number) {
-    this.linkedVariants.clear();
     this.productService.getVariantsForAttributeValue(attributeId, attributeValueId).subscribe(variants => {
-      this.linkedVariants.set(attributeValueId, variants);
-      this.expandedAttributeValueIdDelete = attributeValueId;
+      const canDeleteObservables: Observable<[number, boolean]>[] = variants.map(variant =>
+        this.productService.canDeleteVariant(variant.productId, variant.sku).pipe(
+          map(canDelete => [variant.id, canDelete] as [number, boolean])
+        )
+      );
+
+      forkJoin(canDeleteObservables).subscribe(results => {
+        this.linkedVariants.clear();
+        this.variantsToRemovable.clear();
+        results.forEach(([id, canDelete]) => {
+          this.variantsToRemovable.set(id, canDelete);
+        });
+        this.linkedVariants.set(attributeValueId, variants);
+        this.expandedAttributeValueIdEdit = null;
+        this.expandedAttributeValueIdDelete = attributeValueId;
+      });
     });
   }
 
@@ -281,12 +293,12 @@ export class AttributesListComponent implements OnInit {
     this.productService.deleteVariant(productId, sku).subscribe({
       next: () => {
         if (this.linkedVariants.size === 1) {
-          this.fetchAttributes();
+          this.fetchAttributeValues(attributeId);
         } else {
           this.fetchLinkedVariants(attributeId, attributeValueId);
         }
       }, error: () => {
-
+        //TODO:
       }
     })
   }
@@ -308,16 +320,42 @@ export class AttributesListComponent implements OnInit {
     }
   }
 
+
+  canDeleteVariant(variantId: number) {
+    return this.variantsToRemovable.get(variantId);
+  }
+
   private handleAttributeValueEdit(attributeValue: IProductAttributeValue) {
     this.productService.getVariantsForAttributeValue(attributeValue.attributeId, attributeValue.id).subscribe(variants => {
-      this.linkedVariants.set(attributeValue.id, variants);
-      this.initAttributeValueEditForm(attributeValue);
-      this.expandedAttributeValueIdDelete = null;
-      this.expandedAttributeValueIdEdit = attributeValue.id;
+      if (variants && variants.length > 0) {
+        const canDeleteObservables: Observable<[number, boolean]>[] = variants.map(variant =>
+          this.productService.canDeleteVariant(variant.productId, variant.sku).pipe(
+            map(canDelete => [variant.id, canDelete] as [number, boolean])
+          )
+        );
+
+        forkJoin(canDeleteObservables).subscribe(results => {
+          this.variantsToRemovable.clear();
+          results.forEach(([id, canDelete]) => {
+            this.variantsToRemovable.set(id, canDelete);
+          });
+
+          this.linkedVariants.set(attributeValue.id, variants);
+          this.initAttributeValueEditForm(attributeValue);
+          this.expandedAttributeValueIdDelete = null;
+          this.expandedAttributeValueIdEdit = attributeValue.id;
+        });
+      } else {
+        this.linkedVariants.clear();
+        this.variantsToRemovable.clear();
+
+        this.initAttributeValueEditForm(attributeValue);
+        this.expandedAttributeValueIdDelete = null;
+        this.expandedAttributeValueIdEdit = attributeValue.id;
+      }
     });
   }
 
-  attributeValueEditForm!: FormGroup;
 
   private initAttributeValueEditForm(attributeValue: IProductAttributeValue) {
     this.attributeValueEditForm = this.fb.group({
@@ -336,5 +374,50 @@ export class AttributesListComponent implements OnInit {
         //TODO:
       }
     })
+  }
+
+
+  submitAttributeEditForm() {
+    this.productService.updateAttribute(this.attributeEditForm.value).subscribe({
+      next: () => {
+        this.fetchAttributes()
+      },
+      error: () => {
+        //TODO:
+      }
+    })
+  }
+
+  toggleAttributeEdit(attribute: IProductAttribute) {
+    if (this.expandedAttributeIdEdit === attribute.id) {
+      this.expandedAttributeIdEdit = null;
+      return;
+    } else {
+      this.handleAttributeEdit(attribute);
+    }
+  }
+
+  private handleAttributeEdit(attribute: IProductAttribute) {
+    this.productService.getProductsForAttribute(attribute.id).subscribe(products => {
+      this.linkedProducts.set(attribute.id, products);
+      this.initAttributeEditForm(attribute);
+      this.unexpandAll();
+      this.expandedAttributeIdEdit = attribute.id;
+    });
+  }
+
+  private initAttributeEditForm(attribute: IProductAttribute) {
+    this.attributeEditForm = this.fb.group({
+      id: [attribute.id, Validators.required],
+      name: [attribute.name, Validators.required]
+    })
+  }
+
+  private unexpandAll() {
+    this.expandedAttributeIdEdit = null;
+    this.expandedAttributeIdDelete = null;
+    this.expandedAttributeIdAttributeValues = null;
+    this.expandedAttributeValueIdDelete = null;
+    this.expandedAttributeValueIdEdit = null;
   }
 }

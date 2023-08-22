@@ -1,14 +1,14 @@
 import {Component, OnInit} from "@angular/core";
-import {ProductService} from "../service/product.service";
-import {IProduct} from "../model/product.model";
 import {Router} from "@angular/router";
+import {IProduct} from "../../../store-admin/product/model/product.model";
+import {ProductService} from "../../../store-admin/product/service/product.service";
 import {tap} from "rxjs/operators";
 import {forkJoin} from "rxjs";
-import {IProductVariant} from "../model/product-variant.model";
 
 @Component({
   selector: 'ewt-store-admin-product-list',
-  templateUrl: 'product-list.component.html'
+  templateUrl: 'product-list.component.html',
+  styleUrls: ['product-list.component.scss']
 })
 export class ProductListComponent implements OnInit {
 
@@ -16,7 +16,7 @@ export class ProductListComponent implements OnInit {
   products: IProduct[] = [];
   skuImageMap: { [sku: string]: string[] } = {};
 
-  itemsPerPage = 2;
+  itemsPerPage = 12;
   currentPage = 1;
   totalItems = 0;
 
@@ -77,18 +77,11 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-  goToEdit(id: number) {
-    this.router.navigate(['store-admin/products/edit', id]).then();
+  addToCart(product: IProduct) {
+
   }
 
-  deleteProduct(id: number) {
-    this.productService.deleteProduct(id).subscribe(() => {
-      this.fetchProducts();
-    })
-  }
-
-  formatProductVariantName(productName: string, variant: IProductVariant): string {
-    const attributeValues = variant.variantAttributeValues.map(av => av.value).join(' / ');
-    return `${productName} / ${attributeValues}`;
+  goToView(id: number) {
+    this.router.navigate([`/products/${id}`]).then();
   }
 }

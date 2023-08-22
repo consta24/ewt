@@ -7,7 +7,7 @@ public class StringUtil {
     }
 
     public static String toTitleCase(String givenString) {
-        String[] arr = givenString.split(" ");
+        String[] arr = givenString.trim().split(" ");
         StringBuilder sb = new StringBuilder();
 
         for (String s : arr) {

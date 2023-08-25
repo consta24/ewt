@@ -2,9 +2,8 @@ import {Component, OnInit} from "@angular/core";
 import {ProductService} from "../service/product.service";
 import {IProduct} from "../model/product.model";
 import {Router} from "@angular/router";
-import {tap} from "rxjs/operators";
-import {forkJoin} from "rxjs";
 import {IProductVariant} from "../model/product-variant.model";
+import {ProductImageService} from "../../../../shared/product/product-image.service";
 
 @Component({
   selector: 'ewt-store-admin-product-list',
@@ -14,13 +13,15 @@ export class ProductListComponent implements OnInit {
 
   isLoading = true;
   products: IProduct[] = [];
-  skuImageMap: { [sku: string]: string[] } = {};
+  skuImagesMap: Map<string, string[]> = new Map();
 
   itemsPerPage = 2;
   currentPage = 1;
   totalItems = 0;
 
-  constructor(private router: Router, private productService: ProductService) {
+  constructor(private router: Router,
+              private productService: ProductService,
+              private productImageService: ProductImageService) {
 
   }
 
@@ -37,6 +38,7 @@ export class ProductListComponent implements OnInit {
     this.productService.getProducts(req).subscribe(res => {
       if (res.body) {
         res.body.forEach(product => product.productVariants.forEach(variant => variant.variantAttributeValues.sort((a, b) => a.attributeId - b.attributeId)));
+        res.body.sort((a, b) => a.id - b.id);
         this.products = res.body;
         this.totalItems = Number(res.headers.get('X-Total-Count'))
         this.mapSkuToImages();
@@ -47,35 +49,17 @@ export class ProductListComponent implements OnInit {
   }
 
   private mapSkuToImages(): void {
-    const observables = [];
-
-    for (const product of this.products) {
-      for (const variant of product.productVariants) {
-        const sku = variant.sku;
-        this.skuImageMap[sku] = [];
-
-        for (const image of variant.variantImages) {
-          const ref = image.ref;
-
-          const request$ = this.productService.getProductVariantImageByRef(product.id, sku, ref).pipe(
-            tap(blob => {
-              const reader = new FileReader();
-              reader.readAsDataURL(blob);
-              reader.onloadend = () => {
-                this.skuImageMap[sku].push(reader.result as string);
-              };
-            })
-          );
-
-          observables.push(request$);
-        }
-      }
-    }
-
-    forkJoin(observables).subscribe(() => {
+    this.productImageService.getImagesForProducts(this.products).subscribe(skuImagesMap => {
+      this.skuImagesMap = skuImagesMap;
       this.isLoading = false;
     });
   }
+
+  getFirstImage(sku: string) {
+    const images = this.skuImagesMap.get(sku);
+    return images ? images[0] : '';
+  }
+
 
   goToEdit(id: number) {
     this.router.navigate(['store-admin/products/edit', id]).then();

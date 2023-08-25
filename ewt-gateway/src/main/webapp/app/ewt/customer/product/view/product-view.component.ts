@@ -2,12 +2,14 @@ import {Component, OnInit} from "@angular/core";
 import {ActivatedRoute, Router} from "@angular/router";
 import {IProduct} from "../../../store-admin/product/model/product.model";
 import {ProductService} from "../../../store-admin/product/service/product.service";
-import {forkJoin, Observable} from "rxjs";
 import {IProductVariant} from "../../../store-admin/product/model/product-variant.model";
 import {IProductAttributeValue} from "../../../store-admin/product/model/product-attribute-value.model";
+import {CartService} from "../../cart/service/cart.service";
+import {CartCookieService} from "../../../../shared/cookie/cart-cookie.service";
+import {ProductImageService} from "../../../../shared/product/product-image.service";
 
 @Component({
-  selector: 'ewt-store-admin-product-view',
+  selector: 'ewt-customer-product-view',
   templateUrl: 'product-view.component.html',
   styleUrls: ['product-view.component.scss']
 })
@@ -16,7 +18,7 @@ export class ProductViewComponent implements OnInit {
   isLoading = true;
   product!: IProduct;
 
-  imagesMap: { [sku: string]: string[] } = {};
+  imagesMap: Map<string, string[]> = new Map();
   images: string[] = [];
   attributeValuesMap: { [key: number]: Set<string> } = {};
   selectedAttributes: { [key: number]: string } = {};
@@ -24,8 +26,10 @@ export class ProductViewComponent implements OnInit {
   currentImage: string = '';
   currentVariant!: IProductVariant;
 
+  quantity = 1;
 
-  constructor(private router: Router, private route: ActivatedRoute, private productService: ProductService) {
+
+  constructor(private router: Router, private route: ActivatedRoute, private productService: ProductService, private cartService: CartService, private cartCookieService: CartCookieService, private productImageService: ProductImageService) {
 
   }
 
@@ -64,38 +68,11 @@ export class ProductViewComponent implements OnInit {
   }
 
   private mapSkuToImages(): void {
-    const observables = [];
-
-    for (const variant of this.product.productVariants) {
-      const sku = variant.sku;
-
-      if (!this.imagesMap[sku]) {
-        this.imagesMap[sku] = [];
-      }
-
-      for (const image of variant.variantImages) {
-        const ref = image.ref;
-
-        const request$ = new Observable<string>(observer => {
-          this.productService.getProductVariantImageByRef(this.product.id, sku, ref).subscribe(blob => {
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = () => {
-              const imgData = reader.result as string;
-              this.imagesMap[sku].push(imgData);
-              observer.next(imgData);
-              observer.complete();
-            };
-          });
-        });
-
-        observables.push(request$);
-      }
-    }
-
-    forkJoin(observables).subscribe(() => {
-      this.currentImage = this.imagesMap[this.currentVariant.sku][0];
-      this.images = Object.values(this.imagesMap).reduce((acc, val) => acc.concat(val), []);
+    this.productImageService.getImagesForProduct(this.product).subscribe(skuImagesMap => {
+      this.imagesMap = skuImagesMap;
+      this.images = [...skuImagesMap.values()].reduce((acc, val) => acc.concat(val), []);
+      const firstImage = this.imagesMap.get(this.currentVariant.sku);
+      this.currentImage = firstImage ? firstImage[0] : '';
       this.isLoading = false;
     });
   }
@@ -134,8 +111,9 @@ export class ProductViewComponent implements OnInit {
     );
     if (variant) {
       this.currentVariant = variant;
-      if (this.imagesMap[this.currentVariant.sku][0]) {
-        this.currentImage = this.imagesMap[this.currentVariant.sku][0]
+      const skuImages = this.imagesMap.get(this.currentVariant.sku);
+      if (skuImages) {
+        this.currentImage = skuImages[0]
       }
     }
   }
@@ -158,8 +136,20 @@ export class ProductViewComponent implements OnInit {
     }
   }
 
-  addToCart(product: IProduct) {
-
+  addToCart() {
+    this.cartCookieService.addToCart(this.currentVariant.sku, this.quantity);
+    this.cartService.toggleCart();
   }
 
+  decrementQuantity() {
+    if(this.quantity > 1) {
+      this.quantity = this.quantity - 1;
+    }
+  }
+
+  incrementQuantity() {
+    if(this.quantity < this.currentVariant.stock) {
+      this.quantity = this.quantity + 1;
+    }
+  }
 }

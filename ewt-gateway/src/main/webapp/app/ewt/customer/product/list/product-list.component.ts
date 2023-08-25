@@ -2,11 +2,13 @@ import {Component, OnInit} from "@angular/core";
 import {Router} from "@angular/router";
 import {IProduct} from "../../../store-admin/product/model/product.model";
 import {ProductService} from "../../../store-admin/product/service/product.service";
-import {tap} from "rxjs/operators";
-import {forkJoin} from "rxjs";
+import {CartCookieService} from "../../../../shared/cookie/cart-cookie.service";
+import {ProductImageService} from "../../../../shared/product/product-image.service";
+import {CartService} from "../../cart/service/cart.service";
+
 
 @Component({
-  selector: 'ewt-store-admin-product-list',
+  selector: 'ewt-customer-product-list',
   templateUrl: 'product-list.component.html',
   styleUrls: ['product-list.component.scss']
 })
@@ -14,14 +16,20 @@ export class ProductListComponent implements OnInit {
 
   isLoading = true;
   products: IProduct[] = [];
-  skuImageMap: { [sku: string]: string[] } = {};
+  skuImagesMap: Map<string, string[]> = new Map();
 
   itemsPerPage = 12;
   currentPage = 1;
   totalItems = 0;
 
-  constructor(private router: Router, private productService: ProductService) {
+  hoveredProductSku: string | null = null;
+  hoveredImage: string | null = null;
 
+  constructor(private router: Router,
+              private productService: ProductService,
+              private cartService: CartService,
+              private cartCookieService: CartCookieService,
+              private productImageService: ProductImageService) {
   }
 
   ngOnInit(): void {
@@ -36,7 +44,7 @@ export class ProductListComponent implements OnInit {
     }
     this.productService.getProducts(req).subscribe(res => {
       if (res.body) {
-        res.body.forEach(product => product.productVariants.forEach(variant => variant.variantAttributeValues.sort((a, b) => a.attributeId - b.attributeId)));
+        res.body.sort((a, b) => a.id - b.id);
         this.products = res.body;
         this.totalItems = Number(res.headers.get('X-Total-Count'))
         this.mapSkuToImages();
@@ -47,41 +55,68 @@ export class ProductListComponent implements OnInit {
   }
 
   private mapSkuToImages(): void {
-    const observables = [];
-
-    for (const product of this.products) {
-      for (const variant of product.productVariants) {
-        const sku = variant.sku;
-        this.skuImageMap[sku] = [];
-
-        for (const image of variant.variantImages) {
-          const ref = image.ref;
-
-          const request$ = this.productService.getProductVariantImageByRef(product.id, sku, ref).pipe(
-            tap(blob => {
-              const reader = new FileReader();
-              reader.readAsDataURL(blob);
-              reader.onloadend = () => {
-                this.skuImageMap[sku].push(reader.result as string);
-              };
-            })
-          );
-
-          observables.push(request$);
-        }
-      }
-    }
-
-    forkJoin(observables).subscribe(() => {
+    this.productImageService.getImagesForProducts(this.products).subscribe(skuImagesMap => {
+      this.skuImagesMap = skuImagesMap;
       this.isLoading = false;
     });
   }
 
-  addToCart(product: IProduct) {
+  getFirstImage(sku: string): string {
+    if (this.hoveredProductSku === sku) {
+      return this.hoveredImage || this.skuImagesMap.get(sku)?.[0] || '';
+    }
+    return this.skuImagesMap.get(sku)?.[0] || '';
+  }
 
+
+  addToCart(product: IProduct, quantity: number = 1) {
+    if (product.productVariants.length > 1) {
+      this.goToView(product.id);
+      return;
+    }
+
+    const sku = product.productVariants[0].sku;
+    this.cartCookieService.addToCart(sku, quantity);
+    this.cartService.toggleCart();
   }
 
   goToView(id: number) {
     this.router.navigate([`/products/${id}`]).then();
   }
+
+  onHover(product: IProduct): void {
+    this.hoveredProductSku = product.productVariants[0].sku;
+    this.hoveredImage = this.getNextVariantFirstImage(product);
+  }
+
+  onMouseLeave(): void {
+    this.hoveredProductSku = null;
+    this.hoveredImage = null;
+  }
+
+
+  getNextVariantFirstImage(product: IProduct): string {
+    const currentVariantIndex = product.productVariants.findIndex(
+      variant => variant.sku === this.hoveredProductSku
+    );
+
+    if (currentVariantIndex === -1) {
+      return '';
+    }
+
+    const currentVariant = product.productVariants[currentVariantIndex];
+
+    if (
+      currentVariantIndex + 1 < product.productVariants.length &&
+      product.productVariants[currentVariantIndex + 1].variantImages.length > 0
+    ) {
+      const nextSku = product.productVariants[currentVariantIndex + 1].sku;
+      return this.skuImagesMap.get(nextSku)?.[0] || '';
+    } else if ((this.skuImagesMap.get(currentVariant.sku)?.length ?? 0) > 1) {
+      return this.skuImagesMap.get(currentVariant.sku)?.[1] || '';
+    }
+
+    return '';
+  }
 }
+

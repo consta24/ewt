@@ -11,6 +11,8 @@ import {LoginService} from 'app/login/login.service';
 import {ProfileService} from 'app/layouts/profiles/profile.service';
 import {EntityNavbarItems} from 'app/entities/entity-navbar-items';
 import NavbarItem from './navbar-item.model';
+import {CartService} from "../../ewt/customer/cart/service/cart.service";
+import {CartCookieService} from "../../shared/cookie/cart-cookie.service";
 
 @Component({
   selector: 'jhi-navbar',
@@ -32,6 +34,8 @@ export class NavbarComponent implements OnInit {
     private stateStorageService: StateStorageService,
     private accountService: AccountService,
     private profileService: ProfileService,
+    private cartService: CartService,
+    private cartCookieService: CartCookieService,
     private router: Router
   ) {
     if (VERSION) {
@@ -61,16 +65,25 @@ export class NavbarComponent implements OnInit {
   }
 
   login(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login']).then();
   }
 
   logout(): void {
     this.collapseNavbar();
     this.loginService.logout();
-    this.router.navigate(['']);
+    this.router.navigate(['']).then();
   }
 
   toggleNavbar(): void {
     this.isNavbarCollapsed = !this.isNavbarCollapsed;
+  }
+
+  openCart() {
+    this.cartService.toggleCart();
+    this.toggleNavbar();
+  }
+
+  getCartQuantity() {
+    return this.cartCookieService.getTotalQuantity();
   }
 }

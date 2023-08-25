@@ -1,4 +1,4 @@
-<nav data-cy="navbar" class="navbar navbar-dark navbar-expand-md bg-dark">
+<nav data-cy="navbar" class="navbar navbar-dark navbar-expand-md bg-dark shadow">
   <div class="container-fluid">
     <a class="navbar-brand logo" routerLink="/" (click)="collapseNavbar()">
       <span class="logo-img"></span>
@@ -14,7 +14,7 @@
       aria-label="Toggle navigation"
       (click)="toggleNavbar()"
     >
-      <fa-icon icon="bars"></fa-icon>
+      <fa-icon icon="bars" [fixedWidth]="true"></fa-icon>
     </a>
     <div class="navbar-collapse collapse" id="navbarResponsive" [ngbCollapse]="isNavbarCollapsed"
          [ngSwitch]="account !== null">
@@ -22,7 +22,7 @@
         <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <a class="nav-link" routerLink="/" (click)="collapseNavbar()">
             <span>
-              <fa-icon icon="home"></fa-icon>
+              <fa-icon icon="home" [fixedWidth]="true"></fa-icon>
               <span jhiTranslate="global.menu.home">Home</span>
             </span>
           </a>
@@ -30,7 +30,7 @@
         <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <a class="nav-link" routerLink="/products" (click)="collapseNavbar()">
             <span>
-              <fa-icon icon="shop"></fa-icon>
+              <fa-icon icon="shop" [fixedWidth]="true"></fa-icon>
               <span>Products</span>
             </span>
           </a>
@@ -38,7 +38,7 @@
         <li ngbDropdown class="nav-item dropdown pointer" display="dynamic" *ngIf="languages && languages.length > 1">
           <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="languagesnavBarDropdown">
             <span>
-              <fa-icon icon="flag"></fa-icon>
+              <fa-icon icon="flag" [fixedWidth]="true"></fa-icon>
               <span jhiTranslate="global.menu.language">Language</span>
             </span>
           </a>
@@ -64,7 +64,7 @@
           <a class="nav-link dropdown-toggle" ngbDropdownToggle href="javascript:void(0);" id="account-menu"
              data-cy="accountMenu">
             <span *ngIf="!account?.imageUrl">
-              <fa-icon icon="user"></fa-icon>
+              <fa-icon icon="user" [fixedWidth]="true"></fa-icon>
               <span jhiTranslate="global.menu.account.main">Account</span>
             </span>
             <span *ngIf="account?.imageUrl">
@@ -122,6 +122,15 @@
             </li>
           </ul>
         </li>
+        <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <a class="nav-link" (click)="openCart()">
+            <span class="cart-wrapper">
+              <fa-icon icon="cart-shopping" [fixedWidth]="true"></fa-icon>
+              <span class="badge-count" *ngIf="getCartQuantity() > 0">{{ getCartQuantity() }}</span>
+            </span>
+            <span>Cart</span>
+          </a>
+        </li>
         <li
           *jhiHasAnyAuthority="'ROLE_ADMIN'"
           ngbDropdown
@@ -130,16 +139,18 @@
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
         >
-          <a class="nav-link dropdown-toggle text-danger" ngbDropdownToggle href="javascript:void(0);" id="store-admin-menu"
+          <a class="nav-link dropdown-toggle text-danger" ngbDropdownToggle href="javascript:void(0);"
+             id="store-admin-menu"
              data-cy="adminMenu">
             <span>
-              <fa-icon icon="store"></fa-icon>
+              <fa-icon icon="store" [fixedWidth]="true"></fa-icon>
               <span jhiTranslate="global.menu.store-admin.main">Store management</span>
             </span>
           </a>
           <ul class="dropdown-menu" ngbDropdownMenu aria-labelledby="store-admin-menu">
             <li>
-              <a class="dropdown-item" routerLink="/store-admin/products" routerLinkActive="active" (click)="collapseNavbar()">
+              <a class="dropdown-item" routerLink="/store-admin/products" routerLinkActive="active"
+                 (click)="collapseNavbar()">
                 <fa-icon icon="shirt" [fixedWidth]="true"></fa-icon>
                 <span jhiTranslate="global.menu.store-admin.products">Products</span>
               </a>
@@ -157,7 +168,7 @@
           <a class="nav-link dropdown-toggle text-danger" ngbDropdownToggle href="javascript:void(0);" id="admin-menu"
              data-cy="adminMenu">
             <span>
-              <fa-icon icon="users-cog"></fa-icon>
+              <fa-icon icon="users-cog" [fixedWidth]="true"></fa-icon>
               <span jhiTranslate="global.menu.admin.main">Administration</span>
             </span>
           </a>
@@ -206,7 +217,6 @@
                 <span jhiTranslate="global.menu.admin.apidocs">API</span>
               </a>
             </li>
-            <!-- jhipster-needle-add-element-to-admin-menu - JHipster will add entities to the admin menu here -->
           </ul>
         </li>
       </ul>

@@ -34,6 +34,12 @@ public class ProductVariantService {
     private final ProductVariantAttributeValuesBridgeService productVariantAttributeValuesBridgeService;
     private final ProductVariantImageService productVariantImageService;
 
+
+    public Mono<ProductVariantDTO> getProductVariant(String sku) {
+        return productVariantRepository.findBySku(sku)
+                .flatMap(this::populateProductVariantDTOWithAssociations);
+    }
+
     public Flux<ProductVariantDTO> getAllProductVariants(Long productId) {
         return productVariantRepository.findAllByProductId(productId)
                 .flatMap(this::populateProductVariantDTOWithAssociations);

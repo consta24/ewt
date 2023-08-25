@@ -45,6 +45,11 @@ export class ProductService {
   }
 
   //VARIANTS
+  public getProductVariant(sku: string) {
+    const productId = this.extractProductIdFromSku(sku);
+    return this.httpClient.get<IProductVariant>(`${this.productUrl}/${productId}/variant/${sku}`)
+  }
+
   public getProductVariantImageByRef(productId: number, sku: string, ref: string): Observable<Blob> {
     const params = new HttpParams().set('ref', ref);
     return this.httpClient.get(`${this.productUrl}/${productId}/variant/${sku}/image`, {
@@ -59,6 +64,10 @@ export class ProductService {
 
   public deleteVariant(productId: number, sku: string) {
     return this.httpClient.delete(`${this.productUrl}/${productId}/variant/${sku}`)
+  }
+
+  private extractProductIdFromSku(sku: string) {
+    return sku.split('-')[0];
   }
 
   //CATEGORIES

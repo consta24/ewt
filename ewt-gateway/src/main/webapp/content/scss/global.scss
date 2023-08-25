@@ -67,6 +67,10 @@ Browser Upgrade Prompt
 Generic styles
 ========================================================================== */
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .badge-min-width {
   min-width: 75px;
 }
@@ -257,21 +261,12 @@ ui bootstrap tweaks
 }
 
 .dropdown-menu {
-  padding-left: 0px;
+  padding-left: 0;
 }
 
 /* ==========================================================================
 angular-cli removes postcss-rtl processed inline css, processed rules must be added here instead
 ========================================================================== */
-/* page-ribbon.component.scss */
-.ribbon {
-  left: -3.5em;
-  -moz-transform: rotate(-45deg);
-  -ms-transform: rotate(-45deg);
-  -o-transform: rotate(-45deg);
-  -webkit-transform: rotate(-45deg);
-  transform: rotate(-45deg);
-}
 
 /* navbar.component.scss */
 .navbar {
@@ -281,4 +276,59 @@ angular-cli removes postcss-rtl processed inline css, processed rules must be ad
     }
   }
 }
-/* jhipster-needle-scss-add-main JHipster will add new css style */
+
+/* quantity field */
+/*
+              <div class="custom-quantity">
+                <button (click)="decrementQuantity(variant)" class="quantity-control">
+                  <fa-icon icon="minus" [fixedWidth]="true"></fa-icon>
+                </button>
+                <input type="number" class="quantity-input" id="quantity"
+                       [value]="variantsQuantityMap.get(variant)"
+                       min="1" readonly>
+                <button (click)="incrementQuantity(variant)" class="quantity-control">
+                  <fa-icon icon="plus" [fixedWidth]="true"></fa-icon>
+                </button>
+              </div>
+ */
+.custom-quantity {
+  display: flex;
+  border: 1px solid #ccc;
+  width: 100px;
+  height: 30px;
+  overflow: hidden;
+}
+
+.quantity-input {
+  width: 50px;
+  border: none;
+  text-align: center;
+  appearance: textfield; /* To remove the spinner */
+  -moz-appearance: textfield; /* For Firefox */
+  flex-grow: 1;
+}
+
+.quantity-input::-webkit-inner-spin-button, /* For Chrome */
+.quantity-input::-webkit-outer-spin-button { /* For Chrome */
+  -webkit-appearance: none; /* To remove the spinner in Webkit browsers */
+  margin: 0;
+}
+
+.quantity-control {
+  background: transparent;
+  border: none;
+  width: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.quantity-control:focus {
+  outline: none;
+}
+/* quantity field */
+
+/*  */
+

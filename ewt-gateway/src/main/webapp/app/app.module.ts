@@ -25,22 +25,24 @@ import {FooterComponent} from "./layouts/footer/footer.component";
 import {NavbarComponent} from "./layouts/navbar/navbar.component";
 import {ErrorComponent} from "./layouts/error/error.component";
 import {TranslationModule} from "./shared/language/translation.module";
+import {CartModule} from "./ewt/customer/cart/cart.module";
 
 @NgModule({
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    SharedModule,
-    TranslationModule,
-    ServiceWorkerModule.register('ngsw-worker.js', {enabled: false}),
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        SharedModule,
+        TranslationModule,
+        ServiceWorkerModule.register('ngsw-worker.js', {enabled: false}),
 
-    HttpClientModule,
+        HttpClientModule,
 
-    HomeModule,
-    LoginModule,
+        HomeModule,
+        LoginModule,
 
-    EwtRoutingModule
-  ],
+        EwtRoutingModule,
+        CartModule
+    ],
   providers: [
     Title,
     {provide: LOCALE_ID, useValue: 'en'},

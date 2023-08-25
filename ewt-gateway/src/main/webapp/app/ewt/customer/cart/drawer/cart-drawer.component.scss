@@ -1,0 +1,25 @@
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  width: 50%;
+  background-color: white;
+  box-shadow: -5px 0 5px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-out;
+  z-index: 1000;
+}
+
+.cart-drawer.open {
+  transform: translateX(0);
+}
+
+@media (max-width: 768px) {
+  .cart-drawer {
+    width: 100%;
+  }
+}
+

@@ -176,6 +176,7 @@ export class AttributesListComponent implements OnInit {
   private fetchLinkedProducts(attributeId: number) {
     this.linkedProducts.clear();
     this.productService.getProductsForAttribute(attributeId).subscribe(products => {
+      products.sort((a, b) => a.id - b.id);
       this.linkedProducts.set(attributeId, products);
       this.unexpandAll();
       this.expandedAttributeIdDelete = attributeId;
@@ -260,6 +261,7 @@ export class AttributesListComponent implements OnInit {
 
   private fetchLinkedVariants(attributeId: number, attributeValueId: number) {
     this.productService.getVariantsForAttributeValue(attributeId, attributeValueId).subscribe(variants => {
+      variants.sort((a, b) => a.id - b.id);
       const canDeleteObservables: Observable<[number, boolean]>[] = variants.map(variant =>
         this.productService.canDeleteVariant(variant.productId, variant.sku).pipe(
           map(canDelete => [variant.id, canDelete] as [number, boolean])

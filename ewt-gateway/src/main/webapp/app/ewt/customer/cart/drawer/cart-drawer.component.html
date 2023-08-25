@@ -1,0 +1,80 @@
+<div class="cart-drawer p-3" [ngClass]="{ 'open': isOpen }">
+  <div class="d-flex justify-content-end">
+    <button class="btn btn-danger shadow" (click)="toggleCart()">
+      <fa-icon icon="xmark"></fa-icon>
+    </button>
+  </div>
+  <div class="row">
+    <div class="col">
+      <h4 class="text-center"><strong>Your Cart</strong></h4>
+    </div>
+    <div>
+      <hr class="hr-legal"/>
+    </div>
+  </div>
+  <ewt-loading [isLoading]="isLoading"></ewt-loading>
+  <div *ngIf="!isLoading">
+    <div *ngIf="!cartItems.length" class="row">
+      <div class="col-12">
+        <div class="d-flex justify-content-center">
+          <span class="text-center">Cart is empty</span>
+        </div>
+      </div>
+      <div class="col-12 mt-2">
+        <div class="row">
+          <button class="btn btn-primary" (click)="goToProducts()">View Products</button>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="cartItems.length">
+      <div *ngFor="let variant of variants" class="mb-3">
+        <div class="row">
+          <div class="col-6">
+            <div class="d-flex">
+              <div class="me-1">
+                <img [src]="skuImagesMap.get(variant.sku)" alt="Product Image"
+                     style="width: 100px; height: 100px; object-fit: cover" class="shadow">
+              </div>
+
+              <div>
+                <div>
+                  {{ formatProductVariantName(variant) }}
+                </div>
+                <span class="text-danger">{{ variant.price }} €</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="d-flex flex-column justify-content-center align-items-end">
+              <div class="custom-quantity shadow">
+                <button (click)="decrementQuantity(variant)" class="quantity-control">
+                  <fa-icon icon="minus" [fixedWidth]="true"></fa-icon>
+                </button>
+                <input type="number" class="quantity-input" id="quantity"
+                       [value]="variantsQuantityMap.get(variant)"
+                       min="1" readonly>
+                <button (click)="incrementQuantity(variant)" class="quantity-control">
+                  <fa-icon icon="plus" [fixedWidth]="true"></fa-icon>
+                </button>
+              </div>
+
+              <div class="mt-1">
+                <a (click)="removeFromCart(variant)">Remove</a>
+              </div>
+            </div>
+          </div>
+          <hr class="hr-legal my-2"/>
+        </div>
+      </div>
+      <div class="d-flex justify-content-end">
+        <span>Subtotal: <strong>{{subTotal}} €</strong></span>
+      </div>
+      <div class="row">
+        <button class="btn btn-primary shadow">
+          <fa-icon icon="lock" [fixedWidth]="true"></fa-icon>
+          Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

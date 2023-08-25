@@ -2,7 +2,7 @@
 <div *ngIf="!isLoading">
   <div class="row my-3">
     <div class="col">
-      <h4 class="text-center"><a><strong>Products</strong></a></h4>
+      <h4 class="text-center"><strong>Products</strong></h4>
     </div>
     <div>
       <hr class="hr-legal"/>
@@ -50,7 +50,7 @@
                 <div class="d-flex justify-content-between">
                   <div class="d-flex align-items-center">
                     <div>
-                      <img [src]="skuImageMap[variant.sku][0]" alt="Image" height="35" width="35" class="border me-2">
+                      <img [src]="getFirstImage(variant.sku)" alt="Image" height="35" width="35" class="border me-2">
                     </div>
                     <span>{{formatProductVariantName(product.name, variant)}}</span>
                   </div>

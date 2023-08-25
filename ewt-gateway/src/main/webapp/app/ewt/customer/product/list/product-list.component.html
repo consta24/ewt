@@ -1,36 +1,44 @@
 <ewt-loading [isLoading]="isLoading"></ewt-loading>
 
 <div *ngIf="!isLoading">
-  <div class="p-5">
-    <!-- No products available -->
+  <div class="p-1">
     <div *ngIf="!products.length" class="text-center my-3">
       <hr class="hr-legal"/>
       <strong>There are no products available.</strong>
       <hr class="hr-legal"/>
     </div>
 
-    <!-- Product list -->
     <div class="row my-3" *ngIf="products.length">
       <div class="col-md-3 col-6 mb-4" *ngFor="let product of products">
-        <div class="card h-100">
-          <div class="border hover-product" (click)="goToView(product.id)">
-            <img [src]="skuImageMap[product.productVariants[0].sku][0]" [alt]="product.name" class="img-fluid w-100"
-                 style="max-height: 350px; object-fit: cover;">
-            <h5 class="card-title mt-2 m-2">{{product.name}}</h5>
+        <div class="card h-100 hover-product shadow">
+          <img [src]="getFirstImage(product.productVariants[0].sku)"
+               [alt]="product.name"
+               class="img-fluid w-100 cursor-pointer fade-transition"
+               style="height: 200px; width: 200px; object-fit: cover;"
+               (click)="goToView(product.id)"
+               (mouseover)="onHover(product)"
+               (mouseout)="onMouseLeave()">
+          <div class="p-2">
+            <div>
+              <h4 class="card-title mt-2 cursor-pointer" (click)="goToView(product.id)">{{product.name}}</h4>
+            </div>
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <p class="no-font-space text-danger m-2">{{product.productVariants[0].price}}€</p>
-              </div>
-              <div>
-                <button class="btn btn-primary m-2" (click)="addToCart(product)"><fa-icon icon="cart-shopping" [fixedWidth]="true"></fa-icon></button>
+                <p class="no-font-space">In stock</p>
+                <p class="no-font-space text-danger">{{product.productVariants[0].price}} €</p>
               </div>
             </div>
+          </div>
+          <div class="p-2">
+            <button class="btn btn-sm btn-primary w-100 shadow" (click)="addToCart(product)">
+              <fa-icon icon="cart-shopping" [fixedWidth]="true"></fa-icon>
+              Add To Cart
+            </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Pagination -->
     <div class="d-flex flex-column align-items-center justify-content-center mt-3">
       <div>
         <jhi-item-count

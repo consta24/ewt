@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 
-import {FindLanguageFromKeyPipe} from './language';
-import {TranslateDirective} from './language';
+import {FindLanguageFromKeyPipe, TranslateDirective} from './language';
 import {LoadingComponent} from "./loading/loading.component";
 import {SharedLibsModule} from "./shared-libs.module";
 import {AlertComponent} from "./alert/alert.component";
@@ -12,6 +11,8 @@ import {DurationPipe, FormatMediumDatePipe, FormatMediumDatetimePipe} from "./da
 import {SortByDirective, SortDirective} from "./sort";
 import {FilterComponent} from "./filter";
 import {ActiveMenuDirective} from "../layouts/navbar/active-menu.directive";
+import {SelectStarRatingComponent} from "./reviews/select-stars/select-star-rating.component";
+import {DisplayStarRatingComponent} from "./reviews/display-stars/display-star-rating.component";
 
 /**
  * Application wide Module
@@ -33,7 +34,9 @@ import {ActiveMenuDirective} from "../layouts/navbar/active-menu.directive";
     FilterComponent,
     ActiveMenuDirective,
 
+    DisplayStarRatingComponent,
     LoadingComponent,
+    SelectStarRatingComponent,
   ],
   exports: [
     SharedLibsModule,
@@ -51,6 +54,8 @@ import {ActiveMenuDirective} from "../layouts/navbar/active-menu.directive";
     FilterComponent,
     ActiveMenuDirective,
 
+    DisplayStarRatingComponent,
+    SelectStarRatingComponent,
     LoadingComponent
   ],
 })

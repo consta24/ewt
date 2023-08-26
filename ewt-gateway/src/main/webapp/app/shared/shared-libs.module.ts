@@ -22,7 +22,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop'
     NgbModalModule,
     NgSelectModule,
     NgbPaginationModule,
-    DragDropModule
+    DragDropModule,
   ]
 })
 export class SharedLibsModule {

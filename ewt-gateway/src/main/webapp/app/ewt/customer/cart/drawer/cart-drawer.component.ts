@@ -135,13 +135,7 @@ export class CartDrawerComponent implements OnDestroy {
     this.router.navigate(["/products"]).then();
   }
 
-
-
-
-
   get variants(): IProductVariant[] {
     return Array.from(this.variantsQuantityMap.keys());
   }
-
-
 }

@@ -1,0 +1,51 @@
+<div class="rating">
+  <fa-icon class="star"
+           icon="star"
+           [fixedWidth]="true"
+           [style.font-size]="fontSize"
+           [class.filled]="hoveredRating ? hoveredRating >= 5 : rating >= 5"
+           (click)="setRating(5)"
+           (mouseover)="previewRating(5)"
+           (mouseout)="resetPreview()">
+  </fa-icon>
+
+  <fa-icon class="star"
+           icon="star"
+           [fixedWidth]="true"
+           [style.font-size]="fontSize"
+           [class.filled]="hoveredRating ? hoveredRating >= 4 : rating >= 4"
+           (click)="setRating(4)"
+           (mouseover)="previewRating(4)"
+           (mouseout)="resetPreview()">
+  </fa-icon>
+
+  <fa-icon class="star"
+           icon="star"
+           [fixedWidth]="true"
+           [style.font-size]="fontSize"
+           [class.filled]="hoveredRating ? hoveredRating >= 3 : rating >= 3"
+           (click)="setRating(3)"
+           (mouseover)="previewRating(3)"
+           (mouseout)="resetPreview()">
+  </fa-icon>
+
+  <fa-icon class="star"
+           icon="star"
+           [fixedWidth]="true"
+           [style.font-size]="fontSize"
+           [class.filled]="hoveredRating ? hoveredRating >= 2 : rating >= 2"
+           (click)="setRating(2)"
+           (mouseover)="previewRating(2)"
+           (mouseout)="resetPreview()">
+  </fa-icon>
+
+  <fa-icon class="star"
+           icon="star"
+           [fixedWidth]="true"
+           [style.font-size]="fontSize"
+           [class.filled]="hoveredRating ? hoveredRating >= 1 : rating >= 1"
+           (click)="setRating(1)"
+           (mouseover)="previewRating(1)"
+           (mouseout)="resetPreview()">
+  </fa-icon>
+</div>

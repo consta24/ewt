@@ -1,0 +1,8 @@
+<fa-icon class="full-star" icon="star" [fixedWidth]="true" [style.font-size]="fontSize"
+         *ngFor="let _ of [].constructor(fullStars)"></fa-icon>
+
+<fa-icon class="half-star" icon="star-half-alt" [fixedWidth]="true" [style.font-size]="fontSize"
+         *ngIf="halfStar"></fa-icon>
+
+<fa-icon class="empty-star" icon="star" [fixedWidth]="true" [style.font-size]="fontSize"
+         *ngFor="let _ of [].constructor(emptyStars)"></fa-icon>

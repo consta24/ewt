@@ -1,12 +1,11 @@
 <ewt-loading [isLoading]="isLoading"></ewt-loading>
 
 <div *ngIf="!isLoading">
-
   <div class="row">
-    <div class="col-md-6 col-12">
+    <div class="col-md-6 col-12 m-0 p-0">
       <div class="position-relative">
-        <img [src]="currentImage" [alt]="product.name" class="img-fluid w-100 shadow"
-             style="height: 500px; width: 500px; object-fit: cover;">
+        <img [src]="currentImage" [alt]="product.name" class="no-font-space"
+             style="height: 400px; width: 100%;">
 
 
         <div *ngIf="images.length > 1">
@@ -21,8 +20,8 @@
       </div>
 
       <div class="d-flex mt-3" *ngIf="images.length > 1">
-        <div *ngFor="let img of images; let i = index" class="thumbnail-wrapper me-2 shadow">
-          <div [ngClass]="{'selected-image': currentImage === img}">
+        <div *ngFor="let img of images; let i = index">
+          <div class="thumbnail-wrapper me-2 shadow" [ngClass]="{'selected-image': currentImage === img}">
             <img [src]="img"
                  [alt]="product.name + '-' + i"
                  (click)="currentImage = img"
@@ -36,6 +35,10 @@
       <div class="row">
         <h3 class="mt-2"><strong>{{product.name}}</strong></h3>
         <h5 class="text-danger">{{product.productVariants[0].price}} €</h5>
+        <div class="d-flex align-items-baseline">
+          <ewt-display-star-rating [value]="4.5" [fontSize]="'15px'"></ewt-display-star-rating>
+          <p class="ms-2 no-font-space">46 reviews</p>
+        </div>
         <div>
           <hr/>
         </div>
@@ -52,42 +55,110 @@
         </div>
 
         <div class="d-flex mt-5 mb-2 align-items-center">
-          <label for="quantity" class="me-2"><strong>Quantity:</strong></label>
-          <div class="custom-quantity shadow">
-            <button (click)="decrementQuantity()" class="quantity-control">
-              <fa-icon icon="minus" [fixedWidth]="true"></fa-icon>
-            </button>
-            <input type="number" class="quantity-input" id="quantity"
-                   [value]="quantity"
-                   min="1" readonly>
-            <button (click)="incrementQuantity()" class="quantity-control">
-              <fa-icon icon="plus" [fixedWidth]="true"></fa-icon>
-            </button>
+          <div *ngIf="currentVariant.stock > 0">
+            <label for="quantity" class="me-2"><strong>Quantity:</strong></label>
+            <div class="custom-quantity shadow">
+              <button (click)="decrementQuantity()" class="quantity-control">
+                <fa-icon icon="minus" [fixedWidth]="true"></fa-icon>
+              </button>
+              <input type="number" class="quantity-input" id="quantity"
+                     [value]="quantity"
+                     min="1" readonly>
+              <button (click)="incrementQuantity()" class="quantity-control">
+                <fa-icon icon="plus" [fixedWidth]="true"></fa-icon>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="mt-2">
-          <span>{{ currentVariant.stock }} left in stock</span>
-          <button class="btn btn-primary w-100 shadow" (click)="addToCart()">
-            <fa-icon icon="cart-shopping" [fixedWidth]="true"></fa-icon>
-            Add To Cart
+        <div *ngIf="currentVariant.stock > 0">
+          <div class="mt-2">
+            <span>{{ currentVariant.stock }} left in stock</span>
+            <button class="btn btn-primary w-100 shadow" (click)="addToCart()">
+              <fa-icon icon="cart-shopping" [fixedWidth]="true"></fa-icon>
+              Add To Cart
+            </button>
+          </div>
+
+          <div class="mt-2">
+            <button class="btn btn-info w-100 shadow" (click)="addToCart()">
+              Buy Now
+            </button>
+          </div>
+        </div>
+        <div *ngIf="currentVariant.stock === 0" class="mt-2">
+          <button class="btn btn-outline-dark w-100 shadow" disabled>
+            Sold Out
           </button>
+          <button class="btn btn-dark w-100 shadow mt-2" (click)="toggleNotify()">
+            Notify me when back in stock
+          </button>
+          <div *ngIf="isNotifyExpanded" class="mt-2 d-flex">
+            <input type="email" class="form-control shadow" placeholder="Your Email" [(ngModel)]="notifyEmailInput"/>
+            <button class="btn btn-dark shadow" (click)="submitNotify()">Notify</button>
+          </div>
         </div>
 
-        <div class="mt-2">
-          <button class="btn btn-info w-100 shadow" (click)="addToCart()">
-            Buy Now
-          </button>
-        </div>
 
-        <div class="mt-2" *ngIf="product.description">
-          <h5><strong>Description</strong></h5>
-          <div>
+        <div class="mt-4" *ngIf="product.description">
+          <div class="cursor-pointer" (click)="toggleDescription()">
+            <h5 class="d-flex justify-content-between align-items-center">
+              <strong>Description</strong>
+              <fa-icon [icon]="isDescriptionExpanded ? 'minus' : 'plus'" [fixedWidth]="true"></fa-icon>
+            </h5>
+          </div>
+
+          <div *ngIf="isDescriptionExpanded">
             <span>{{product.description}}</span>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <div class="cursor-pointer" (click)="toggleDeliveryAndReturns()">
+            <h5 class="d-flex justify-content-between align-items-center">
+              <strong>Delivery & Returns</strong>
+              <fa-icon [icon]="isDeliveryAndReturnsExpanded ? 'minus' : 'plus'" [fixedWidth]="true"></fa-icon>
+            </h5>
+          </div>
+
+          <div *ngIf="isDeliveryAndReturnsExpanded">
+            <a class="text-underline"><strong>DELIVERY</strong></a>
+            <p>We are committed to delivering your EWT item as swiftly and securely as possible. We understand the
+              anticipation of wearing our thoughtfully designed piece, which is why we collaborate with reliable
+              delivery partners to ensure it reaches you on time. All our packages are inspected and packed with care,
+              ensuring they arrive in impeccable condition. We offer various delivery options, tailored to your needs,
+              and you can track your package every step of the way. Experience the joy of unwrapping an EWT piece,
+              knowing it has been delivered with love and care.</p>
+            <a class="text-underline"><strong>RETURNS</strong></a>
+            <p>We want you to love your EWT item as much as we loved designing, creating & wearing it. That’s why, if
+              you’re not completely happy with it, we'll exchange it or give you a refund. All we ask is that that it’s
+              returned to us in its original condition with all original packaging, within 28 days of delivery.
+              To allow us to refund you as quick as possible, we’ve implemented a quick & simple returns process
+              online.</p>
           </div>
         </div>
       </div>
     </div>
 
+    <div class="row mt-2">
+      <hr/>
+      <div class="d-flex flex-column align-items-center">
+        <h2 class="no-font-space"><strong>4.5</strong></h2>
+        <ewt-display-star-rating [value]="4.5"></ewt-display-star-rating>
+        <p class="no-font-space">46 reviews</p>
+      </div>
+      <div class="d-flex justify-content-end my-2">
+        <button class="btn btn-outline-dark me-1" (click)="openReviewModal()">
+          <fa-icon icon="pencil" [fixedWidth]="true"></fa-icon>
+          Write A Review
+        </button>
+        <button class="btn btn-outline-dark" (click)="openQuestionModal()">
+          <fa-icon icon="question" [fixedWidth]="true"></fa-icon>
+          Ask A Question
+        </button>
+      </div>
+      <hr/>
+    </div>
+    <ewt-select-star-rating (ratingChange)="handleRatingChange($event)"></ewt-select-star-rating>
   </div>
 </div>

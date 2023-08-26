@@ -7,6 +7,9 @@ import {IProductAttributeValue} from "../../../store-admin/product/model/product
 import {CartService} from "../../cart/service/cart.service";
 import {CartCookieService} from "../../../../shared/cookie/cart-cookie.service";
 import {ProductImageService} from "../../../../shared/product/product-image.service";
+import {ProductViewReviewModalComponent} from "./review-modal/product-view-review-modal.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {ProductViewQuestionModalComponent} from "./question-modal/product-view-question-modal.component";
 
 @Component({
   selector: 'ewt-customer-product-view',
@@ -29,7 +32,13 @@ export class ProductViewComponent implements OnInit {
   quantity = 1;
 
 
-  constructor(private router: Router, private route: ActivatedRoute, private productService: ProductService, private cartService: CartService, private cartCookieService: CartCookieService, private productImageService: ProductImageService) {
+  constructor(private router: Router,
+              private route: ActivatedRoute,
+              private modalService: NgbModal,
+              private productService: ProductService,
+              private cartService: CartService,
+              private cartCookieService: CartCookieService,
+              private productImageService: ProductImageService) {
 
   }
 
@@ -142,14 +151,55 @@ export class ProductViewComponent implements OnInit {
   }
 
   decrementQuantity() {
-    if(this.quantity > 1) {
+    if (this.quantity > 1) {
       this.quantity = this.quantity - 1;
     }
   }
 
   incrementQuantity() {
-    if(this.quantity < this.currentVariant.stock) {
+    if (this.quantity < this.currentVariant.stock) {
       this.quantity = this.quantity + 1;
     }
+  }
+
+  isNotifyExpanded = false;
+  notifyEmailInput = '';
+  isDescriptionExpanded = false;
+  isDeliveryAndReturnsExpanded = false;
+
+  toggleNotify() {
+    this.isNotifyExpanded = !this.isNotifyExpanded;
+  }
+
+  submitNotify() {
+    if (this.notifyEmailInput && this.isValidEmail(this.notifyEmailInput)) {
+      this.isNotifyExpanded = !this.isNotifyExpanded;
+      this.notifyEmailInput = '';
+    }
+  }
+
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return emailRegex.test(email);
+  }
+
+  toggleDescription() {
+    this.isDescriptionExpanded = !this.isDescriptionExpanded;
+  }
+
+  toggleDeliveryAndReturns() {
+    this.isDeliveryAndReturnsExpanded = !this.isDeliveryAndReturnsExpanded;
+  }
+
+  handleRatingChange(event: any) {
+
+  }
+
+  openReviewModal() {
+    this.modalService.open(ProductViewReviewModalComponent, { centered: true });
+  }
+
+  openQuestionModal() {
+    this.modalService.open(ProductViewQuestionModalComponent, { centered: true });
   }
 }

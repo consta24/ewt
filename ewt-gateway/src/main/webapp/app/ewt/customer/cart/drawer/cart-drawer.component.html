@@ -29,7 +29,7 @@
     <div *ngIf="cartItems.length">
       <div *ngFor="let variant of variants" class="mb-3">
         <div class="row">
-          <div class="col-6">
+          <div class="col-md-6 col-12">
             <div class="d-flex">
               <div class="me-1">
                 <img [src]="skuImagesMap.get(variant.sku)" alt="Product Image"
@@ -44,7 +44,7 @@
               </div>
             </div>
           </div>
-          <div class="col-6">
+          <div class="col-md-6 col-12">
             <div class="d-flex flex-column justify-content-center align-items-end">
               <div class="custom-quantity shadow">
                 <button (click)="decrementQuantity(variant)" class="quantity-control">

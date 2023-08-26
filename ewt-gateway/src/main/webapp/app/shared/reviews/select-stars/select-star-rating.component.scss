@@ -1,0 +1,15 @@
+.rating {
+  display: inline-flex;
+  direction: rtl;
+}
+
+.star {
+  cursor: pointer;
+  display: inline-block;
+  transition: color 0.2s;
+  color: #ccc;
+}
+
+.star.filled {
+  color: gold;
+}

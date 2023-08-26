@@ -294,8 +294,9 @@ angular-cli removes postcss-rtl processed inline css, processed rules must be ad
 .custom-quantity {
   display: flex;
   border: 1px solid #ccc;
-  width: 100px;
-  height: 30px;
+  padding: 10px;
+  width: 150px;
+  height: 50px;
   overflow: hidden;
 }
 
@@ -330,5 +331,7 @@ angular-cli removes postcss-rtl processed inline css, processed rules must be ad
 }
 /* quantity field */
 
-/*  */
+/* rating */
+
+
 

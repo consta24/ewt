@@ -43,7 +43,7 @@ import tech.jhipster.web.util.HeaderUtil;
 
 /**
  * Controller advice to translate the server side exceptions to client-friendly json structures.
- * The error response follows RFC7807 - Problem Details for HTTP APIs (https://tools.ietf.org/html/rfc7807).
+ * The error response follows RFC7807 - Problem Details for HTTP APIs (<a href="https://tools.ietf.org/html/rfc7807">...</a>).
  */
 @ControllerAdvice
 @Component("jhiExceptionTranslator")
@@ -70,7 +70,7 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler implemen
         return handleExceptionInternal(
             (Exception) ex,
             pdCause,
-            buildHeaders(ex, request),
+            buildHeaders(ex),
             HttpStatusCode.valueOf(pdCause.getStatus()),
             request
         );
@@ -85,7 +85,7 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler implemen
         HttpStatusCode statusCode,
         ServerWebExchange request
     ) {
-        body = body == null ? wrapAndCustomizeProblem((Throwable) ex, (ServerWebExchange) request) : body;
+        body = body == null ? wrapAndCustomizeProblem(ex, request) : body;
         if (request.getResponse().isCommitted()) {
             return Mono.error(ex);
         }
@@ -120,15 +120,16 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler implemen
                 .build();
         }
         if (
-            ex instanceof ErrorResponseException exp && exp.getBody() instanceof ProblemDetailWithCause
-        ) return (ProblemDetailWithCause) exp.getBody();
+            ex instanceof ErrorResponseException exp && exp.getBody() instanceof ProblemDetailWithCause problemDetailWithCause
+        ) return problemDetailWithCause;
         return ProblemDetailWithCauseBuilder.instance().withStatus(toStatus(ex).value()).build();
     }
 
     protected ProblemDetailWithCause customizeProblem(ProblemDetailWithCause problem, Throwable err, ServerWebExchange request) {
         if (problem.getStatus() <= 0) problem.setStatus(toStatus(err));
 
-        if (problem.getType() == null || problem.getType().equals(URI.create("about:blank"))) problem.setType(getMappedType(err));
+        problem.getType();
+        if (problem.getType().equals(URI.create("about:blank"))) problem.setType(getMappedType(err));
 
         // higher precedence to Custom/ResponseStatus types
         String title = extractTitle(err, problem.getStatus());
@@ -151,8 +152,8 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler implemen
         if (problemProperties == null || !problemProperties.containsKey(PATH_KEY)) problem.setProperty(PATH_KEY, getPathValue(request));
 
         if (
-            (err instanceof WebExchangeBindException) && (problemProperties == null || !problemProperties.containsKey(FIELD_ERRORS_KEY))
-        ) problem.setProperty(FIELD_ERRORS_KEY, getFieldErrors((WebExchangeBindException) err));
+            (err instanceof WebExchangeBindException webExchangeBindException) && (problemProperties == null || !problemProperties.containsKey(FIELD_ERRORS_KEY))
+        ) problem.setProperty(FIELD_ERRORS_KEY, getFieldErrors(webExchangeBindException));
 
         problem.setCause(buildCause(err.getCause(), request).orElse(null));
 
@@ -195,7 +196,7 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler implemen
     }
 
     private ResponseStatus extractResponseStatus(final Throwable throwable) {
-        return Optional.ofNullable(resolveResponseStatus(throwable)).orElse(null);
+        return resolveResponseStatus(throwable);
     }
 
     private ResponseStatus resolveResponseStatus(final Throwable type) {
@@ -204,21 +205,23 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler implemen
     }
 
     private URI getMappedType(Throwable err) {
-        if (err instanceof MethodArgumentNotValidException exp) return ErrorConstants.CONSTRAINT_VIOLATION_TYPE;
+        if (err instanceof MethodArgumentNotValidException) return ErrorConstants.CONSTRAINT_VIOLATION_TYPE;
         return ErrorConstants.DEFAULT_TYPE;
     }
 
     private String getMappedMessageKey(Throwable err) {
-        if (err instanceof MethodArgumentNotValidException) return ErrorConstants.ERR_VALIDATION; else if (
-            err instanceof ConcurrencyFailureException || err.getCause() != null && err.getCause() instanceof ConcurrencyFailureException
-        ) return ErrorConstants.ERR_CONCURRENCY_FAILURE; else if (
-            err instanceof WebExchangeBindException
-        ) return ErrorConstants.ERR_VALIDATION;
+        if (err instanceof MethodArgumentNotValidException)
+            return ErrorConstants.ERR_VALIDATION;
+        else if (err instanceof ConcurrencyFailureException ||
+                    err.getCause() instanceof ConcurrencyFailureException)
+            return ErrorConstants.ERR_CONCURRENCY_FAILURE;
+        else if (err instanceof WebExchangeBindException)
+            return ErrorConstants.ERR_VALIDATION;
         return null;
     }
 
     private String getCustomizedTitle(Throwable err) {
-        if (err instanceof MethodArgumentNotValidException exp) return "Method argument not valid";
+        if (err instanceof MethodArgumentNotValidException) return "Method argument not valid";
         return null;
     }
 
@@ -246,14 +249,14 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler implemen
         return request.getRequest().getURI();
     }
 
-    private HttpHeaders buildHeaders(Throwable err, ServerWebExchange request) {
-        return err instanceof BadRequestAlertException
+    private HttpHeaders buildHeaders(Throwable err) {
+        return err instanceof BadRequestAlertException badRequestAlertException
             ? HeaderUtil.createFailureAlert(
                 applicationName,
                 true,
-                ((BadRequestAlertException) err).getEntityName(),
-                ((BadRequestAlertException) err).getErrorKey(),
-                ((BadRequestAlertException) err).getMessage()
+                badRequestAlertException.getEntityName(),
+                badRequestAlertException.getErrorKey(),
+                badRequestAlertException.getMessage()
             )
             : null;
     }
@@ -270,7 +273,7 @@ public class ExceptionTranslator extends ResponseEntityExceptionHandler implemen
         if (throwable != null && isCasualChainEnabled()) {
             return Optional.of(customizeProblem(getProblemDetailWithCause(throwable), throwable, request));
         }
-        return Optional.ofNullable(null);
+        return Optional.empty();
     }
 
     private boolean isCasualChainEnabled() {

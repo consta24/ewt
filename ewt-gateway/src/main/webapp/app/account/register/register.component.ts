@@ -3,7 +3,12 @@ import {HttpErrorResponse} from '@angular/common/http';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {TranslateService} from '@ngx-translate/core';
 
-import {EMAIL_ALREADY_USED_TYPE, LOGIN_ALREADY_USED_TYPE} from 'app/config/error.constants';
+import {
+  EMAIL_ALREADY_USED_DETAIL,
+  EMAIL_ALREADY_USED_TYPE,
+  LOGIN_ALREADY_USED_DETAIL,
+  LOGIN_ALREADY_USED_TYPE
+} from 'app/config/error.constants';
 import {RegisterService} from './register.service';
 
 @Component({
@@ -29,6 +34,15 @@ export class RegisterComponent implements AfterViewInit {
         Validators.maxLength(50),
         Validators.pattern('^[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$|^[_.@A-Za-z0-9-]+$'),
       ],
+    }),
+
+    firstName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(1), Validators.maxLength(50), Validators.pattern("^[a-zA-Z-' ]*$")],
+    }),
+    lastName: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(1), Validators.maxLength(50), Validators.pattern("^[a-zA-Z-' ]*$")],
     }),
     email: new FormControl('', {
       nonNullable: true,
@@ -63,10 +77,26 @@ export class RegisterComponent implements AfterViewInit {
     if (password !== confirmPassword) {
       this.doNotMatch = true;
     } else {
-      const {login, email} = this.registerForm.getRawValue();
+      const {login, email, firstName, lastName} = this.registerForm.getRawValue();
       this.registerService
-        .save({login, email, password, langKey: this.translateService.currentLang})
-        .subscribe({next: () => (this.success = true), error: response => this.processError(response)});
+        .save({login, firstName, lastName, email, password, langKey: this.translateService.currentLang})
+        .subscribe({
+          next: (response: any) => this.checkForErrors(response),
+          error: response => this.processError(response)
+        });
+    }
+  }
+
+  private checkForErrors(response: any) {
+    if (!response) {
+      this.success = true;
+    }
+    if (response.detail === LOGIN_ALREADY_USED_DETAIL) {
+      this.errorUserExists = true;
+    } else if (response.detail === EMAIL_ALREADY_USED_DETAIL) {
+      this.errorEmailExists = true;
+    } else if (response.detail) {
+      this.error = true
     }
   }
 

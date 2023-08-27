@@ -49,14 +49,18 @@
     "form": {
       "username.label": "Utilizator",
       "username.placeholder": "Numele de utilizator",
-      "currentpassword.label": "Current password",
-      "currentpassword.placeholder": "Current password",
+      "firstName.label": "Prenume",
+      "firstName.placeholder": "Prenumele dumneavoastră",
+      "lastName.label": "Nume",
+      "lastName.placeholder": "Numele dumneavoastră",
+      "currentpassword.label": "Parola curentă",
+      "currentpassword.placeholder": "Parola curentă",
       "newpassword.label": "Parolă nouă",
       "newpassword.placeholder": "Parolă nouă",
       "confirmpassword.label": "Confirma parolă",
       "confirmpassword.placeholder": "Confirmați noua parolă",
       "email.label": "Email",
-      "email.placeholder": "Emailul dumneavoastră"
+      "email.placeholder": "Email-ul dumneavoastră"
     },
     "messages": {
       "info": {

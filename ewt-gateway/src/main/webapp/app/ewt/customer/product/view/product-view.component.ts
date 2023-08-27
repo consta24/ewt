@@ -4,12 +4,12 @@ import {IProduct} from "../../../store-admin/product/model/product.model";
 import {ProductService} from "../../../store-admin/product/service/product.service";
 import {IProductVariant} from "../../../store-admin/product/model/product-variant.model";
 import {IProductAttributeValue} from "../../../store-admin/product/model/product-attribute-value.model";
-import {CartService} from "../../cart/service/cart.service";
-import {CartCookieService} from "../../../../shared/cookie/cart-cookie.service";
+import {CartDrawerService} from "../../cart/service/cart-drawer.service";
 import {ProductImageService} from "../../../../shared/product/product-image.service";
 import {ProductViewReviewModalComponent} from "./review-modal/product-view-review-modal.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ProductViewQuestionModalComponent} from "./question-modal/product-view-question-modal.component";
+import {CartService} from "../../cart/service/cart.service";
 
 @Component({
   selector: 'ewt-customer-product-view',
@@ -31,15 +31,23 @@ export class ProductViewComponent implements OnInit {
 
   quantity = 1;
 
+  isNotifyExpanded = false;
+  notifyEmailInput = '';
+
+  isDescriptionExpanded = false;
+  isDeliveryAndReturnsExpanded = false;
+
+  isReviewsExpanded = false;
+  isQuestionsExpanded = false;
+
 
   constructor(private router: Router,
               private route: ActivatedRoute,
               private modalService: NgbModal,
               private productService: ProductService,
               private cartService: CartService,
-              private cartCookieService: CartCookieService,
+              private cartDrawerService: CartDrawerService,
               private productImageService: ProductImageService) {
-
   }
 
   ngOnInit(): void {
@@ -146,8 +154,13 @@ export class ProductViewComponent implements OnInit {
   }
 
   addToCart() {
-    this.cartCookieService.addToCart(this.currentVariant.sku, this.quantity);
-    this.cartService.toggleCart();
+    this.cartService.addToCart(this.currentVariant.sku, this.quantity).subscribe({
+      next: () => {
+        this.cartDrawerService.toggleCart();
+      }, error: () => {
+        //TODO
+      }
+    })
   }
 
   decrementQuantity() {
@@ -162,10 +175,6 @@ export class ProductViewComponent implements OnInit {
     }
   }
 
-  isNotifyExpanded = false;
-  notifyEmailInput = '';
-  isDescriptionExpanded = false;
-  isDeliveryAndReturnsExpanded = false;
 
   toggleNotify() {
     this.isNotifyExpanded = !this.isNotifyExpanded;
@@ -191,15 +200,25 @@ export class ProductViewComponent implements OnInit {
     this.isDeliveryAndReturnsExpanded = !this.isDeliveryAndReturnsExpanded;
   }
 
-  handleRatingChange(event: any) {
-
-  }
-
   openReviewModal() {
-    this.modalService.open(ProductViewReviewModalComponent, { centered: true });
+    this.modalService.open(ProductViewReviewModalComponent, {centered: true});
   }
 
   openQuestionModal() {
-    this.modalService.open(ProductViewQuestionModalComponent, { centered: true });
+    this.modalService.open(ProductViewQuestionModalComponent, {centered: true});
+  }
+
+  toggleReviews() {
+    if (!this.isReviewsExpanded) {
+      this.isQuestionsExpanded = false;
+    }
+    this.isReviewsExpanded = !this.isReviewsExpanded;
+  }
+
+  toggleQuestions() {
+    if (!this.isQuestionsExpanded) {
+      this.isReviewsExpanded = false;
+    }
+    this.isQuestionsExpanded = !this.isQuestionsExpanded;
   }
 }

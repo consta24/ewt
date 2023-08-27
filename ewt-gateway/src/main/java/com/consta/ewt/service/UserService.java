@@ -9,11 +9,6 @@ import com.consta.ewt.security.AuthoritiesConstants;
 import com.consta.ewt.security.SecurityUtils;
 import com.consta.ewt.service.dto.AdminUserDTO;
 import com.consta.ewt.service.dto.UserDTO;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +20,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import tech.jhipster.security.RandomUtil;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Service class for managing users.
@@ -277,14 +279,15 @@ public class UserService {
             .getCurrentUserLogin()
             .flatMap(userRepository::findOneByLogin)
             .publishOn(Schedulers.boundedElastic())
-            .map(user -> {
+            .<User>handle((user, sink) -> {
                 String currentEncryptedPassword = user.getPassword();
                 if (!passwordEncoder.matches(currentClearTextPassword, currentEncryptedPassword)) {
-                    throw new InvalidPasswordException();
+                    sink.error(new InvalidPasswordException());
+                    return;
                 }
                 String encryptedPassword = passwordEncoder.encode(newPassword);
                 user.setPassword(encryptedPassword);
-                return user;
+                sink.next(user);
             })
             .flatMap(this::saveUser)
             .doOnNext(user -> log.debug("Changed password for User: {}", user))
@@ -338,6 +341,7 @@ public class UserService {
 
     /**
      * Gets a list of all the authorities.
+     *
      * @return a list of all the authorities.
      */
     @Transactional(readOnly = true)

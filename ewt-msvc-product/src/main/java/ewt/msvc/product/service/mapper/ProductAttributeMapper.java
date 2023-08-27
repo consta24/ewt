@@ -11,6 +11,4 @@ public interface ProductAttributeMapper {
     ProductAttribute toEntity(ProductAttributeDTO productAttributeDTO);
 
     ProductAttributeDTO toDTO(ProductAttribute productAttribute);
-
-    List<ProductAttributeDTO> toDTOList(List<ProductAttribute> productAttributes);
 }

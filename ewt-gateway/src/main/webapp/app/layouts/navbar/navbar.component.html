@@ -126,7 +126,7 @@
           <a class="nav-link" (click)="openCart()">
             <span class="cart-wrapper">
               <fa-icon icon="cart-shopping" [fixedWidth]="true"></fa-icon>
-              <span class="badge-count" *ngIf="getCartQuantity() > 0">{{ getCartQuantity() }}</span>
+              <span class="badge-count" *ngIf="cartQuantity > 0">{{ cartQuantity }}</span>
             </span>
             <span>Cart</span>
           </a>

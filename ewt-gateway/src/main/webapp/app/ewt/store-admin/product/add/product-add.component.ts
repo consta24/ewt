@@ -162,7 +162,7 @@ export class ProductAddComponent implements OnInit {
             const variantFormGroup = this.createVariantFormGroup();
 
             variantFormGroup.patchValue({
-              id:  variant.id,
+              id: variant.id,
               sku: variant.sku,
               price: variant.price,
               stock: variant.stock,
@@ -317,8 +317,10 @@ export class ProductAddComponent implements OnInit {
         const reader = new FileReader();
         reader.onload = (event: ProgressEvent<FileReader>) => {
           const src = event.target?.result as string;
-          this.variantImages[variantIndex].push(event.target?.result as string);
-          this.getProductVariantImages(variantIndex).push(this.fb.control(src));
+          if (!this.variantImages[variantIndex].includes(src)) {
+            this.variantImages[variantIndex].push(event.target?.result as string);
+            this.getProductVariantImages(variantIndex).push(this.fb.control(src));
+          }
         };
         reader.readAsDataURL(file);
       }

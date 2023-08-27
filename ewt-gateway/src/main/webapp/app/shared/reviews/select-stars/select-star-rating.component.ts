@@ -11,7 +11,7 @@ export class SelectStarRatingComponent {
   @Input() fontSize: string = '24px';
 
 
-  rating: number = 0;
+  rating: number = 5;
   hoveredRating: number | null = null;
 
   setRating(value: number): void {

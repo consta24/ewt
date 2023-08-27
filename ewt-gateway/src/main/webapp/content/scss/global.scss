@@ -331,7 +331,18 @@ angular-cli removes postcss-rtl processed inline css, processed rules must be ad
 }
 /* quantity field */
 
-/* rating */
+/* ==========================================================================
+Logo styles
+========================================================================== */
+.logo-img {
+  height: 45px;
+  width: 45px;
+  display: inline-block;
+  vertical-align: middle;
+  background: url('/content/images/logo-jhipster.png') no-repeat center center;
+  background-size: contain;
+}
+
 
 
 

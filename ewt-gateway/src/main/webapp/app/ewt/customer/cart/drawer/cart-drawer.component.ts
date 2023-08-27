@@ -1,7 +1,6 @@
-import {Component, OnDestroy, OnInit} from "@angular/core";
-import {CartService} from "../service/cart.service";
+import {Component, OnDestroy} from "@angular/core";
+import {CartDrawerService} from "../service/cart-drawer.service";
 import {forkJoin, Subscription, switchMap} from "rxjs";
-import {CartCookieService} from "../../../../shared/cookie/cart-cookie.service";
 import {ICartItem} from "../model/cart-item.model";
 import {ProductService} from "../../../store-admin/product/service/product.service";
 import {ProductImageService} from "../../../../shared/product/product-image.service";
@@ -9,6 +8,7 @@ import {IProduct} from "../../../store-admin/product/model/product.model";
 import {IProductVariant} from "../../../store-admin/product/model/product-variant.model";
 import {tap} from "rxjs/operators";
 import {Router} from "@angular/router";
+import {CartService} from "../service/cart.service";
 
 
 @Component({
@@ -36,8 +36,8 @@ export class CartDrawerComponent implements OnDestroy {
   subTotal: number = 0;
 
   constructor(private router: Router,
-              private cartDrawerService: CartService,
-              private cartCookieService: CartCookieService,
+              private cartService: CartService,
+              private cartDrawerService: CartDrawerService,
               private productService: ProductService,
               private productImageService: ProductImageService) {
     this.subscription = this.cartDrawerService.cartToggleAction$.subscribe(() => {
@@ -53,34 +53,39 @@ export class CartDrawerComponent implements OnDestroy {
     this.variantsQuantityMap.clear();
     this.skuImagesMap.clear();
     this.skuProductsMap.clear();
-    this.cartItems = this.cartCookieService.getCart();
+    this.cartService.getCart().subscribe({
+      next: (cartItems: ICartItem[]) => {
+        this.cartItems = cartItems;
+        if (!this.cartItems.length) {
+          this.isLoading = false;
+        } else {
+          const cartObservables = this.cartItems.map(cartItem => {
+            return this.productService.getProductVariant(cartItem.sku).pipe(
+              switchMap((variant) => {
+                this.variantsQuantityMap.set(variant, cartItem.quantity);
+                return this.productService.getProduct(variant.productId).pipe(
+                  switchMap(product => {
+                    return this.productImageService.getImagesForSKU(variant.sku, product).pipe(
+                      tap(images => {
+                        this.skuImagesMap.set(variant.sku, images[0]);
+                        this.skuProductsMap.set(variant.sku, product);
+                      })
+                    )
+                  })
+                );
+              })
+            );
+          });
 
-    if(!this.cartItems.length) {
-      this.isLoading = false;
-    }
-
-    const cartObservables = this.cartItems.map(cartItem => {
-      return this.productService.getProductVariant(cartItem.sku).pipe(
-        switchMap((variant) => {
-          this.variantsQuantityMap.set(variant, cartItem.quantity);
-          return this.productService.getProduct(variant.productId).pipe(
-            switchMap(product => {
-              return this.productImageService.getImagesForSKU(variant.sku, product).pipe(
-                tap(images => {
-                  this.skuImagesMap.set(variant.sku, images[0]);
-                  this.skuProductsMap.set(variant.sku, product);
-                })
-              )
-            })
-          );
-        })
-      );
-    });
-
-    forkJoin(cartObservables).subscribe(() => {
-      this.calculateSubTotal();
-      this.isLoading = false;
-    });
+          forkJoin(cartObservables).subscribe(() => {
+            this.calculateSubTotal();
+            this.isLoading = false;
+          });
+        }
+      }, error: () => {
+        //TODO
+      }
+    })
   }
 
   calculateSubTotal() {
@@ -102,37 +107,57 @@ export class CartDrawerComponent implements OnDestroy {
   decrementQuantity(variant: IProductVariant) {
     const currentQuantity = this.variantsQuantityMap.get(variant);
     if (currentQuantity && currentQuantity > 1) {
-      if (this.cartCookieService.updateQuantityInCart(variant.sku, currentQuantity - 1)) {
-        this.variantsQuantityMap.set(variant, currentQuantity - 1);
-        this.calculateSubTotal();
-      } else {
-        //TODO
-      }
+      this.cartService.updateQuantityInCart(variant.sku, currentQuantity - 1).subscribe(
+        {
+          next: () => {
+            this.variantsQuantityMap.set(variant, currentQuantity - 1);
+            this.calculateSubTotal();
+          }, error: () => {
+            //TODO
+          }
+        }
+      )
     }
   }
 
   incrementQuantity(variant: IProductVariant) {
     const currentQuantity = this.variantsQuantityMap.get(variant);
     if (currentQuantity && currentQuantity + 1 <= variant.stock) {
-      if (this.cartCookieService.updateQuantityInCart(variant.sku, currentQuantity + 1)) {
-        this.variantsQuantityMap.set(variant, currentQuantity + 1);
-        this.calculateSubTotal();
-      } else {
-        //TODO
-      }
+      this.cartService.updateQuantityInCart(variant.sku, currentQuantity + 1).subscribe(
+        {
+          next: () => {
+            this.variantsQuantityMap.set(variant, currentQuantity + 1);
+            this.calculateSubTotal();
+          }, error: () => {
+            //TODO
+          }
+        }
+      )
     }
   }
 
   removeFromCart(variant: IProductVariant) {
-    this.cartCookieService.removeFromCart(variant.sku)
-    this.variantsQuantityMap.delete(variant);
-    this.cartItems = this.cartCookieService.getCart();
-    this.calculateSubTotal();
+    this.cartService.removeFromCart(variant.sku).subscribe(
+      {
+        next: () => {
+          this.variantsQuantityMap.delete(variant);
+          this.cartItems = this.cartItems.filter(cartItem => cartItem.sku !== variant.sku)
+          this.calculateSubTotal();
+        }, error: () => {
+          //TODO
+        }
+      }
+    )
   }
 
   goToProducts() {
     this.toggleCart();
     this.router.navigate(["/products"]).then();
+  }
+
+  goToCheckout() {
+    this.toggleCart();
+    this.router.navigate(["/checkout"]).then();
   }
 
   get variants(): IProductVariant[] {

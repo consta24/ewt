@@ -22,6 +22,12 @@ public class ProductVariantResource {
         return productVariantService.getProductVariant(sku);
     }
 
+    @GetMapping("{sku}/stock")
+    public Mono<Integer> getProductVariantStock(@PathVariable Long productId, @PathVariable String sku) {
+        return productVariantService.getProductVariantStock(sku);
+    }
+
+
     @GetMapping
     public Flux<ProductVariantDTO> getAllProductVariants(@PathVariable Long productId) {
         return productVariantService.getAllProductVariants(productId);

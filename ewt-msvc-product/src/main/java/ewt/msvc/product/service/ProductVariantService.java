@@ -40,6 +40,11 @@ public class ProductVariantService {
                 .flatMap(this::populateProductVariantDTOWithAssociations);
     }
 
+    public Mono<Integer> getProductVariantStock(String sku) {
+        return productVariantRepository.findBySku(sku)
+                .map(ProductVariant::getStock);
+    }
+
     public Flux<ProductVariantDTO> getAllProductVariants(Long productId) {
         return productVariantRepository.findAllByProductId(productId)
                 .flatMap(this::populateProductVariantDTOWithAssociations);

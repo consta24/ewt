@@ -55,7 +55,6 @@ public class AccountResource {
      * @throws LoginAlreadyUsedException {@code 400 (Bad Request)} if the login is already used.
      */
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
     public Mono<Void> registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
         if (isPasswordLengthInvalid(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();

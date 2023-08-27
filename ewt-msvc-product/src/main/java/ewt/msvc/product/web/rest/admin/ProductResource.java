@@ -17,8 +17,6 @@ import reactor.core.publisher.Mono;
 import tech.jhipster.web.util.PaginationUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @RestController

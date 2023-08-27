@@ -8,6 +8,8 @@ import {
   faBook,
   faCalendarAlt,
   faCaretDown,
+  faCaretLeft,
+  faCaretRight,
   faCaretUp,
   faCartShopping,
   faCheck,
@@ -111,5 +113,7 @@ export const fontAwesomeIcons = [
   faStarHalfAlt,
   faPencil,
   faQuestion,
-  faQuestionCircle
+  faQuestionCircle,
+  faCaretLeft,
+  faCaretRight
 ];

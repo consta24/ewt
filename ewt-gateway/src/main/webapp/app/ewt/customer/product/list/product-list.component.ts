@@ -2,8 +2,8 @@ import {Component, OnInit} from "@angular/core";
 import {Router} from "@angular/router";
 import {IProduct} from "../../../store-admin/product/model/product.model";
 import {ProductService} from "../../../store-admin/product/service/product.service";
-import {CartCookieService} from "../../../../shared/cookie/cart-cookie.service";
 import {ProductImageService} from "../../../../shared/product/product-image.service";
+import {CartDrawerService} from "../../cart/service/cart-drawer.service";
 import {CartService} from "../../cart/service/cart.service";
 
 
@@ -28,7 +28,7 @@ export class ProductListComponent implements OnInit {
   constructor(private router: Router,
               private productService: ProductService,
               private cartService: CartService,
-              private cartCookieService: CartCookieService,
+              private cartDrawerService: CartDrawerService,
               private productImageService: ProductImageService) {
   }
 
@@ -76,8 +76,15 @@ export class ProductListComponent implements OnInit {
     }
 
     const sku = product.productVariants[0].sku;
-    this.cartCookieService.addToCart(sku, quantity);
-    this.cartService.toggleCart();
+    this.cartService.addToCart(sku, quantity).subscribe(
+      {
+        next: () => {
+          this.cartDrawerService.toggleCart();
+        }, error: () => {
+          //TODO
+        }
+      }
+    )
   }
 
   goToView(id: number) {

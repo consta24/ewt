@@ -11,6 +11,4 @@ public interface ProductVariantImageMapper {
     ProductVariantImage toEntity(ProductVariantImageDTO productVariantImageDTO);
 
     ProductVariantImageDTO toDTO(ProductVariantImage productVariantImage);
-
-    List<ProductVariantImageDTO> toDTOList(List<ProductVariantImage> productVariantImages);
 }

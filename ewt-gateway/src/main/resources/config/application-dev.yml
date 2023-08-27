@@ -58,10 +58,16 @@ spring:
     contexts: dev, faker
     url: jdbc:postgresql://localhost:5432/ewt
   mail:
-    host: localhost
-    port: 25
-    username:
-    password:
+    host: smtp.gmail.com
+    port: 587
+    username: ewt.business.project@gmail.com
+    password: aovxkvredvaaglbo
+    protocol: smtp
+    tls: true
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
+      ssl.trust: smtp.gmail.com
   messages:
     cache-duration: PT1S # 1 second, see the ISO 8601 standard
   r2dbc:
@@ -108,7 +114,8 @@ jhipster:
         token-validity-in-seconds: 86400
         token-validity-in-seconds-for-remember-me: 2592000
   mail: # specific JHipster mail property, for standard properties see MailProperties
-    base-url: http://127.0.0.1:9100
+    baseUrl: http://127.0.0.1:9002
+    base-url: http://127.0.0.1:9002
   logging:
     use-json-format: false # By default, logs are not in Json format
     logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration

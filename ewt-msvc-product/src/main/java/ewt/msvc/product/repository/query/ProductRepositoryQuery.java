@@ -44,5 +44,4 @@ public class ProductRepositoryQuery {
                     return product;
                 }).all();
     }
-
 }

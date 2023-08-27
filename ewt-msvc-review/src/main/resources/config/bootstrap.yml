@@ -1,0 +1,16 @@
+jhipster:
+  registry:
+    password: admin
+
+spring:
+  application:
+    name: ewt-msvc-review
+  profiles:
+    active: #spring.profiles.active#
+  cloud:
+    config:
+      fail-fast: false
+      uri: http://admin:${jhipster.registry.password}@localhost:8761/config
+      name: ewt-msvc-review
+      profile: dev
+      label: main

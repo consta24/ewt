@@ -40,10 +40,6 @@ import {UserRouteAccessService} from 'app/core/auth/user-route-access.service';
         },
         {
           path: '',
-          loadChildren: () => import(`./entities/entity-routing.module`).then(({EntityRoutingModule}) => EntityRoutingModule),
-        },
-        {
-          path: '',
           loadChildren: () => import(`./ewt/ewt-routing.module`).then(m => m.EwtRoutingModule),
 
         },

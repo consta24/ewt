@@ -20,7 +20,7 @@ public class WebClientConfig {
                                 .build()));
 
         return WebClient.builder()
-                .baseUrl("http://localhost:9100/services")
+                .baseUrl("http://localhost:9100/services/")
                 .filter(authFilter)
                 .build();
     }

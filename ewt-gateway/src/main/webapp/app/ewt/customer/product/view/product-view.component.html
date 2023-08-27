@@ -5,16 +5,16 @@
     <div class="col-md-6 col-12 m-0 p-0">
       <div class="position-relative">
         <img [src]="currentImage" [alt]="product.name" class="no-font-space"
-             style="height: 400px; width: 100%;">
+             style="height: 600px; width: 100%;">
 
 
         <div *ngIf="images.length > 1">
           <button class="position-absolute top-50 start-0 translate-middle-y btn btn-outline-dark"
                   (click)="prevImage()">
-            <fa-icon icon="arrow-left" [fixedWidth]="true"></fa-icon>
+            <fa-icon icon="caret-left" [fixedWidth]="true"></fa-icon>
           </button>
           <button class="position-absolute top-50 end-0 translate-middle-y btn btn-outline-dark" (click)="nextImage()">
-            <fa-icon icon="arrow-right" [fixedWidth]="true"></fa-icon>
+            <fa-icon icon="caret-right" [fixedWidth]="true"></fa-icon>
           </button>
         </div>
       </div>
@@ -147,7 +147,7 @@
         <ewt-display-star-rating [value]="4.5"></ewt-display-star-rating>
         <p class="no-font-space">46 reviews</p>
       </div>
-      <div class="d-flex justify-content-end my-2">
+      <div class="d-flex justify-content-end my-4">
         <button class="btn btn-outline-dark me-1" (click)="openReviewModal()">
           <fa-icon icon="pencil" [fixedWidth]="true"></fa-icon>
           Write A Review
@@ -157,8 +157,35 @@
           Ask A Question
         </button>
       </div>
-      <hr/>
     </div>
-    <ewt-select-star-rating (ratingChange)="handleRatingChange($event)"></ewt-select-star-rating>
+
+    <div class="row">
+      <div class="d-flex">
+        <h4 class="me-4" (click)="toggleReviews()">
+          <a style="text-decoration: none;"
+             [class.text-muted]="!isReviewsExpanded"
+             [ngStyle]="isReviewsExpanded ? {'border-bottom': '2px solid currentColor'} : {}">
+            <strong>Reviews</strong>
+          </a>
+        </h4>
+        <h4 (click)="toggleQuestions()">
+          <a style="text-decoration: none;"
+             [class.text-muted]="!isQuestionsExpanded"
+             [ngStyle]="isQuestionsExpanded ? {'border-bottom': '2px solid currentColor'} : {}">
+            <strong>Questions</strong>
+          </a>
+        </h4>
+      </div>
+
+      <hr/>
+
+      <div *ngIf="isReviewsExpanded">
+        <h2>REVIEWS</h2>
+      </div>
+
+      <div *ngIf="isQuestionsExpanded">
+        <h2>QUESTIONS</h2>
+      </div>
+    </div>
   </div>
 </div>

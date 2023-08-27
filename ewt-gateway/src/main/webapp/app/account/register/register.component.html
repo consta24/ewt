@@ -77,6 +77,100 @@
         </div>
 
         <div class="mb-3">
+          <label class="form-label" for="firstName" jhiTranslate="global.form.firstName.label">First Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="firstName"
+            name="firstName"
+            placeholder="{{ 'global.form.firstName.placeholder' | translate }}"
+            formControlName="firstName"
+            data-cy="firstName"
+          />
+
+          <div *ngIf="registerForm.get('firstName')!.invalid && (registerForm.get('firstName')!.dirty || registerForm.get('firstName')!.touched)">
+            <small
+              class="form-text text-danger"
+              *ngIf="registerForm.get('firstName')?.errors?.required"
+              jhiTranslate="register.messages.validate.firstName.required"
+            >
+              Your first name is required.
+            </small>
+
+            <small
+              class="form-text text-danger"
+              *ngIf="registerForm.get('firstName')?.errors?.minlength"
+              jhiTranslate="register.messages.validate.firstName.minlength"
+            >
+              Your first name is required to be at least 1 character.
+            </small>
+
+            <small
+              class="form-text text-danger"
+              *ngIf="registerForm.get('firstName')?.errors?.maxlength"
+              jhiTranslate="register.messages.validate.firstName.maxlength"
+            >
+              Your first name cannot be longer than 50 characters.
+            </small>
+
+            <small
+              class="form-text text-danger"
+              *ngIf="registerForm.get('firstName')?.errors?.pattern"
+              jhiTranslate="register.messages.validate.firstName.pattern"
+            >
+              Your first name is invalid.
+            </small>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="lastName" jhiTranslate="global.form.lastName.label">Last Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="lastName"
+            name="lastName"
+            placeholder="{{ 'global.form.lastName.placeholder' | translate }}"
+            formControlName="lastName"
+            data-cy="lastName"
+          />
+
+          <div *ngIf="registerForm.get('lastName')!.invalid && (registerForm.get('lastName')!.dirty || registerForm.get('lastName')!.touched)">
+            <small
+              class="form-text text-danger"
+              *ngIf="registerForm.get('lastName')?.errors?.required"
+              jhiTranslate="register.messages.validate.lastName.required"
+            >
+              Your last name is required.
+            </small>
+
+            <small
+              class="form-text text-danger"
+              *ngIf="registerForm.get('lastName')?.errors?.minlength"
+              jhiTranslate="register.messages.validate.lastName.minlength"
+            >
+              Your last name is required to be at least 1 character.
+            </small>
+
+            <small
+              class="form-text text-danger"
+              *ngIf="registerForm.get('lastName')?.errors?.maxlength"
+              jhiTranslate="register.messages.validate.lastName.maxlength"
+            >
+              Your last name cannot be longer than 50 characters.
+            </small>
+
+            <small
+              class="form-text text-danger"
+              *ngIf="registerForm.get('lastName')?.errors?.pattern"
+              jhiTranslate="register.messages.validate.lastName.pattern"
+            >
+              Your last name is invalid.
+            </small>
+          </div>
+        </div>
+
+        <div class="mb-3">
           <label class="form-label" for="email" jhiTranslate="global.form.email.label">Email</label>
           <input
             type="email"

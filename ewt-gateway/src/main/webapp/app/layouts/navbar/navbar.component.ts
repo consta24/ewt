@@ -9,10 +9,8 @@ import {Account} from 'app/core/auth/account.model';
 import {AccountService} from 'app/core/auth/account.service';
 import {LoginService} from 'app/login/login.service';
 import {ProfileService} from 'app/layouts/profiles/profile.service';
-import {EntityNavbarItems} from 'app/entities/entity-navbar-items';
-import NavbarItem from './navbar-item.model';
+import {CartDrawerService} from "../../ewt/customer/cart/service/cart-drawer.service";
 import {CartService} from "../../ewt/customer/cart/service/cart.service";
-import {CartCookieService} from "../../shared/cookie/cart-cookie.service";
 
 @Component({
   selector: 'jhi-navbar',
@@ -26,17 +24,18 @@ export class NavbarComponent implements OnInit {
   openAPIEnabled?: boolean;
   version = '';
   account: Account | null = null;
-  entitiesNavbarItems: NavbarItem[] = [];
+  cartQuantity = 0;
+
 
   constructor(
+    private router: Router,
     private loginService: LoginService,
     private translateService: TranslateService,
     private stateStorageService: StateStorageService,
     private accountService: AccountService,
     private profileService: ProfileService,
-    private cartService: CartService,
-    private cartCookieService: CartCookieService,
-    private router: Router
+    private cartDrawerService: CartDrawerService,
+    private cartService: CartService
   ) {
     if (VERSION) {
       this.version = VERSION.toLowerCase().startsWith('v') ? VERSION : `v${VERSION}`;
@@ -44,7 +43,6 @@ export class NavbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.entitiesNavbarItems = EntityNavbarItems;
     this.profileService.getProfileInfo().subscribe(profileInfo => {
       this.inProduction = profileInfo.inProduction;
       this.openAPIEnabled = profileInfo.openAPIEnabled;
@@ -53,6 +51,10 @@ export class NavbarComponent implements OnInit {
     this.accountService.getAuthenticationState().subscribe(account => {
       this.account = account;
     });
+
+    this.cartService.cartQuantity.subscribe(
+      cartQuantity => this.cartQuantity = cartQuantity
+    );
   }
 
   changeLanguage(languageKey: string): void {
@@ -79,11 +81,7 @@ export class NavbarComponent implements OnInit {
   }
 
   openCart() {
-    this.cartService.toggleCart();
+    this.cartDrawerService.toggleCart();
     this.toggleNavbar();
-  }
-
-  getCartQuantity() {
-    return this.cartCookieService.getTotalQuantity();
   }
 }

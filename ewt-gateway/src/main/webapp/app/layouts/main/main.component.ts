@@ -5,6 +5,7 @@ import dayjs from 'dayjs/esm';
 import { AccountService } from 'app/core/auth/account.service';
 import { AppPageTitleStrategy } from 'app/app-page-title-strategy';
 import { Router } from '@angular/router';
+import {CartService} from "../../ewt/customer/cart/service/cart.service";
 
 @Component({
   selector: 'jhi-main',

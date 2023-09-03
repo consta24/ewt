@@ -16,7 +16,7 @@
         <module>../ewt-msvc-identity</module>
         <module>../ewt-msvc-cart</module>
         <module>../ewt-msvc-order</module>
-        <module>../ewt-msvc-review</module>
+        <module>../ewt-msvc-feedback</module>
         <module>../ewt-msvc-customer</module>
     </modules>
 

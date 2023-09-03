@@ -27,8 +27,8 @@ export class ProductService {
     return this.httpClient.get<IProduct>(`${this.productUrl}/${productId}`);
   }
 
-  public getProducts(req: any) {
-    let options = createRequestOption(req);
+  public getProductsPage(pageable: any) {
+    let options = createRequestOption(pageable);
     return this.httpClient.get<IProduct[]>(`${this.productUrl}`, {params: options, observe: "response"});
   }
 

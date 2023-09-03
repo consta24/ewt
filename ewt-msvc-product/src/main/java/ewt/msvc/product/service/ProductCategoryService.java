@@ -1,5 +1,6 @@
 package ewt.msvc.product.service;
 
+import ewt.msvc.config.utils.StringUtil;
 import ewt.msvc.product.domain.ProductCategory;
 import ewt.msvc.product.repository.ProductCategoryRepository;
 import ewt.msvc.product.repository.ProductRepository;
@@ -8,7 +9,6 @@ import ewt.msvc.product.service.dto.ProductCategoryDTO;
 import ewt.msvc.product.service.dto.ProductDTO;
 import ewt.msvc.product.service.mapper.ProductCategoryMapper;
 import ewt.msvc.product.service.mapper.ProductMapper;
-import ewt.msvc.product.service.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -33,7 +33,8 @@ public class ProductCategoryService {
     public Mono<ProductCategoryDTO> addProductCategory(ProductCategoryDTO productCategoryDTO) {
         ProductCategory productCategory = productCategoryMapper.toEntity(productCategoryDTO);
         productCategory.setName(StringUtil.toTitleCase(productCategory.getName()));
-        return productCategoryRepository.save(productCategory).map(productCategoryMapper::toDTO);
+        return productCategoryRepository.save(productCategory)
+                .map(productCategoryMapper::toDTO);
     }
 
     public Mono<ProductCategoryDTO> updateProductCategory(Long id, ProductCategoryDTO productCategoryDTO) {

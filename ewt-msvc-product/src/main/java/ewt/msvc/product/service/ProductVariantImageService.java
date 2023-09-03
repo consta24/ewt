@@ -1,15 +1,14 @@
 package ewt.msvc.product.service;
 
+import ewt.msvc.config.utils.Base64Util;
 import ewt.msvc.product.domain.ProductVariantImage;
 import ewt.msvc.product.repository.ProductVariantImageRepository;
 import ewt.msvc.product.service.dto.ProductVariantImageDTO;
 import ewt.msvc.product.service.mapper.ProductVariantImageMapper;
-import ewt.msvc.product.service.util.Base64Util;
 import io.minio.*;
 import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.compress.utils.IOUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,8 +25,8 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class ProductVariantImageService {
 
-    @Value("${minio.bucketName:ewt-product}")
-    private String minioBucketName;
+    private final String minioBucketName;
+
     private final MinioAsyncClient minioAsyncClient;
 
     private final ProductVariantImageMapper productVariantImageMapper;
@@ -58,7 +57,7 @@ public class ProductVariantImageService {
                 future.thenAccept(response -> {
                     try {
                         byte[] imageBytes = IOUtils.toByteArray(response);
-                        String contentType = response.headers().get("Content-Type");  // Make sure this is the correct way to get headers in your version of the MinIO client.
+                        String contentType = response.headers().get("Content-Type");
                         String base64Image = Base64.getEncoder().encodeToString(imageBytes);
                         String fullData = "data:" + contentType + ";base64," + base64Image;
                         sink.success(fullData);
@@ -76,38 +75,39 @@ public class ProductVariantImageService {
     }
 
 
-
     public Flux<ProductVariantImageDTO> getAllProductVariantImages(String sku) {
         return productVariantImageRepository.findAllBySku(sku)
                 .map(productVariantImageMapper::toDTO);
     }
 
-    public Flux<ProductVariantImageDTO> saveProductVariantImages(String sku, Set<ProductVariantImageDTO> variantImages) {
-
-        List<Mono<ProductVariantImageDTO>> monos = variantImages.stream()
+    public Mono<Void> saveProductVariantImages(String sku, Set<ProductVariantImageDTO> variantImages) {
+        List<Mono<Void>> monos = variantImages.stream()
                 .map(imageDTO -> {
                     imageDTO.setSku(sku);
-
                     String base64Data = imageDTO.getRef().split(",")[1];
 
                     byte[] imageBytes = Base64.getDecoder().decode(base64Data);
                     String contentType = Base64Util.getContentTypeFromBase64(imageDTO.getRef());
-                    String objectName = imageDTO.getSku() + "/" + imageDTO.getSequence();
+                    String fileExtension = Base64Util.getFileExtensionFromBase64(imageDTO.getRef());
+                    String objectName = imageDTO.getSku() + "/" + imageDTO.getSequence() + "." + fileExtension;
 
-                    return Mono.fromFuture(() -> asyncPutObject(imageBytes, minioBucketName, objectName, contentType, imageDTO))
-                            .flatMap(updatedImageDTO -> {
-                                ProductVariantImage productVariantImage = productVariantImageMapper.toEntity(updatedImageDTO);
-                                return productVariantImageRepository.save(productVariantImage)
-                                        .map(productVariantImageMapper::toDTO);
-                            });
+                    // Set the ref here before saving to the database
+                    imageDTO.setRef(objectName);
+
+                    ProductVariantImage productVariantImage = productVariantImageMapper.toEntity(imageDTO);
+                    return productVariantImageRepository.save(productVariantImage)
+                            .flatMap(savedImage -> Mono.fromFuture(() -> asyncPutObject(imageBytes, minioBucketName, objectName, contentType))
+                                    .onErrorResume(ex -> productVariantImageRepository.deleteById(savedImage.getId()).then(Mono.error(ex)))
+                                    .then());
                 })
                 .toList();
 
-        return Flux.merge(monos);
+        return Mono.when(monos).then();
     }
 
-    private CompletableFuture<ProductVariantImageDTO> asyncPutObject(byte[] imageBytes, String bucketName, String objectName, String contentType, ProductVariantImageDTO imageDTO) {
-        CompletableFuture<ProductVariantImageDTO> future = new CompletableFuture<>();
+
+    private CompletableFuture<Void> asyncPutObject(byte[] imageBytes, String bucketName, String objectName, String contentType) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
         try {
             minioAsyncClient.putObject(
                     PutObjectArgs.builder()
@@ -117,8 +117,7 @@ public class ProductVariantImageService {
                             .contentType(contentType)
                             .build()
             ).thenAccept(result -> {
-                imageDTO.setRef(objectName);
-                future.complete(imageDTO);
+                future.complete(null);
             }).exceptionally(ex -> {
                 future.completeExceptionally(ex);
                 return null;

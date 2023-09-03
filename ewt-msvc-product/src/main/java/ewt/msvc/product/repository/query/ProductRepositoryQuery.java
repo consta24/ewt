@@ -28,7 +28,7 @@ public class ProductRepositoryQuery {
                             .append(" ")
                             .append(order.getDirection()));
         } else {
-            queryBuilder.append(" ORDER BY id ASC");  // Default sorting
+            queryBuilder.append(" ORDER BY id ASC");
         }
 
         queryBuilder.append(" LIMIT $1 OFFSET $2");

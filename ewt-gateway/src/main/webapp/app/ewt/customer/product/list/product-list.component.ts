@@ -18,9 +18,9 @@ export class ProductListComponent implements OnInit {
   products: IProduct[] = [];
   skuImagesMap: Map<string, string[]> = new Map();
 
-  itemsPerPage = 12;
+  productsPerPage = 12;
   currentPage = 1;
-  totalItems = 0;
+  totalProducts = 0;
 
   hoveredProductSku: string | null = null;
   hoveredImage: string | null = null;
@@ -37,16 +37,15 @@ export class ProductListComponent implements OnInit {
   }
 
   fetchProducts() {
-    const req = {
+    const pageable = {
       page: this.currentPage - 1,
-      size: this.itemsPerPage,
+      size: this.productsPerPage,
       sort: ["id,desc"]
     }
-    this.productService.getProducts(req).subscribe(res => {
+    this.productService.getProductsPage(pageable).subscribe(res => {
       if (res.body) {
-        res.body.sort((a, b) => a.id - b.id);
         this.products = res.body;
-        this.totalItems = Number(res.headers.get('X-Total-Count'))
+        this.totalProducts = Number(res.headers.get('X-Total-Count'))
         this.mapSkuToImages();
       } else {
         //TODO:

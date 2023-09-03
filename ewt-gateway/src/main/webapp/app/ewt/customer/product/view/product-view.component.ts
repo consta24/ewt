@@ -6,19 +6,19 @@ import {IProductVariant} from "../../../store-admin/product/model/product-varian
 import {IProductAttributeValue} from "../../../store-admin/product/model/product-attribute-value.model";
 import {CartDrawerService} from "../../cart/service/cart-drawer.service";
 import {ProductImageService} from "../../../../shared/product/product-image.service";
-import {ProductViewReviewModalComponent} from "./review-modal/product-view-review-modal.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {ProductViewQuestionModalComponent} from "./question-modal/product-view-question-modal.component";
 import {CartService} from "../../cart/service/cart.service";
+import {FeedbackService} from "../../feedback/service/feedback.service";
+import {IFeedbackReviewInfo} from "../../feedback/model/feedback-review-info.model";
 
 @Component({
   selector: 'ewt-customer-product-view',
   templateUrl: 'product-view.component.html',
-  styleUrls: ['product-view.component.scss']
 })
 export class ProductViewComponent implements OnInit {
 
   isLoading = true;
+  reviewInfo!: IFeedbackReviewInfo
   product!: IProduct;
 
   imagesMap: Map<string, string[]> = new Map();
@@ -37,27 +37,26 @@ export class ProductViewComponent implements OnInit {
   isDescriptionExpanded = false;
   isDeliveryAndReturnsExpanded = false;
 
-  isReviewsExpanded = false;
-  isQuestionsExpanded = false;
-
-
   constructor(private router: Router,
               private route: ActivatedRoute,
               private modalService: NgbModal,
               private productService: ProductService,
               private cartService: CartService,
               private cartDrawerService: CartDrawerService,
-              private productImageService: ProductImageService) {
+              private productImageService: ProductImageService,
+              private feedbackService: FeedbackService) {
   }
 
   ngOnInit(): void {
-    const productId = this.route.snapshot.paramMap.get('productId');
-    if (productId) {
-      this.fetchProduct(Number(productId));
+    const productId = Number(this.route.snapshot.paramMap.get('productId'));
+    if (!isNaN(productId)) {
+      this.fetchProduct(productId);
+      this.fetchReviewInfo(productId);
     } else {
       this.router.navigate(["/products"]).then();
     }
   }
+
 
   fetchProduct(productId: number) {
     this.productService.getProduct(productId).subscribe({
@@ -73,7 +72,18 @@ export class ProductViewComponent implements OnInit {
     })
   }
 
-  private initSelectedAttributes(): void {
+  private fetchReviewInfo(productId: number) {
+    this.feedbackService.getReviewInfoForProduct(productId).subscribe({
+      next: (reviewInfo) => {
+        this.reviewInfo = reviewInfo;
+      },
+      error: () => {
+        //TODO:
+      }
+    })
+  }
+
+  private initSelectedAttributes() {
     if (this.currentVariant && this.currentVariant.variantAttributeValues) {
       this.selectedAttributes = {};
       for (const attributeValue of this.currentVariant.variantAttributeValues) {
@@ -84,7 +94,7 @@ export class ProductViewComponent implements OnInit {
     }
   }
 
-  private mapSkuToImages(): void {
+  private mapSkuToImages() {
     this.productImageService.getImagesForProduct(this.product).subscribe(skuImagesMap => {
       this.imagesMap = skuImagesMap;
       this.images = [...skuImagesMap.values()].reduce((acc, val) => acc.concat(val), []);
@@ -181,15 +191,11 @@ export class ProductViewComponent implements OnInit {
   }
 
   submitNotify() {
-    if (this.notifyEmailInput && this.isValidEmail(this.notifyEmailInput)) {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    if (this.notifyEmailInput && emailRegex.test(this.notifyEmailInput)) {
       this.isNotifyExpanded = !this.isNotifyExpanded;
       this.notifyEmailInput = '';
     }
-  }
-
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    return emailRegex.test(email);
   }
 
   toggleDescription() {
@@ -198,27 +204,5 @@ export class ProductViewComponent implements OnInit {
 
   toggleDeliveryAndReturns() {
     this.isDeliveryAndReturnsExpanded = !this.isDeliveryAndReturnsExpanded;
-  }
-
-  openReviewModal() {
-    this.modalService.open(ProductViewReviewModalComponent, {centered: true});
-  }
-
-  openQuestionModal() {
-    this.modalService.open(ProductViewQuestionModalComponent, {centered: true});
-  }
-
-  toggleReviews() {
-    if (!this.isReviewsExpanded) {
-      this.isQuestionsExpanded = false;
-    }
-    this.isReviewsExpanded = !this.isReviewsExpanded;
-  }
-
-  toggleQuestions() {
-    if (!this.isQuestionsExpanded) {
-      this.isReviewsExpanded = false;
-    }
-    this.isQuestionsExpanded = !this.isQuestionsExpanded;
   }
 }

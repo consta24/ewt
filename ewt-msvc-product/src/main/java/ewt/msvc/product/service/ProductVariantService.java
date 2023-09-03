@@ -66,7 +66,7 @@ public class ProductVariantService {
                     return productVariantRepository.save(productVariantMapper.toEntity(productVariantDTO));
                 })
                 .flatMap(savedProductVariant -> {
-                    Flux<ProductVariantImageDTO> saveProductVariantImages =
+                    Mono<Void> saveProductVariantImages =
                             productVariantImageService
                                     .saveProductVariantImages(savedProductVariant.getSku(), productVariantDTO.getVariantImages());
 
@@ -124,10 +124,13 @@ public class ProductVariantService {
 
                     return Flux.concat(deleteVariantImages, deleteAttributeValuesBridges)
                             .then(Mono.defer(() -> {
-                                Flux<ProductVariantImageDTO> saveProductVariantImages =
-                                        productVariantImageService.saveProductVariantImages(updatedVariant.getSku(), productVariantDTO.getVariantImages());
+                                Mono<Void> saveProductVariantImages =
+                                        productVariantImageService
+                                                .saveProductVariantImages(updatedVariant.getSku(), productVariantDTO.getVariantImages());
+
                                 Flux<ProductVariantAttributeValuesBridge> saveVariantAttributeValuesBridges =
-                                        productVariantAttributeValuesBridgeService.saveVariantAttributeValuesBridges(updatedVariant.getSku(), productVariantDTO.getVariantAttributeValues());
+                                        productVariantAttributeValuesBridgeService
+                                                .saveVariantAttributeValuesBridges(updatedVariant.getSku(), productVariantDTO.getVariantAttributeValues());
 
                                 return Flux.concat(saveVariantAttributeValuesBridges, saveProductVariantImages).then(Mono.just(updatedVariant));
                             }));

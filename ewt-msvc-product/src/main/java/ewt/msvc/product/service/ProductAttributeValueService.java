@@ -1,5 +1,7 @@
 package ewt.msvc.product.service;
 
+import ewt.msvc.config.utils.Base64Util;
+import ewt.msvc.config.utils.StringUtil;
 import ewt.msvc.product.domain.ProductAttributeValue;
 import ewt.msvc.product.repository.ProductAttributeValueRepository;
 import ewt.msvc.product.repository.ProductVariantRepository;
@@ -8,8 +10,6 @@ import ewt.msvc.product.service.dto.ProductAttributeValueDTO;
 import ewt.msvc.product.service.dto.ProductVariantDTO;
 import ewt.msvc.product.service.mapper.ProductAttributeValueMapper;
 import ewt.msvc.product.service.mapper.ProductVariantMapper;
-import ewt.msvc.product.service.util.Base64Util;
-import ewt.msvc.product.service.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,6 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Base64;
 import java.util.HashSet;
 
 @Service

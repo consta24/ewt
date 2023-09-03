@@ -35,7 +35,7 @@ export class ProductListComponent implements OnInit {
       size: this.itemsPerPage,
       sort: ["id,desc"]
     }
-    this.productService.getProducts(req).subscribe(res => {
+    this.productService.getProductsPage(req).subscribe(res => {
       if (res.body) {
         res.body.forEach(product => product.productVariants.forEach(variant => variant.variantAttributeValues.sort((a, b) => a.attributeId - b.attributeId)));
         res.body.sort((a, b) => a.id - b.id);

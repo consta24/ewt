@@ -36,8 +36,8 @@
         <h3 class="mt-2"><strong>{{product.name}}</strong></h3>
         <h5 class="text-danger">{{product.productVariants[0].price}} €</h5>
         <div class="d-flex align-items-baseline">
-          <ewt-display-star-rating [value]="4.5" [fontSize]="'15px'"></ewt-display-star-rating>
-          <p class="ms-2 no-font-space">46 reviews</p>
+          <ewt-display-star-rating [value]="reviewInfo.score" [fontSize]="'15px'"></ewt-display-star-rating>
+          <p class="ms-2 no-font-space">{{reviewInfo.count}} reviews</p>
         </div>
         <div>
           <hr/>
@@ -73,16 +73,10 @@
 
         <div *ngIf="currentVariant.stock > 0">
           <div class="mt-2">
-            <span>{{ currentVariant.stock }} left in stock</span>
-            <button class="btn btn-primary w-100 shadow" (click)="addToCart()">
+            <span class="text-danger" *ngIf="currentVariant.stock < 10">{{ currentVariant.stock }} left in stock</span>
+            <button class="btn btn-dark w-100 shadow" (click)="addToCart()">
               <fa-icon icon="cart-shopping" [fixedWidth]="true"></fa-icon>
-              Add To Cart
-            </button>
-          </div>
-
-          <div class="mt-2">
-            <button class="btn btn-info w-100 shadow" (click)="addToCart()">
-              Buy Now
+              ADD TO CART
             </button>
           </div>
         </div>
@@ -139,53 +133,6 @@
         </div>
       </div>
     </div>
-
-    <div class="row mt-2">
-      <hr/>
-      <div class="d-flex flex-column align-items-center">
-        <h2 class="no-font-space"><strong>4.5</strong></h2>
-        <ewt-display-star-rating [value]="4.5"></ewt-display-star-rating>
-        <p class="no-font-space">46 reviews</p>
-      </div>
-      <div class="d-flex justify-content-end my-4">
-        <button class="btn btn-outline-dark me-1" (click)="openReviewModal()">
-          <fa-icon icon="pencil" [fixedWidth]="true"></fa-icon>
-          Write A Review
-        </button>
-        <button class="btn btn-outline-dark" (click)="openQuestionModal()">
-          <fa-icon icon="question" [fixedWidth]="true"></fa-icon>
-          Ask A Question
-        </button>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="d-flex">
-        <h4 class="me-4" (click)="toggleReviews()">
-          <a style="text-decoration: none;"
-             [class.text-muted]="!isReviewsExpanded"
-             [ngStyle]="isReviewsExpanded ? {'border-bottom': '2px solid currentColor'} : {}">
-            <strong>Reviews</strong>
-          </a>
-        </h4>
-        <h4 (click)="toggleQuestions()">
-          <a style="text-decoration: none;"
-             [class.text-muted]="!isQuestionsExpanded"
-             [ngStyle]="isQuestionsExpanded ? {'border-bottom': '2px solid currentColor'} : {}">
-            <strong>Questions</strong>
-          </a>
-        </h4>
-      </div>
-
-      <hr/>
-
-      <div *ngIf="isReviewsExpanded">
-        <h2>REVIEWS</h2>
-      </div>
-
-      <div *ngIf="isQuestionsExpanded">
-        <h2>QUESTIONS</h2>
-      </div>
-    </div>
+    <ewt-customer-feedback-list [productId]="product.id"></ewt-customer-feedback-list>
   </div>
 </div>

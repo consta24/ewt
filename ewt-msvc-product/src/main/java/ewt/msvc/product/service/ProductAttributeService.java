@@ -1,5 +1,6 @@
 package ewt.msvc.product.service;
 
+import ewt.msvc.config.utils.StringUtil;
 import ewt.msvc.product.domain.ProductAttribute;
 import ewt.msvc.product.repository.ProductAttributeRepository;
 import ewt.msvc.product.repository.ProductAttributeValueRepository;
@@ -9,7 +10,6 @@ import ewt.msvc.product.service.dto.ProductAttributeDTO;
 import ewt.msvc.product.service.dto.ProductDTO;
 import ewt.msvc.product.service.mapper.ProductAttributeMapper;
 import ewt.msvc.product.service.mapper.ProductMapper;
-import ewt.msvc.product.service.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;

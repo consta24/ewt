@@ -7,12 +7,14 @@ import {AlertComponent} from "./alert/alert.component";
 import {AlertErrorComponent} from "./alert/alert-error.component";
 import {ItemCountComponent} from "./pagination/item-count.component";
 import {HasAnyAuthorityDirective} from "./auth/has-any-authority.directive";
-import {DurationPipe, FormatMediumDatePipe, FormatMediumDatetimePipe} from "./date";
 import {SortByDirective, SortDirective} from "./sort";
 import {FilterComponent} from "./filter";
 import {ActiveMenuDirective} from "../layouts/navbar/active-menu.directive";
 import {SelectStarRatingComponent} from "./reviews/select-stars/select-star-rating.component";
 import {DisplayStarRatingComponent} from "./reviews/display-stars/display-star-rating.component";
+import {DurationPipe} from "./date/duration.pipe";
+import {FormatMediumDatePipe} from "./date/format-medium-date.pipe";
+import {FormatMediumDatetimePipe} from "./date/format-medium-datetime.pipe";
 
 /**
  * Application wide Module

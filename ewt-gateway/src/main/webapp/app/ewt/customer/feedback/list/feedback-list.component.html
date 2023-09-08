@@ -1,13 +1,19 @@
 <div *ngIf="!isLoading">
   <div class="row mt-2">
     <hr/>
-    <div class="d-flex flex-column align-items-center">
+
+    <div class="d-flex flex-column align-items-center" *ngIf="reviewInfo">
       <h2 class="no-font-space"><strong>{{reviewInfo.score}}</strong></h2>
       <ewt-display-star-rating [value]="reviewInfo.score"></ewt-display-star-rating>
       <p class="no-font-space">{{reviewInfo.count}} reviews</p>
     </div>
+    <div class="d-flex flex-column align-items-center" *ngIf="!reviewInfo">
+      <ewt-display-star-rating [value]="0"></ewt-display-star-rating>
+      <p class="no-font-space">No reviews yet</p>
+    </div>
+
     <div class="d-flex justify-content-center my-4">
-      <button class="btn btn-sm btn-outline-dark me-1" (click)="openReviewModal()">
+      <button class="btn btn-sm btn-outline-dark me-2" (click)="openReviewModal()">
         <fa-icon icon="pencil" [fixedWidth]="true"></fa-icon>
         Write A Review
       </button>
@@ -40,57 +46,57 @@
 
     <div *ngIf="isReviewsExpanded">
       <div *ngIf="!reviews.length" class="d-flex justify-content-center">
-        <button class="btn btn-dark" (click)="openReviewModal()">BE THE FIRST TO WRITE A REVIEW</button>
+        <button class="btn btn-sm btn-secondary" (click)="openReviewModal()">BE THE FIRST TO WRITE A REVIEW</button>
       </div>
-      <div *ngFor="let review of reviews">
-        <div class="row">
-          <div class="col-1">
-            <h2 class="no-font-space">{{review.firstName.charAt(0)}}</h2>
-          </div>
-          <div class="col-11">
-            <div class="d-flex justify-content-between">
-              <p class="small no-font-space"><strong>{{review.firstName.split(" ")[0]}} {{review.lastName.charAt(0)}}
-                .</strong> -
-                <span class="text-muted">Verified Buyer</span></p>
-              <p class="small no-font-space">{{review.creationDate | formatMediumDate}}</p>
+      <div *ngIf="reviews.length">
+        <div *ngFor="let review of reviews">
+          <div class="row">
+            <div class="col-1">
+              <h2 class="no-font-space">{{review.firstName.charAt(0)}}</h2>
             </div>
-            <ewt-display-star-rating [value]="review.score" [fontSize]="'15px'"></ewt-display-star-rating>
-            <p class="no-font-space small text-muted">{{review.review}}</p>
-            <div class="d-flex mb-2" *ngIf="review.reviewImages.length">
-              <div *ngFor="let img of getImagesForReview(review.id); let i = index">
-                <div class="thumbnail-wrapper me-2 shadow">
-                  <img [src]="img"
-                       [alt]="productId + '- review - ' + i"
-                       class="thumbnail-img"
-                  />
+            <div class="col-11">
+              <div class="d-flex justify-content-between">
+                <p class="small no-font-space"><strong>{{review.firstName.split(" ")[0]}} {{review.lastName.charAt(0)}}
+                  .</strong> -
+                  <span class="text-muted">Verified Buyer</span></p>
+                <p class="small no-font-space">{{review.creationDate | formatMediumDate}}</p>
+              </div>
+              <ewt-display-star-rating [value]="review.score" [fontSize]="'15px'"></ewt-display-star-rating>
+              <p class="no-font-space small text-muted">{{review.review}}</p>
+              <div class="d-flex mb-2" *ngIf="review.reviewImages.length">
+                <div *ngFor="let img of getImagesForReview(review.id); let i = index">
+                  <div class="thumbnail-wrapper me-2 shadow">
+                    <img [src]="img"
+                         [alt]="productId + '- review - ' + i"
+                         class="thumbnail-img"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
+            <hr/>
           </div>
-          <hr/>
         </div>
-      </div>
-      <div class="d-flex flex-column align-items-center justify-content-center mt-3">
-        <div>
-          <jhi-item-count
-            [params]="{ page: currentPage, totalItems: totalReviews, itemsPerPage: reviewsPerPage }"></jhi-item-count>
-        </div>
-        <div>
-          <ngb-pagination
-            [collectionSize]="totalReviews"
-            [(page)]="currentPage"
-            [pageSize]="reviewsPerPage"
-            [maxSize]="5"
-            [rotate]="true"
-            [boundaryLinks]="true"
-            (pageChange)="fetchReviews()"
-          ></ngb-pagination>
+        <div class="d-flex flex-column align-items-center justify-content-center mt-3">
+          <div>
+            <ngb-pagination
+              [collectionSize]="totalReviews"
+              [(page)]="currentPage"
+              [pageSize]="reviewsPerPage"
+              [maxSize]="5"
+              [rotate]="true"
+              [boundaryLinks]="true"
+              (pageChange)="fetchReviewsData()"
+            ></ngb-pagination>
+          </div>
         </div>
       </div>
     </div>
 
     <div *ngIf="isQuestionsExpanded">
-      <h2>QUESTIONS</h2>
+      <div class="d-flex justify-content-center">
+        <button class="btn btn-sm btn-secondary" (click)="openQuestionModal()">BE THE FIRST TO ASK A QUESTION</button>
+      </div>
     </div>
   </div>
 </div>

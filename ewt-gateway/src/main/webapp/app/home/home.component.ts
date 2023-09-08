@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewEncapsulation} from '@angular/core';
 import {Router} from '@angular/router';
 import {Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
@@ -9,6 +9,7 @@ import {Account} from 'app/core/auth/account.model';
   selector: 'jhi-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
+  encapsulation: ViewEncapsulation.Emulated
 })
 export class HomeComponent implements OnInit, OnDestroy {
   account: Account | null = null;

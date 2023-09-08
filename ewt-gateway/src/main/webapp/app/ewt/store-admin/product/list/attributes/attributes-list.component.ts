@@ -60,19 +60,25 @@ export class AttributesListComponent implements OnInit {
   private fetchAttributes() {
     this.productService.getAttributes().pipe(
       switchMap(attributes => {
-        const linkedCheckObservables = attributes.map(attribute =>
-          this.productService.isAttributeLinkedToProducts(attribute.id!).pipe(
-            tap(isLinked => this.linkedAttributes.set(attribute.id!, isLinked))
-          )
-        );
+        if(attributes.length) {
+          const linkedCheckObservables = attributes.map(attribute =>
+            this.productService.isAttributeLinkedToProducts(attribute.id!).pipe(
+              tap(isLinked => this.linkedAttributes.set(attribute.id!, isLinked))
+            )
+          );
 
-        return forkJoin(linkedCheckObservables).pipe(map(() => attributes));
+          return forkJoin(linkedCheckObservables).pipe(map(() => attributes));
+        } else {
+          return of(null);
+        }
       })
     ).subscribe(attributes => {
-      attributes.sort((a, b) => a.id - b.id);
-      this.unexpandAll();
-      this.linkedProducts.clear();
-      this.attributes = attributes;
+      if(attributes) {
+        attributes.sort((a, b) => a.id - b.id);
+        this.unexpandAll();
+        this.linkedProducts.clear();
+        this.attributes = attributes;
+      }
       this.isLoading = false;
     });
   }

@@ -2,14 +2,13 @@
   <router-outlet name="navbar"></router-outlet>
 </div>
 
-<div class="container">
-  <div class="card jh-card">
-    <ewt-customer-cart-drawer></ewt-customer-cart-drawer>
-    <router-outlet></router-outlet>
-  </div>
+
+<div [ngClass]="isFullPage() ? '' : 'jh-card card'">
+  <ewt-customer-cart-drawer></ewt-customer-cart-drawer>
+  <router-outlet></router-outlet>
 </div>
 
-<div class="container-fluid">
+<div>
   <ewt-footer></ewt-footer>
 </div>
 

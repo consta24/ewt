@@ -25,20 +25,6 @@ export class FeedbackReviewModalComponent implements OnInit {
     this.initForm();
   }
 
-  private initForm() {
-    this.reviewForm = this.fb.group({
-      id: [null],
-      productId: [this.productId],
-      firstName: [null, Validators.required],
-      lastName: [null, Validators.required],
-      email: [null, [Validators.required, Validators.email]],
-      score: [5],
-      review: [null, Validators.required],
-      isVerified: [false],
-      reviewImages: this.fb.array([])
-    });
-  }
-
   dismissModal() {
     this.activeModal.dismiss();
   }
@@ -109,6 +95,20 @@ export class FeedbackReviewModalComponent implements OnInit {
         reader.readAsDataURL(file);
       }
     }
+  }
+
+  private initForm() {
+    this.reviewForm = this.fb.group({
+      id: [null],
+      productId: [this.productId],
+      firstName: [null, Validators.required],
+      lastName: [null, Validators.required],
+      email: [null, [Validators.required, Validators.email]],
+      score: [5],
+      review: [null, Validators.required],
+      isVerified: [false],
+      reviewImages: this.fb.array([])
+    });
   }
 
   set score(score: number) {

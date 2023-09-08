@@ -21,12 +21,14 @@
       </div>
     </div>
   </div>
-  <div class="row my-3" *ngIf="!products.length">
-    <hr class="hr-legal"/>
-    <div class="text-center mb-3">
-      <strong>There are no products available.</strong>
+  <div *ngIf="!products.length" class="text-center my-3">
+    <div class="row">
+      <hr class="hr-legal"/>
     </div>
-    <hr class="hr-legal"/>
+    <strong>There are no products available.</strong>
+    <div class="row mt-2">
+      <hr class="hr-legal"/>
+    </div>
   </div>
   <div class="row my-3" *ngIf="products.length">
     <div *ngFor="let product of products">

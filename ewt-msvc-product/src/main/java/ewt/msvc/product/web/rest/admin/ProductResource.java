@@ -28,6 +28,11 @@ public class ProductResource {
 
     private final ProductService productService;
 
+    @GetMapping("/sku/{sku}")
+    public Mono<ProductDTO> getProductForSku(@PathVariable String sku) {
+        return this.productService.getProductForSku(sku);
+    }
+
     @GetMapping("/{id}")
     public Mono<ProductDTO> getProduct(@PathVariable Long id) {
         return this.productService.getProduct(id);

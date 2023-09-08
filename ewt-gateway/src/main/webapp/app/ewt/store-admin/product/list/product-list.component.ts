@@ -3,7 +3,7 @@ import {ProductService} from "../service/product.service";
 import {IProduct} from "../model/product.model";
 import {Router} from "@angular/router";
 import {IProductVariant} from "../model/product-variant.model";
-import {ProductImageService} from "../../../../shared/product/product-image.service";
+import {ProductImageService} from "../../../../shared/image/product-image.service";
 
 @Component({
   selector: 'ewt-store-admin-product-list',
@@ -22,7 +22,6 @@ export class ProductListComponent implements OnInit {
   constructor(private router: Router,
               private productService: ProductService,
               private productImageService: ProductImageService) {
-
   }
 
   ngOnInit(): void {
@@ -36,14 +35,14 @@ export class ProductListComponent implements OnInit {
       sort: ["id,desc"]
     }
     this.productService.getProductsPage(req).subscribe(res => {
-      if (res.body) {
+      if (res.body && res.body.length) {
         res.body.forEach(product => product.productVariants.forEach(variant => variant.variantAttributeValues.sort((a, b) => a.attributeId - b.attributeId)));
         res.body.sort((a, b) => a.id - b.id);
         this.products = res.body;
         this.totalItems = Number(res.headers.get('X-Total-Count'))
         this.mapSkuToImages();
       } else {
-        //TODO:
+        this.isLoading = false;
       }
     })
   }

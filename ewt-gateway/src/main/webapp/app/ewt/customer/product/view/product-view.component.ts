@@ -5,11 +5,13 @@ import {ProductService} from "../../../store-admin/product/service/product.servi
 import {IProductVariant} from "../../../store-admin/product/model/product-variant.model";
 import {IProductAttributeValue} from "../../../store-admin/product/model/product-attribute-value.model";
 import {CartDrawerService} from "../../cart/service/cart-drawer.service";
-import {ProductImageService} from "../../../../shared/product/product-image.service";
+import {ProductImageService} from "../../../../shared/image/product-image.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {CartService} from "../../cart/service/cart.service";
 import {FeedbackService} from "../../feedback/service/feedback.service";
 import {IFeedbackReviewInfo} from "../../feedback/model/feedback-review-info.model";
+import {forkJoin, switchMap} from "rxjs";
+import {tap} from "rxjs/operators";
 
 @Component({
   selector: 'ewt-customer-product-view',
@@ -47,85 +49,21 @@ export class ProductViewComponent implements OnInit {
               private feedbackService: FeedbackService) {
   }
 
+
   ngOnInit(): void {
     const productId = Number(this.route.snapshot.paramMap.get('productId'));
     if (!isNaN(productId)) {
-      this.fetchProduct(productId);
-      this.fetchReviewInfo(productId);
+      this.isLoading = true;
+      this.fetchData(productId);
     } else {
       this.router.navigate(["/products"]).then();
     }
   }
 
-
-  fetchProduct(productId: number) {
-    this.productService.getProduct(productId).subscribe({
-      next: (product) => {
-        product.productAttributes.sort((a, b) => a.id - b.id);
-        product.productVariants.forEach(variant => variant.variantAttributeValues.sort((a, b) => a.id - b.id))
-        this.product = product;
-        this.currentVariant = this.product.productVariants[0];
-        this.initSelectedAttributes();
-        this.initializeAttributeValuesMap();
-        this.mapSkuToImages();
-      }
-    })
-  }
-
-  private fetchReviewInfo(productId: number) {
-    this.feedbackService.getReviewInfoForProduct(productId).subscribe({
-      next: (reviewInfo) => {
-        this.reviewInfo = reviewInfo;
-      },
-      error: () => {
-        //TODO:
-      }
-    })
-  }
-
-  private initSelectedAttributes() {
-    if (this.currentVariant && this.currentVariant.variantAttributeValues) {
-      this.selectedAttributes = {};
-      for (const attributeValue of this.currentVariant.variantAttributeValues) {
-        if (!this.selectedAttributes[attributeValue.attributeId]) {
-          this.selectedAttributes[attributeValue.attributeId] = attributeValue.value;
-        }
-      }
-    }
-  }
-
-  private mapSkuToImages() {
-    this.productImageService.getImagesForProduct(this.product).subscribe(skuImagesMap => {
-      this.imagesMap = skuImagesMap;
-      this.images = [...skuImagesMap.values()].reduce((acc, val) => acc.concat(val), []);
-      const firstImage = this.imagesMap.get(this.currentVariant.sku);
-      this.currentImage = firstImage ? firstImage[0] : '';
-      this.isLoading = false;
-    });
-  }
-
-
-  initializeAttributeValuesMap() {
-    for (const variant of this.product.productVariants) {
-      for (const value of variant.variantAttributeValues) {
-        if (!this.attributeValuesMap[value.attributeId]) {
-          this.attributeValuesMap[value.attributeId] = new Set<string>();
-        }
-        this.attributeValuesMap[value.attributeId].add(value.value);
-      }
-    }
-  }
-
-
   selectAttributeValue(attributeId: number, selectedValue: string) {
     this.selectedAttributes[attributeId] = selectedValue;
     this.selectVariant();
   }
-
-  isSelectedAttributeValue(attributeId: number, value: string): boolean {
-    return this.selectedAttributes[attributeId] === value;
-  }
-
 
   selectVariant() {
     const variant = this.product.productVariants.find(variant =>
@@ -139,7 +77,7 @@ export class ProductViewComponent implements OnInit {
     if (variant) {
       this.currentVariant = variant;
       const skuImages = this.imagesMap.get(this.currentVariant.sku);
-      if (skuImages) {
+      if (skuImages?.length) {
         this.currentImage = skuImages[0]
       }
     }
@@ -204,5 +142,62 @@ export class ProductViewComponent implements OnInit {
 
   toggleDeliveryAndReturns() {
     this.isDeliveryAndReturnsExpanded = !this.isDeliveryAndReturnsExpanded;
+  }
+
+  private fetchData(productId: number) {
+    this.productService.getProduct(productId).pipe(
+      tap(product => {
+        product.productAttributes.sort((a, b) => a.id - b.id);
+        product.productVariants.forEach(variant => variant.variantAttributeValues.sort((a, b) => a.id - b.id))
+        this.product = product;
+        this.currentVariant = this.product.productVariants[0];
+        this.initSelectedAttributes();
+        this.initializeAttributeValuesMap();
+      }),
+      switchMap(product =>
+        forkJoin([
+          this.productImageService.getImagesForProduct(product),
+          this.feedbackService.getReviewInfoForProduct(productId)
+        ])
+      )
+    ).subscribe({
+      next: ([skuImagesMap, reviewInfo]) => {
+        this.reviewInfo = reviewInfo;
+
+        this.imagesMap = skuImagesMap;
+        this.images = [...skuImagesMap.values()].reduce((acc, val) => acc.concat(val), []);
+        const firstImage = this.imagesMap.get(this.currentVariant.sku);
+        this.currentImage = firstImage ? firstImage[0] : '';
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error("Error loading data:", error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+
+  private initSelectedAttributes() {
+    if (this.currentVariant && this.currentVariant.variantAttributeValues) {
+      this.selectedAttributes = {};
+      for (const attributeValue of this.currentVariant.variantAttributeValues) {
+        if (!this.selectedAttributes[attributeValue.attributeId]) {
+          this.selectedAttributes[attributeValue.attributeId] = attributeValue.value;
+        }
+      }
+    }
+  }
+
+
+  private initializeAttributeValuesMap() {
+    for (const variant of this.product.productVariants) {
+      for (const value of variant.variantAttributeValues) {
+        if (!this.attributeValuesMap[value.attributeId]) {
+          this.attributeValuesMap[value.attributeId] = new Set<string>();
+        }
+        this.attributeValuesMap[value.attributeId].add(value.value);
+      }
+    }
   }
 }

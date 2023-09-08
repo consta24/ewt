@@ -1,9 +1,8 @@
 import {ProductService} from "../../ewt/store-admin/product/service/product.service";
-import {forkJoin, Observable, of, switchMap} from "rxjs";
+import {forkJoin, from, mergeAll, Observable, of, switchMap, toArray} from "rxjs";
 import {Injectable} from "@angular/core";
 import {map} from "rxjs/operators";
 import {IProduct} from "../../ewt/store-admin/product/model/product.model";
-import {extractProductIdFromSku} from "./extract-productid-from-sku.function";
 
 @Injectable({
   providedIn: 'root'
@@ -20,13 +19,11 @@ export class ProductImageService {
     return forkJoin(observables).pipe(
       map(mapsArray => {
         const result = new Map<string, string[]>();
-
         for (let skuImagesMap of mapsArray) {
           for (let [sku, images] of skuImagesMap.entries()) {
             result.set(sku, images);
           }
         }
-
         return result;
       })
     );
@@ -61,24 +58,21 @@ export class ProductImageService {
   }
 
   private getProductIfNeeded(sku: string): Observable<IProduct> {
-    const productId = Number(extractProductIdFromSku(sku));
-    return this.productService.getProduct(productId);
+    return this.productService.getProductForSku(sku);
   }
 
   private fetchImagesForProductVariants(product: IProduct): Observable<void> {
-    const observables = [];
-
-    for (const variant of product.productVariants) {
+    const observables = product.productVariants.map(variant => {
       const sku = variant.sku;
 
       if (!this.imagesCache.has(sku)) {
         this.imagesCache.set(sku, []);
       }
 
-      for (const image of variant.variantImages) {
+      return variant.variantImages.map(image => {
         const ref = image.ref;
 
-        const request$ = new Observable<string>(observer => {
+        return new Observable<string>(observer => {
           this.productService.getProductVariantImageByRef(product.id, sku, ref).subscribe(blob => {
             const reader = new FileReader();
             reader.readAsDataURL(blob);
@@ -90,12 +84,10 @@ export class ProductImageService {
             };
           });
         });
+      });
+    }).reduce((acc, curr) => acc.concat(curr), []); // Flattens the array.
 
-        observables.push(request$);
-      }
-    }
-
-    return forkJoin(observables).pipe(map(() => {
+    return from(observables).pipe(mergeAll(), toArray(), map(() => {
     }));
   }
 }

@@ -3,7 +3,7 @@ import {CartDrawerService} from "../service/cart-drawer.service";
 import {forkJoin, Subscription, switchMap} from "rxjs";
 import {ICartItem} from "../model/cart-item.model";
 import {ProductService} from "../../../store-admin/product/service/product.service";
-import {ProductImageService} from "../../../../shared/product/product-image.service";
+import {ProductImageService} from "../../../../shared/image/product-image.service";
 import {IProduct} from "../../../store-admin/product/model/product.model";
 import {IProductVariant} from "../../../store-admin/product/model/product-variant.model";
 import {tap} from "rxjs/operators";

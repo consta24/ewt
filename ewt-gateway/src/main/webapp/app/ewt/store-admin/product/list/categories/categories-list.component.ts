@@ -1,7 +1,7 @@
 import {Component, OnInit} from "@angular/core";
 import {ProductService} from "../../service/product.service";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {forkJoin, switchMap} from "rxjs";
+import {forkJoin, of, switchMap} from "rxjs";
 import {map, tap} from "rxjs/operators";
 import {IProduct} from "../../model/product.model";
 import {Router} from "@angular/router";
@@ -39,20 +39,26 @@ export class CategoriesListComponent implements OnInit {
   private fetchCategories() {
     this.productService.getCategories().pipe(
       switchMap(categories => {
-        const linkedCheckObservables = categories.map(category =>
-          this.productService.isCategoryLinkedToProducts(category.id!).pipe(
-            tap(isLinked => this.linkedCategories.set(category.id!, isLinked))
-          )
-        );
+        if(categories.length) {
+          const linkedCheckObservables = categories.map(category =>
+            this.productService.isCategoryLinkedToProducts(category.id!).pipe(
+              tap(isLinked => this.linkedCategories.set(category.id!, isLinked))
+            )
+          );
 
-        return forkJoin(linkedCheckObservables).pipe(map(() => categories));
+          return forkJoin(linkedCheckObservables).pipe(map(() => categories));
+        } else {
+          return of(null);
+        }
       })
     ).subscribe(categories => {
-      categories.sort((a, b) => a.id - b.id);
-      this.expandedCategoryIdEdit = null;
-      this.expandedCategoryIdDelete = null;
-      this.linkedProducts.clear();
-      this.categories = categories;
+      if(categories) {
+        categories.sort((a, b) => a.id - b.id);
+        this.expandedCategoryIdEdit = null;
+        this.expandedCategoryIdDelete = null;
+        this.linkedProducts.clear();
+        this.categories = categories;
+      }
       this.isLoading = false;
     });
   }

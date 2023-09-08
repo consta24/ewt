@@ -1,7 +1,7 @@
 import {Component, OnInit} from "@angular/core";
 import {forkJoin, switchMap} from "rxjs";
 import {ProductService} from "../../../store-admin/product/service/product.service";
-import {ProductImageService} from "../../../../shared/product/product-image.service";
+import {ProductImageService} from "../../../../shared/image/product-image.service";
 import {IProduct} from "../../../store-admin/product/model/product.model";
 import {IProductVariant} from "../../../store-admin/product/model/product-variant.model";
 import {tap} from "rxjs/operators";

@@ -3,10 +3,10 @@
 <div *ngIf="!isLoading">
   <div class="row">
     <div class="col-md-6 col-12 m-0 p-0">
-      <div class="position-relative">
-        <img [src]="currentImage" [alt]="product.name" class="no-font-space"
-             style="height: 600px; width: 100%;">
-
+      <div class="position-relative text-center" *ngIf="currentImage">
+        <div class="square-image">
+          <img [src]="currentImage" [alt]="product.name">
+        </div>
 
         <div *ngIf="images.length > 1">
           <button class="position-absolute top-50 start-0 translate-middle-y btn btn-outline-dark"
@@ -35,7 +35,7 @@
       <div class="row">
         <h3 class="mt-2"><strong>{{product.name}}</strong></h3>
         <h5 class="text-danger">{{product.productVariants[0].price}} €</h5>
-        <div class="d-flex align-items-baseline">
+        <div class="d-flex align-items-baseline" *ngIf="reviewInfo">
           <ewt-display-star-rating [value]="reviewInfo.score" [fontSize]="'15px'"></ewt-display-star-rating>
           <p class="ms-2 no-font-space">{{reviewInfo.count}} reviews</p>
         </div>
@@ -47,7 +47,7 @@
           <div class="d-flex">
             <button *ngFor="let value of attributeValuesMap[attribute.id]"
                     class="btn btn-lg btn-outline-dark me-2 shadow"
-                    [class.active]="isSelectedAttributeValue(attribute.id, value)"
+                    [class.active]="selectedAttributes[attribute.id] === value"
                     (click)="selectAttributeValue(attribute.id, value)">
               {{value}}
             </button>

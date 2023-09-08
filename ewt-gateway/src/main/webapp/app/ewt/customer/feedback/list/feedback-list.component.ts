@@ -7,6 +7,8 @@ import {IFeedbackReview} from "../model/feedback-review.model";
 import {FeedbackReviewImageService} from "../../../../shared/image/feedback-review-image.service";
 import dayjs from "dayjs/esm";
 import {IFeedbackReviewInfo} from "../model/feedback-review-info.model";
+import {defaultIfEmpty, forkJoin, of, switchMap} from "rxjs";
+import {tap} from "rxjs/operators";
 
 @Component({
   selector: 'ewt-customer-feedback-list',
@@ -24,7 +26,7 @@ export class FeedbackListComponent implements OnInit {
   isReviewsExpanded = true;
   isQuestionsExpanded = false;
 
-  reviewsPerPage = 2;
+  reviewsPerPage = 5;
   currentPage = 1;
   totalReviews = 0;
 
@@ -32,60 +34,67 @@ export class FeedbackListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.fetchReviewInfo();
-    this.fetchReviews();
+    this.fetchReviewsData();
   }
 
-  fetchReviewInfo() {
-    this.feedbackService.getReviewInfoForProduct(this.productId).subscribe({
-      next: (reviewInfo) => {
-        this.reviewInfo = reviewInfo;
-        console.log(reviewInfo);
-      },
-      error: () => {
-        //TODO:
-      }
-    })
-  }
-
-  fetchReviews() {
+  fetchReviewsData() {
     const pageable = {
       page: this.currentPage - 1,
       size: this.reviewsPerPage,
       sort: ["creation_date,desc"]
     }
-    this.feedbackService.getReviewsPageForProduct(this.productId, pageable).subscribe({
-      next: (res) => {
-        if (res.body) {
-          this.reviews = res.body.map(review => ({
+
+    forkJoin({
+      reviewInfo: this.feedbackService.getReviewInfoForProduct(this.productId).pipe(
+        defaultIfEmpty(null)
+      ),
+      reviewsPage: this.feedbackService.getReviewsPageForProduct(this.productId, pageable)
+    }).pipe(
+      tap((results) => {
+        if (results.reviewInfo) {
+          this.reviewInfo = results.reviewInfo;
+        }
+        if (results.reviewsPage.body) {
+          this.reviews = results.reviewsPage.body.map(review => ({
             ...review,
             creationDate: dayjs(review.creationDate)
           }));
-          this.totalReviews = Number(res.headers.get('X-Total-Count'))
-          this.fetchReviewsImages();
+          this.totalReviews = Number(results.reviewsPage.headers.get('X-Total-Count'));
         } else {
           //TODO:
         }
+      }),
+      switchMap(() => {
+        if (this.reviews && this.reviews.length > 0) {
+          return this.feedbackReviewImageService.getImagesForReviews(this.reviews);
+        } else {
+          return of(null);
+        }
+      })
+    ).subscribe({
+      next: (imagesMap) => {
+        if (imagesMap) {
+          this.imagesMap = imagesMap;
+        }
+        this.isLoading = false;
       },
       error: () => {
         //TODO:
       }
-    })
+    });
   }
+
 
   openReviewModal() {
     const modalRef = this.modalService.open(FeedbackReviewModalComponent, {centered: true});
     modalRef.componentInstance.productId = this.productId;
-    modalRef.closed.subscribe(() => {
-      this.fetchReviewInfo();
-      this.fetchReviews()
-    })
+    modalRef.closed.subscribe(() => this.fetchReviewsData());
   }
 
   openQuestionModal() {
     const modalRef = this.modalService.open(FeedbackQuestionModalComponent, {centered: true});
     modalRef.componentInstance.productId = this.productId;
-    modalRef.closed.subscribe(() => this.fetchReviews())
+    modalRef.closed.subscribe(() => this.fetchReviewsData());
   }
 
   toggleReviews() {
@@ -104,17 +113,5 @@ export class FeedbackListComponent implements OnInit {
 
   getImagesForReview(reviewId: number) {
     return this.imagesMap.get(reviewId);
-  }
-
-  private fetchReviewsImages() {
-    this.feedbackReviewImageService.getImagesForReviews(this.reviews).subscribe({
-      next: (imagesMap) => {
-        this.imagesMap = imagesMap;
-        this.isLoading = false;
-      },
-      error: () => {
-        //TODO:
-      }
-    })
   }
 }

@@ -3,21 +3,25 @@
 <div *ngIf="!isLoading">
   <div class="p-1">
     <div *ngIf="!products.length" class="text-center my-3">
-      <hr class="hr-legal"/>
+      <div class="row">
+        <hr class="hr-legal"/>
+      </div>
       <strong>There are no products available.</strong>
-      <hr class="hr-legal"/>
+      <div class="row mt-2">
+        <hr class="hr-legal"/>
+      </div>
     </div>
 
     <div class="row my-3" *ngIf="products.length">
-      <div class="col-md-3 col-6 mb-4" *ngFor="let product of products">
+      <div class="col-md-3 col-12 mb-4" *ngFor="let product of products">
         <div class="card h-100 hover-product shadow">
+          <div class="square-image cursor-pointer">
             <img [src]="getFirstImage(product.productVariants[0].sku)"
                  [alt]="product.name"
-                 class="cursor-pointer fade-transition"
-                 style="width: 100%; height: 200px"
                  (click)="goToView(product.id)"
                  (mouseover)="onHover(product)"
                  (mouseout)="onMouseLeave()">
+          </div>
           <div class="p-2">
             <div>
               <h4 class="card-title mt-2 cursor-pointer" (click)="goToView(product.id)">{{product.name}}</h4>
@@ -37,23 +41,19 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="d-flex flex-column align-items-center justify-content-center mt-3">
-      <div>
-        <jhi-item-count
-          [params]="{ page: currentPage, totalItems: totalProducts, itemsPerPage: productsPerPage }"></jhi-item-count>
-      </div>
-      <div>
-        <ngb-pagination
-          [collectionSize]="totalProducts"
-          [(page)]="currentPage"
-          [pageSize]="productsPerPage"
-          [maxSize]="5"
-          [rotate]="true"
-          [boundaryLinks]="true"
-          (pageChange)="fetchProducts()"
-        ></ngb-pagination>
+      <div class="d-flex flex-column align-items-center justify-content-center mt-3">
+        <div>
+          <ngb-pagination
+            [collectionSize]="totalProducts"
+            [(page)]="currentPage"
+            [pageSize]="productsPerPage"
+            [maxSize]="5"
+            [rotate]="true"
+            [boundaryLinks]="true"
+            (pageChange)="fetchProducts()"
+          ></ngb-pagination>
+        </div>
       </div>
     </div>
   </div>

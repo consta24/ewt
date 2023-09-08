@@ -27,6 +27,10 @@ export class ProductService {
     return this.httpClient.get<IProduct>(`${this.productUrl}/${productId}`);
   }
 
+  public getProductForSku(sku: string) {
+    return this.httpClient.get<IProduct>(`${this.productUrl}/sku/${sku}`);
+  }
+
   public getProductsPage(pageable: any) {
     let options = createRequestOption(pageable);
     return this.httpClient.get<IProduct[]>(`${this.productUrl}`, {params: options, observe: "response"});

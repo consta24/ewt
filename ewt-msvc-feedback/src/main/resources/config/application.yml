@@ -147,6 +147,8 @@ server:
     session:
       cookie:
         http-only: true
+  tomcat:
+    max-http-form-post-size: 10MB
 
 springdoc:
   show-actuator: true
@@ -193,3 +195,4 @@ minio:
   accessKey: minio-admin
   secretKey: minio-admin
   bucketName: ewt-feedback
+

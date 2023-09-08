@@ -7,6 +7,6 @@ export const homeRoute: Route = {
   component: HomeComponent,
   data: {
     authorities: [],
-    pageTitle: 'Home Page Title',
+    fullPage: true,
   },
 };

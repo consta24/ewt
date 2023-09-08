@@ -2,9 +2,10 @@ import {Component, OnInit} from "@angular/core";
 import {Router} from "@angular/router";
 import {IProduct} from "../../../store-admin/product/model/product.model";
 import {ProductService} from "../../../store-admin/product/service/product.service";
-import {ProductImageService} from "../../../../shared/product/product-image.service";
+import {ProductImageService} from "../../../../shared/image/product-image.service";
 import {CartDrawerService} from "../../cart/service/cart-drawer.service";
 import {CartService} from "../../cart/service/cart.service";
+import {of, switchMap} from "rxjs";
 
 
 @Component({
@@ -42,23 +43,30 @@ export class ProductListComponent implements OnInit {
       size: this.productsPerPage,
       sort: ["id,desc"]
     }
-    this.productService.getProductsPage(pageable).subscribe(res => {
-      if (res.body) {
-        this.products = res.body;
-        this.totalProducts = Number(res.headers.get('X-Total-Count'))
-        this.mapSkuToImages();
-      } else {
+    this.productService.getProductsPage(pageable).pipe(
+      switchMap(res => {
+        if (res.body && res.body.length) {
+          this.products = res.body;
+          this.totalProducts = Number(res.headers.get('X-Total-Count'));
+          return this.productImageService.getImagesForProducts(res.body);
+        } else {
+          return of(null);
+        }
+      })
+    ).subscribe({
+      next: imagesToSkuMap => {
+        if (imagesToSkuMap) {
+          this.skuImagesMap = imagesToSkuMap;
+          this.isLoading = false;
+        } else {
+          this.isLoading = false;
+        }
+      }, error: () => {
         //TODO:
       }
-    })
-  }
-
-  private mapSkuToImages(): void {
-    this.productImageService.getImagesForProducts(this.products).subscribe(skuImagesMap => {
-      this.skuImagesMap = skuImagesMap;
-      this.isLoading = false;
     });
   }
+
 
   getFirstImage(sku: string): string {
     if (this.hoveredProductSku === sku) {

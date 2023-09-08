@@ -44,6 +44,10 @@ public class ProductService {
         return productRepository.count();
     }
 
+    public Mono<ProductDTO> getProductForSku(String sku) {
+        return productVariantService.getProductVariant(sku).flatMap(variant -> getProduct(variant.getProductId()));
+    }
+
     public Mono<ProductDTO> getProduct(Long productId) {
         return productRepository.findById(productId)
                 .flatMap(this::populateProductDTOWithAssociations);

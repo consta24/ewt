@@ -184,13 +184,13 @@ jhipster:
     contact-email:
     license: unlicensed
     license-url:
-  security:
 
 # ===================================================================
 # Application specific properties
 # ===================================================================
 
 minio:
+  enabled: true
   endpoint: http://localhost:9000
   accessKey: minio-admin
   secretKey: minio-admin

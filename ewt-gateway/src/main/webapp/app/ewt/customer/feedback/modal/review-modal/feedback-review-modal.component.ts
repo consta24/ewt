@@ -1,21 +1,24 @@
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {Component, ElementRef, OnInit, ViewChild} from "@angular/core";
-import {FormArray, FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {FeedbackService} from "../../service/feedback.service";
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {FeedbackReviewService} from "../../service/feedback-review.service";
 
 @Component({
   selector: 'ewt-customer-feedback-review-modal',
   templateUrl: 'feedback-review-modal.component.html',
   styleUrls: ['feedback-review-modal.component.scss']
 })
-export class FeedbackReviewModalComponent implements OnInit {
+export class FeedbackReviewModalComponent implements OnInit, OnDestroy {
   @ViewChild('imageInput') imageInput!: ElementRef<HTMLInputElement>;
 
   productId!: number;
-  images: string[] = [];
+
   reviewForm!: FormGroup;
 
-  constructor(private activeModal: NgbActiveModal, private fb: FormBuilder, private feedbackService: FeedbackService) {
+  images: File[] = [];
+  imagesPreviews: string[] = [];
+
+  constructor(private activeModal: NgbActiveModal, private fb: FormBuilder, private feedbackService: FeedbackReviewService) {
   }
 
   ngOnInit() {
@@ -23,6 +26,10 @@ export class FeedbackReviewModalComponent implements OnInit {
       this.dismissModal();
     }
     this.initForm();
+  }
+
+  ngOnDestroy() {
+    this.imagesPreviews.forEach(url => URL.revokeObjectURL(url));
   }
 
   dismissModal() {
@@ -34,22 +41,13 @@ export class FeedbackReviewModalComponent implements OnInit {
   }
 
   submitReview() {
-    this.attachImagesToForm();
-    this.feedbackService.saveReview(this.reviewForm.value).subscribe({
+    this.feedbackService.saveReview(this.reviewForm.value, this.images).subscribe({
       next: () => {
         this.closeModal();
       },
       error: () => {
         this.dismissModal();
       }
-    })
-  }
-
-  attachImagesToForm() {
-    this.images.forEach(image => {
-      (this.reviewForm.get('reviewImages') as FormArray).push(this.fb.group({
-        ref: image
-      }))
     })
   }
 
@@ -65,36 +63,28 @@ export class FeedbackReviewModalComponent implements OnInit {
     event.preventDefault();
     const files = event.dataTransfer?.files;
     if (files) {
-      this.previewFiles(files);
+      this.images.push(...Array.from(files));
+
+      const newImagePreviews = Array.from(files).map(file => URL.createObjectURL(file));
+      this.imagesPreviews.push(...newImagePreviews);
     }
   }
 
   onImagesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files) {
-      this.previewFiles(input.files);
+      this.images.push(...Array.from(input.files));
+
+      const newImagePreviews = Array.from(input.files).map(file => URL.createObjectURL(file));
+      this.imagesPreviews.push(...newImagePreviews);
     }
   }
 
-  removeImage(imageIndex: number) {
-    this.images.splice(imageIndex, 1);
-  }
+  removeImage(index: number) {
+    this.images.splice(index, 1);
 
-
-  previewFiles(files: FileList) {
-    for (let i = 0; i < files.length; i++) {
-      const file = files.item(i);
-      if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (event: ProgressEvent<FileReader>) => {
-          const src = event.target?.result as string;
-          if (!this.images.includes(src)) {
-            this.images.push(event.target?.result as string);
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    }
+    URL.revokeObjectURL(this.imagesPreviews[index]);
+    this.imagesPreviews.splice(index, 1);
   }
 
   private initForm() {
@@ -107,7 +97,6 @@ export class FeedbackReviewModalComponent implements OnInit {
       score: [5],
       review: [null, Validators.required],
       isVerified: [false],
-      reviewImages: this.fb.array([])
     });
   }
 

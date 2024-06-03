@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="order_table" author="ewt">
+        <createTable tableName="order">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="guest_uuid" type="UUID">
+                <constraints unique="true"/>
+            </column>
+            <column name="is_guest" type="BOOLEAN" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_method" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="receive_sms" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="additional_address" type="VARCHAR(1000)"/>
+            <column name="postal_code" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="order_item">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sku" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="order_item" baseColumnNames="order_id"
+                                 constraintName="fk_order_item_order"
+                                 referencedTableName="order" referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>
+

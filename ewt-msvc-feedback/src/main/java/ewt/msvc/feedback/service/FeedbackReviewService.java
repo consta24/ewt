@@ -10,8 +10,11 @@ import ewt.msvc.feedback.service.dto.FeedbackReviewInfoDTO;
 import ewt.msvc.feedback.service.mapper.FeedbackReviewMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -19,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -51,8 +55,7 @@ public class FeedbackReviewService {
                 });
     }
 
-
-    public Mono<Void> saveReview(FeedbackReviewDTO feedbackReviewDTO) {
+    public Mono<Void> saveReview(FeedbackReviewDTO feedbackReviewDTO, Flux<FilePart> images) {
         feedbackReviewDTO.setFirstName(StringUtil.toTitleCase(feedbackReviewDTO.getFirstName()));
         feedbackReviewDTO.setLastName(StringUtil.toTitleCase(feedbackReviewDTO.getLastName()));
         feedbackReviewDTO.setCreationDate(LocalDate.now());
@@ -60,7 +63,7 @@ public class FeedbackReviewService {
                 .flatMap(savedFeedbackReview -> feedbackReviewImageService.saveFeedbackReviewImages(
                                 savedFeedbackReview.getProductId(),
                                 savedFeedbackReview.getId(),
-                                feedbackReviewDTO.getReviewImages())
+                                images)
                         .thenReturn(savedFeedbackReview))
                 .then();
     }

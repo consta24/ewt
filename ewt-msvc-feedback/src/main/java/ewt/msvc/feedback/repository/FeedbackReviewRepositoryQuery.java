@@ -16,7 +16,7 @@ public class FeedbackReviewRepositoryQuery {
     private final R2dbcEntityTemplate entityTemplate;
 
     public Flux<FeedbackReview> findAllByProductId(Long productId, Pageable pageable) {
-        String baseQuery = "SELECT * FROM ewt_feedback.ewt_feedback.feedback_review WHERE product_id = $3";
+        String baseQuery = "SELECT * FROM ewt.ewt_feedback.feedback_review WHERE product_id = $3";
 
         StringBuilder queryBuilder = new StringBuilder(baseQuery);
 

@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -12,9 +13,10 @@ import java.time.Instant;
  * Base abstract class for entities which will hold definitions for created, last modified, created by,
  * last modified by attributes.
  */
-@JsonIgnoreProperties(value = { "createdBy", "createdDate", "lastModifiedBy", "lastModifiedDate" }, allowGetters = true)
+@JsonIgnoreProperties(value = {"createdBy", "createdDate", "lastModifiedBy", "lastModifiedDate"}, allowGetters = true)
 public abstract class AbstractAuditingEntity<T> implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public abstract T getId();

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -17,7 +18,7 @@ public class CartCleanupService {
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void removeExpiredCarts() {
-        LocalDateTime threshold = LocalDateTime.now().minusDays(30);
+        LocalDate threshold = LocalDate.now().minusDays(30);
 
         cartRepository.findByLastModifiedDateBefore(threshold)
                 .flatMap(cart ->

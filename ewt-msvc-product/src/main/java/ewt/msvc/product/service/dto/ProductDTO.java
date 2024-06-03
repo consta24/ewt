@@ -1,5 +1,6 @@
 package ewt.msvc.product.service.dto;
 
+import ewt.msvc.product.service.http.dto.FeedbackReviewInfoDTO;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,8 @@ public class ProductDTO implements Serializable {
 
     @Size(max = 1000)
     private String description;
+
+    private FeedbackReviewInfoDTO feedbackReviewInfo;
 
     private Set<ProductVariantDTO> productVariants;
 

@@ -1,5 +1,4 @@
 <ewt-loading [isLoading]="isLoading"></ewt-loading>
-
 <div *ngIf="!isLoading">
   <div class="p-1">
     <div *ngIf="!products.length" class="text-center my-3">
@@ -16,12 +15,27 @@
       <div class="col-md-3 col-12 mb-4" *ngFor="let product of products">
         <div class="card h-100 hover-product shadow">
           <div class="square-image cursor-pointer">
-            <img [src]="getFirstImage(product.productVariants[0].sku)"
-                 [alt]="product.name"
-                 (click)="goToView(product.id)"
-                 (mouseover)="onHover(product)"
-                 (mouseout)="onMouseLeave()">
+            <img
+              [ngStyle]="hoveredProductId === product.id ? {'opacity': '0'} : {'opacity': '1'}"
+              width="1512"
+              height="1512"
+              [ngSrc]="getDefaultImageRef(product)"
+              [alt]="product.name"
+              (click)="goToView(product.id)"
+              (mouseover)="hoveredProductId = product.id"
+              (mouseout)="onMouseLeave()">
+
+            <img
+              [ngStyle]="hoveredProductId === product.id ? {'opacity': '1'} : {'opacity': '0'}"
+              width="1000"
+              height="1000"
+              [ngSrc]="getHoverImageRef(product)"
+              [alt]="product.name"
+              (click)="goToView(product.id)"
+              (mouseover)="hoveredProductId = product.id"
+              (mouseout)="onMouseLeave()">
           </div>
+
           <div class="p-2">
             <div>
               <h4 class="card-title mt-2 cursor-pointer" (click)="goToView(product.id)">{{product.name}}</h4>

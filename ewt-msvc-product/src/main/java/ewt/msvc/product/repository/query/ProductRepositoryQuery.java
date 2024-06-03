@@ -14,7 +14,7 @@ public class ProductRepositoryQuery {
     private final R2dbcEntityTemplate entityTemplate;
 
     public Flux<Product> findAllBy(Pageable pageable) {
-        String baseQuery = "SELECT * FROM ewt_product.ewt_product.product";
+        String baseQuery = "SELECT * FROM ewt.ewt_product.product";
 
         StringBuilder queryBuilder = new StringBuilder(baseQuery);
 

@@ -1,19 +1,23 @@
-import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {Component, OnInit} from "@angular/core";
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FeedbackQuestionService } from '../../service/feedback-question.service';
 
 @Component({
   selector: 'ewt-customer-feedback-question-modal',
   templateUrl: 'feedback-question-modal.component.html',
 })
 export class FeedbackQuestionModalComponent implements OnInit {
+  productId!: number;
 
   questionForm!: FormGroup;
 
-  constructor(private activeModal: NgbActiveModal, private fb: FormBuilder) {
-  }
+  constructor(private activeModal: NgbActiveModal, private fb: FormBuilder, private feedbackQuestionService: FeedbackQuestionService) {}
 
   ngOnInit() {
+    if (!this.productId) {
+      this.dismissModal();
+    }
     this.initForm();
   }
 
@@ -24,16 +28,26 @@ export class FeedbackQuestionModalComponent implements OnInit {
       firstName: [null, Validators.required],
       lastName: [null, Validators.required],
       email: [null, [Validators.required, Validators.email]],
+      productId: [this.productId],
     });
   }
 
-  closeModal() {
+  dismissModal() {
     this.activeModal.dismiss();
   }
 
-  submitQuestion() {
-    console.log(this.questionForm.value);
+  closeModal() {
+    this.activeModal.close();
+  }
 
-    //this.closeModal();
+  submitQuestion() {
+    this.feedbackQuestionService.saveQuestion(this.questionForm.value).subscribe({
+      next: () => {
+        this.closeModal();
+      },
+      error: () => {
+        this.dismissModal();
+      },
+    });
   }
 }

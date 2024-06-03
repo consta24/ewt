@@ -82,19 +82,19 @@ public class LocaleConfiguration {
             TimeZone timeZone = null;
             if (localeContext != null) {
                 locale = localeContext.getLocale();
-                if (localeContext instanceof TimeZoneAwareLocaleContext) {
-                    timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+                if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAwareLocaleContext) {
+                    timeZone = timeZoneAwareLocaleContext.getTimeZone();
                 }
                 addCookie(
-                    exchange.getResponse(),
-                    QUOTE + (locale != null ? locale.toString() : "-") + (timeZone != null ? ' ' + timeZone.getID() : "") + QUOTE
+                        exchange.getResponse(),
+                        QUOTE + (locale != null ? locale.toString() : "-") + (timeZone != null ? ' ' + timeZone.getID() : "") + QUOTE
                 );
             } else {
                 removeCookie(exchange.getResponse());
             }
             exchange
-                .getAttributes()
-                .put(LOCALE_REQUEST_ATTRIBUTE_NAME, (locale != null ? locale : LocaleContextHolder.getLocale(exchange.getLocaleContext())));
+                    .getAttributes()
+                    .put(LOCALE_REQUEST_ATTRIBUTE_NAME, (locale != null ? locale : LocaleContextHolder.getLocale(exchange.getLocaleContext())));
             if (timeZone != null) {
                 exchange.getAttributes().put(TIME_ZONE_REQUEST_ATTRIBUTE_NAME, timeZone);
             } else {
@@ -145,12 +145,12 @@ public class LocaleConfiguration {
                     }
                     if (logger.isTraceEnabled()) {
                         logger.trace(
-                            "Parsed cookie value [" +
-                            cookie.getValue() +
-                            "] into locale '" +
-                            locale +
-                            "'" +
-                            (timeZone != null ? " and time zone '" + timeZone.getID() + "'" : "")
+                                "Parsed cookie value [" +
+                                        cookie.getValue() +
+                                        "] into locale '" +
+                                        locale +
+                                        "'" +
+                                        (timeZone != null ? " and time zone '" + timeZone.getID() + "'" : "")
                         );
                     }
                 }

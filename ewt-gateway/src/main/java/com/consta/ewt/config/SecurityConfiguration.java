@@ -55,7 +55,7 @@ public class SecurityConfiguration {
                 )
             )
             .cors(withDefaults())
-            .csrf(csrf -> csrf.disable())
+            .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .addFilterAfter(new SpaWebFilter(), SecurityWebFiltersOrder.HTTPS_REDIRECT)
             .headers(headers ->
                 headers
@@ -81,10 +81,10 @@ public class SecurityConfiguration {
                     .pathMatchers("/api/account/reset-password/init").permitAll()
                     .pathMatchers("/api/account/reset-password/finish").permitAll()
                     .pathMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                    .pathMatchers("/api/**").authenticated()
+                    .pathMatchers("/api/**").permitAll() //authenticated()
                     .pathMatchers("/services/*/management/health/readiness").permitAll()
                     .pathMatchers("/services/*/v3/api-docs").hasAuthority(AuthoritiesConstants.ADMIN)
-                    .pathMatchers("/services/**").authenticated()
+                    .pathMatchers("/services/**").permitAll() //authenticated()
                     .pathMatchers("/v3/api-docs/**").permitAll() //
                     .pathMatchers("/management/health").permitAll()
                     .pathMatchers("/management/health/**").permitAll()
@@ -92,8 +92,8 @@ public class SecurityConfiguration {
                     .pathMatchers("/management/prometheus").permitAll()
                     .pathMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
             )
-            .httpBasic(basic -> basic.disable())
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt());
+            .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+            .oauth2ResourceServer(ServerHttpSecurity.OAuth2ResourceServerSpec::jwt);
         return http.build();
     }
 }

@@ -48,12 +48,11 @@ public class SecurityConfiguration {
                     )
             )
             .requestCache(cache -> cache.requestCache(NoOpServerRequestCache.getInstance()))
-            .authorizeExchange(authz ->
-                // prettier-ignore
-                authz
+            .authorizeExchange(auth ->
+                auth
                     .pathMatchers("/api/authenticate").permitAll()
                     .pathMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
-                    .pathMatchers("/api/**").authenticated()
+                    .pathMatchers("/api/**").permitAll() //
                     .pathMatchers("/v3/api-docs/**").permitAll()
                     .pathMatchers("/management/health").permitAll()
                     .pathMatchers("/management/health/**").permitAll()

@@ -11,7 +11,7 @@ import ewt.msvc.product.service.dto.ProductVariantImageDTO;
 import ewt.msvc.product.service.mapper.ProductVariantMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.reactive.TransactionalOperator;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,9 +21,8 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProductVariantService {
-
-    private final TransactionalOperator transactionalOperator;
 
     private final ProductVariantMapper productVariantMapper;
 
@@ -81,8 +80,7 @@ public class ProductVariantService {
                     savedProductVariantDTO.setVariantAttributeValues(new HashSet<>(productVariantDTO.getVariantAttributeValues()));
                     savedProductVariantDTO.setVariantImages(new HashSet<>(productVariantDTO.getVariantImages()));
                     return savedProductVariantDTO;
-                })
-                .as(transactionalOperator::transactional);
+                });
     }
 
     public Mono<Void> deleteProductVariant(String sku) {
@@ -140,8 +138,7 @@ public class ProductVariantService {
                     updatedProductVariantDTO.setVariantAttributeValues(new HashSet<>(productVariantDTO.getVariantAttributeValues()));
                     updatedProductVariantDTO.setVariantImages(new HashSet<>(productVariantDTO.getVariantImages()));
                     return updatedProductVariantDTO;
-                })
-                .as(transactionalOperator::transactional);
+                });
     }
 
 

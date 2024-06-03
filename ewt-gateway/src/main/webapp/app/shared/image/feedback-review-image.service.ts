@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {FeedbackService} from "../../ewt/customer/feedback/service/feedback.service";
+import {FeedbackReviewService} from "../../ewt/customer/feedback/service/feedback-review.service";
 import {IFeedbackReview} from "../../ewt/customer/feedback/model/feedback-review.model";
 import {forkJoin, from, Observable, of, reduce, take} from "rxjs";
 import {catchError, map, mergeMap, switchMap, tap} from "rxjs/operators";
@@ -10,7 +10,7 @@ import {catchError, map, mergeMap, switchMap, tap} from "rxjs/operators";
 export class FeedbackReviewImageService {
   private imagesCache = new Map<number, string[]>();
 
-  constructor(private feedbackService: FeedbackService) {}
+  constructor(private feedbackService: FeedbackReviewService) {}
 
   public getImagesForReviews(reviews: IFeedbackReview[]): Observable<Map<number, string[]>> {
     return forkJoin(reviews.map(review => this.getImagesForReview(review))).pipe(

@@ -32,7 +32,6 @@
                 <constraints nullable="false" foreignKeyName="fk_product_variant_product" referencedTableName="product"
                              referencedColumnNames="id"/>
             </column>
-            <!-- ... Other SKU related columns (like stock, price) -->
             <column name="price" type="decimal(10,2)">
                 <constraints nullable="false"/>
             </column>

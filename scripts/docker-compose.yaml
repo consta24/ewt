@@ -1,10 +1,10 @@
 version: '3'
-name: 'ewt'
+name: 'ewt-licenta'
 
 volumes:
   ewt-postgres_data:
-      driver: local
-  ewt-minio_data: {}
+    driver: local
+  ewt-minio_data: { }
 
 services:
   ewt-postgres:
@@ -16,62 +16,85 @@ services:
       POSTGRES_USER: ewt
       POSTGRES_PASSWORD: ewt
     ports:
-      - 5432:5432
+      - "5432:5432"
+  ewt-keycloak:
+    image: quay.io/keycloak/keycloak
+    platform: linux/amd64
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: ewt-postgres
+      DB_DATABASE: ewt
+      DB_USER: ewt
+      DB_SCHEMA: ewt_keycloak
+      DB_PASSWORD: ewt
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_DATABASE: postgres
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
+      #JDBC_PARAMS: "ssl=true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ewt-postgres
+    command:
+      - start-dev
   ewt-minio:
     image: minio/minio
     volumes:
       - ewt-minio_data:/data
     ports:
-      - 9000:9000
-      - 9001:9001
-    environment: 
+      - "9000:9000"
+      - "9001:9001"
+    environment:
       MINIO_ROOT_USER: minio-admin
       MINIO_ROOT_PASSWORD: minio-admin
     command: server --console-address ":9001" /data
 
-  jhipster-registry:
-    image: jhipster/jhipster-registry:v7.4.0
-    volumes:
-      - ./central-server-config:/central-config
-    # When run with the "dev" Spring profile, the JHipster Registry will
-    # read the config from the local filesystem (central-server-config directory)
-    # When run with the "prod" Spring profile, it will read the configuration from a Git repository
-    # See https://www.jhipster.tech/jhipster-registry/#spring-cloud-config
-    environment:
-      - _JAVA_OPTIONS=-Xmx512m -Xms256m
-      - SPRING_PROFILES_ACTIVE=dev,api-docs
-      - SPRING_SECURITY_USER_PASSWORD=admin
-      - JHIPSTER_REGISTRY_PASSWORD=admin
-      - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_TYPE=native
-      - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_SEARCH_LOCATIONS=file:./central-config/localhost-config/
-      # - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_TYPE=git
-      # - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_URI=https://github.com/jhipster/jhipster-registry/
-      # - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_SEARCH_PATHS=central-config
-    # If you want to expose these ports outside your dev PC,
-    # remove the "127.0.0.1:" prefix
-    ports:
-      - 127.0.0.1:8761:8761
-    healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:8761/management/health' ]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-  jhipster-control-center:
-    image: 'jhipster/jhipster-control-center:v0.5.0'
-    command:
-      - /bin/sh
-      - -c
-      # Patch /etc/hosts to support resolving host.docker.internal to the internal IP address used by the host in all OSes
-      - echo "`ip route | grep default | cut -d ' ' -f3` host.docker.internal" | tee -a /etc/hosts > /dev/null && java -jar /jhipster-control-center.jar
-    environment:
-      - _JAVA_OPTIONS=-Xmx512m -Xms256m
-      - SPRING_PROFILES_ACTIVE=prod,api-docs,none
-      - SPRING_SECURITY_USER_PASSWORD=admin
-      # The token should have the same value than the one declared in you Spring configuration under the jhipster.security.authentication.jwt.base64-secret configuration's entry
-      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=MzEzN2Y5ZDRiODQwNTgwMGMwOTk3NTZkNzUxMTQyY2FjN2UyOWEwNDY0Mjc5Zjc1ODJlODU3NGRhZDQ2NWI5ZjY2MTk1NTA0OGUwNTJhZjU2NzM0NGQ4YjgzYjU4YWNhNzU5NTdmMTU1OWI3MTcwOTcwNzYxYTg2ZmVmMjA2MjM=
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://admin:admin@host.docker.internal:8761/eureka/
-      - LOGGING_FILE_NAME=/tmp/jhipster-control-center.log
-    # If you want to expose these ports outside your dev PC,
-    # remove the "127.0.0.1:" prefix
-    ports:
-      - 127.0.0.1:7419:7419
+#  jhipster-registry:
+#    image: jhipster/jhipster-registry:v7.4.0
+#    volumes:
+#      - ./central-server-config:/central-config
+#    # When run with the "dev" Spring profile, the JHipster Registry will
+#    # read the config from the local filesystem (central-server-config directory)
+#    # When run with the "prod" Spring profile, it will read the configuration from a Git repository
+#    # See https://www.jhipster.tech/jhipster-registry/#spring-cloud-config
+#    environment:
+#      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+#      - SPRING_PROFILES_ACTIVE=dev,api-docs
+#      - SPRING_SECURITY_USER_PASSWORD=admin
+#      - JHIPSTER_REGISTRY_PASSWORD=admin
+#      - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_TYPE=native
+#      - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_SEARCH_LOCATIONS=file:./central-config/localhost-config/
+#      # - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_TYPE=git
+#      # - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_URI=https://github.com/jhipster/jhipster-registry/
+#      # - SPRING_CLOUD_CONFIG_SERVER_COMPOSITE_0_SEARCH_PATHS=central-config
+#    # If you want to expose these ports outside your dev PC,
+#    # remove the "127.0.0.1:" prefix
+#    ports:
+#      - "127.0.0.1:8761:8761"
+#    healthcheck:
+#      test: [ 'CMD', 'curl', '-f', 'http://localhost:8761/management/health' ]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 20
+#  jhipster-control-center:
+#    image: 'jhipster/jhipster-control-center:v0.5.0'
+#    command:
+#      - /bin/sh
+#      - -c
+#      # Patch /etc/hosts to support resolving host.docker.internal to the internal IP address used by the host in all OSes
+#      - echo "`ip route | grep default | cut -d ' ' -f3` host.docker.internal" | tee -a /etc/hosts > /dev/null && java -jar /jhipster-control-center.jar
+#    environment:
+#      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+#      - SPRING_PROFILES_ACTIVE=prod,api-docs,none
+#      - SPRING_SECURITY_USER_PASSWORD=admin
+#      # The token should have the same value than the one declared in you Spring configuration under the jhipster.security.authentication.jwt.base64-secret configuration's entry
+#      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET=MzEzN2Y5ZDRiODQwNTgwMGMwOTk3NTZkNzUxMTQyY2FjN2UyOWEwNDY0Mjc5Zjc1ODJlODU3NGRhZDQ2NWI5ZjY2MTk1NTA0OGUwNTJhZjU2NzM0NGQ4YjgzYjU4YWNhNzU5NTdmMTU1OWI3MTcwOTcwNzYxYTg2ZmVmMjA2MjM=
+#      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://admin:admin@host.docker.internal:8761/eureka/
+#      - LOGGING_FILE_NAME=/tmp/jhipster-control-center.log
+#    # If you want to expose these ports outside your dev PC,
+#    # remove the "127.0.0.1:" prefix
+#    ports:
+#      - "127.0.0.1:7419:7419"

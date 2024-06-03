@@ -3,6 +3,11 @@
 # ===================================================================
 ---
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ewt
+    username: ewt
+    password: ewt
+    driver-class-name: org.postgresql.Driver
   config:
     activate:
       on-profile: '!api-docs'
@@ -192,9 +197,13 @@ jhipster:
 # Application specific properties
 # ===================================================================
 
-
 minio:
   endpoint: http://localhost:9000
   accessKey: minio-admin
   secretKey: minio-admin
   bucketName: ewt-product
+
+gateway:
+  url: http://localhost:9002
+
+

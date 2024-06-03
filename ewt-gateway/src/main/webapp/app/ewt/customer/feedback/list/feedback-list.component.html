@@ -3,16 +3,18 @@
     <hr/>
 
     <div class="d-flex flex-column align-items-center" *ngIf="reviewInfo">
-      <h2 class="no-font-space"><strong>{{reviewInfo.score}}</strong></h2>
+      <h2 class="no-font-space">
+        <strong>{{ reviewInfo.score }}</strong>
+      </h2>
       <ewt-display-star-rating [value]="reviewInfo.score"></ewt-display-star-rating>
-      <p class="no-font-space">{{reviewInfo.count}} reviews</p>
+      <p class="no-font-space">{{ reviewInfo.count }} reviews</p>
     </div>
     <div class="d-flex flex-column align-items-center" *ngIf="!reviewInfo">
       <ewt-display-star-rating [value]="0"></ewt-display-star-rating>
       <p class="no-font-space">No reviews yet</p>
     </div>
 
-    <div class="d-flex justify-content-center my-4">
+    <div class="d-flex justify-content-center my-4" *ngIf="isLoggedIn">
       <button class="btn btn-sm btn-outline-dark me-2" (click)="openReviewModal()">
         <fa-icon icon="pencil" [fixedWidth]="true"></fa-icon>
         Write A Review
@@ -27,16 +29,20 @@
   <div class="row">
     <div class="d-flex">
       <h6 class="me-2" (click)="toggleReviews()">
-        <a style="text-decoration: none;"
-           [class.text-muted]="!isReviewsExpanded"
-           [ngStyle]="isReviewsExpanded ? {'border-bottom': '2px solid currentColor'} : {}">
+        <a
+          style="text-decoration: none"
+          [class.text-muted]="!isReviewsExpanded"
+          [ngStyle]="isReviewsExpanded ? { 'border-bottom': '2px solid currentColor' } : {}"
+        >
           <strong>Reviews</strong>
         </a>
       </h6>
       <h6 (click)="toggleQuestions()">
-        <a style="text-decoration: none;"
-           [class.text-muted]="!isQuestionsExpanded"
-           [ngStyle]="isQuestionsExpanded ? {'border-bottom': '2px solid currentColor'} : {}">
+        <a
+          style="text-decoration: none"
+          [class.text-muted]="!isQuestionsExpanded"
+          [ngStyle]="isQuestionsExpanded ? { 'border-bottom': '2px solid currentColor' } : {}"
+        >
           <strong>Questions</strong>
         </a>
       </h6>
@@ -44,7 +50,7 @@
 
     <hr/>
 
-    <div *ngIf="isReviewsExpanded">
+    <div [@expandFadeAnimation]="isReviewsExpanded ? 'expanded' : 'collapsed'">
       <div *ngIf="!reviews.length" class="d-flex justify-content-center">
         <button class="btn btn-sm btn-secondary" (click)="openReviewModal()">BE THE FIRST TO WRITE A REVIEW</button>
       </div>
@@ -52,24 +58,22 @@
         <div *ngFor="let review of reviews">
           <div class="row">
             <div class="col-1">
-              <h2 class="no-font-space">{{review.firstName.charAt(0)}}</h2>
+              <h2 class="no-font-space">{{ review.firstName.charAt(0) }}</h2>
             </div>
             <div class="col-11">
               <div class="d-flex justify-content-between">
-                <p class="small no-font-space"><strong>{{review.firstName.split(" ")[0]}} {{review.lastName.charAt(0)}}
-                  .</strong> -
-                  <span class="text-muted">Verified Buyer</span></p>
-                <p class="small no-font-space">{{review.creationDate | formatMediumDate}}</p>
+                <p class="small no-font-space">
+                  <strong>{{ review.firstName.split(' ')[0] }} {{ review.lastName.charAt(0) }} .</strong> -
+                  <span class="text-muted">Verified Buyer</span>
+                </p>
+                <p class="small no-font-space">{{ review.creationDate | formatMediumDate }}</p>
               </div>
               <ewt-display-star-rating [value]="review.score" [fontSize]="'15px'"></ewt-display-star-rating>
-              <p class="no-font-space small text-muted">{{review.review}}</p>
+              <p class="no-font-space small text-muted">{{ review.review }}</p>
               <div class="d-flex mb-2" *ngIf="review.reviewImages.length">
                 <div *ngFor="let img of getImagesForReview(review.id); let i = index">
                   <div class="thumbnail-wrapper me-2 shadow">
-                    <img [src]="img"
-                         [alt]="productId + '- review - ' + i"
-                         class="thumbnail-img"
-                    />
+                    <img [src]="img" [alt]="productId + '- review - ' + i" class="thumbnail-img"/>
                   </div>
                 </div>
               </div>
@@ -82,7 +86,7 @@
             <ngb-pagination
               [collectionSize]="totalReviews"
               [(page)]="currentPage"
-              [pageSize]="reviewsPerPage"
+              [pageSize]="itemsPerPage"
               [maxSize]="5"
               [rotate]="true"
               [boundaryLinks]="true"
@@ -93,11 +97,49 @@
       </div>
     </div>
 
-    <div *ngIf="isQuestionsExpanded">
-      <div class="d-flex justify-content-center">
+    <div [@expandFadeAnimation]="isQuestionsExpanded ? 'expanded' : 'collapsed'">
+      <div *ngIf="!questions.length" class="d-flex justify-content-center">
         <button class="btn btn-sm btn-secondary" (click)="openQuestionModal()">BE THE FIRST TO ASK A QUESTION</button>
+      </div>
+      <div *ngIf="questions.length">
+        <div *ngFor="let question of questions">
+          <div class="row">
+            <div class="col-1">
+              <h2 class="no-font-space">{{ question.firstName.charAt(0) }}</h2>
+            </div>
+            <div class="col-11">
+              <div class="d-flex justify-content-between">
+                <p class="small no-font-space">
+                  <strong>{{ question.firstName.split(' ')[0] }} {{ question.lastName.charAt(0) }} .</strong> -
+                  <span class="text-muted">Verified Buyer</span>
+                </p>
+                <p class="small no-font-space">{{ question.creationDate | formatMediumDate }}</p>
+              </div>
+              <p class="no-font-space small text-muted">{{ question.question }}</p>
+              <div *ngIf="question.answer" class="answered-question">
+                <div class="d-flex justify-content-start">
+                  <p class="small no-font-space"><strong>Answer:</strong></p>
+                  <p class="small no-font-space text-muted ms-2">{{ question.answer }}</p>
+                </div>
+              </div>
+            </div>
+            <hr/>
+          </div>
+        </div>
+        <div class="d-flex flex-column align-items-center justify-content-center mt-3">
+          <div>
+            <ngb-pagination
+              [collectionSize]="totalQuestions"
+              [(page)]="currentPage"
+              [pageSize]="itemsPerPage"
+              [maxSize]="5"
+              [rotate]="true"
+              [boundaryLinks]="true"
+              (pageChange)="fetchQuestionsData()"
+            ></ngb-pagination>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-

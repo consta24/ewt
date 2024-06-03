@@ -1,29 +1,34 @@
-import {Component, ElementRef, OnInit, ViewChild} from "@angular/core";
-import {ProductService} from "../service/product.service";
-import {
-  AbstractControl,
-  FormArray,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  ValidationErrors,
-  Validators
-} from "@angular/forms";
-import {IProductCategory} from "../model/product-category.model";
-import {IProductAttribute} from "../model/product-attribute.model";
-import {IProductAttributeValue} from "../model/product-attribute-value.model";
-import {forkJoin} from "rxjs";
-import {CdkDragDrop, moveItemInArray} from "@angular/cdk/drag-drop";
-import {ActivatedRoute, Router} from "@angular/router";
-import {IProduct} from "../model/product.model";
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ProductService } from '../service/product.service';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { IProductCategory } from '../model/product-category.model';
+import { IProductAttribute } from '../model/product-attribute.model';
+import { IProductAttributeValue } from '../model/product-attribute-value.model';
+import { forkJoin } from 'rxjs';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { IProduct } from '../model/product.model';
+import { Editor, Toolbar } from 'ngx-editor';
 
 @Component({
   selector: 'ewt-store-admin-product-add',
   templateUrl: 'product-add.component.html',
-  styleUrls: ['product-add.component.scss']
+  styleUrls: ['product-add.component.scss'],
 })
 export class ProductAddComponent implements OnInit {
   @ViewChild('imageInput') imageInput!: ElementRef<HTMLInputElement>;
+
+  toolbar: Toolbar = [
+    ['bold', 'italic'],
+    ['underline', 'strike'],
+    ['code', 'blockquote'],
+    ['ordered_list', 'bullet_list'],
+    [{ heading: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }],
+    ['link', 'image'],
+    ['text_color', 'background_color'],
+    ['align_left', 'align_center', 'align_right', 'align_justify'],
+  ];
+  editor: Editor = new Editor();
 
   isLoading = true;
 
@@ -41,20 +46,21 @@ export class ProductAddComponent implements OnInit {
 
   productForm!: FormGroup;
 
-  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private productService: ProductService) {
-
-  }
+  constructor(private route: ActivatedRoute, private router: Router, private fb: FormBuilder, private productService: ProductService) {}
 
   submitForm() {
     this.updateFormWithSequencedImages();
+
+    // this.productForm.value.description = JSON.stringify(this.productForm.value.description);
+    this.productForm.value.description = this.productForm.value.description.toString();
     if (!this.editedProduct) {
       this.productService.addProduct(this.productForm.value).subscribe({
         next: () => {
-          this.router.navigate(["/store-admin/products"]).then();
+          this.router.navigate(['/store-admin/products']).then();
         },
         error: () => {
           //
-        }
+        },
       });
     } else {
       console.log(this.productForm.value);
@@ -64,8 +70,8 @@ export class ProductAddComponent implements OnInit {
         },
         error: () => {
           //
-        }
-      })
+        },
+      });
     }
   }
 
@@ -85,30 +91,33 @@ export class ProductAddComponent implements OnInit {
       categories: this.productService.getCategories(),
       attributes: this.productService.getAttributes(),
     }).subscribe(result => {
-      const {categories, attributes} = result;
+      const { categories, attributes } = result;
       this.categoriesOption = categories;
       this.attributesOption = attributes;
     });
   }
 
   private initForm(): void {
-    this.productForm = this.fb.group({
-      id: [null],
-      productCategories: [null, Validators.required],
-      name: [null, Validators.required],
-      description: [null, Validators.maxLength(500)],
-      productAttributes: [null, Validators.required],
-      productVariants: this.fb.array([
-        this.fb.group({
-          id: [null],
-          sku: [null],
-          price: [null, Validators.required],
-          stock: [null, Validators.required],
-          variantAttributeValues: this.fb.array([]),
-          variantImages: this.fb.array([])
-        })
-      ])
-    }, {validators: this.uniqueCombinationOfAttributes});
+    this.productForm = this.fb.group(
+      {
+        id: [null],
+        productCategories: [null, Validators.required],
+        name: [null, Validators.required],
+        description: [null, Validators.maxLength(500)],
+        productAttributes: [null, Validators.required],
+        productVariants: this.fb.array([
+          this.fb.group({
+            id: [null],
+            sku: [null],
+            price: [null, Validators.required],
+            stock: [null, Validators.required],
+            variantAttributeValues: this.fb.array([]),
+            variantImages: this.fb.array([]),
+          }),
+        ]),
+      },
+      { validators: this.uniqueCombinationOfAttributes }
+    );
 
     this.addFormListeners();
   }
@@ -125,26 +134,23 @@ export class ProductAddComponent implements OnInit {
         return;
       }
 
-      const combination = attributesValues
-        .map(av => av!.value)
-        .join('-');
+      const combination = attributesValues.map(av => av!.value).join('-');
       allCombinations.push(combination);
     });
 
     const hasDuplicates = allCombinations.some((combo, index, array) => array.indexOf(combo) !== index);
     if (hasDuplicates) {
-      return {'duplicateCombination': true};
+      return { duplicateCombination: true };
     }
     return null;
   }
-
 
   private updateForm() {
     const url = this.route.snapshot.url;
     if (url[0].path === 'edit') {
       const productId = Number(url[1].path);
       this.productService.getProduct(productId).subscribe({
-        next: (product) => {
+        next: product => {
           this.editedProduct = product;
 
           this.productForm.patchValue({
@@ -171,7 +177,7 @@ export class ProductAddComponent implements OnInit {
             const attributeValuesArray = variantFormGroup.get('variantAttributeValues') as FormArray;
 
             while (attributeValuesArray.length < variant.variantAttributeValues.length) {
-              attributeValuesArray.push(this.fb.group({value: ''}));
+              attributeValuesArray.push(this.fb.group({ value: '' }));
             }
 
             while (attributeValuesArray.length > variant.variantAttributeValues.length) {
@@ -191,17 +197,15 @@ export class ProductAddComponent implements OnInit {
         },
         error: () => {
           this.router.navigate(['/store-admin/products/add']).then();
-        }
+        },
       });
     } else {
       this.isLoading = false;
     }
   }
 
-
   private setVariantImagesForProduct(product: IProduct) {
     product.productVariants.forEach((variant, variantIndex) => {
-
       if (!this.variantImages[variantIndex]) {
         this.variantImages[variantIndex] = [];
       }
@@ -238,14 +242,14 @@ export class ProductAddComponent implements OnInit {
       price: [null, Validators.required],
       stock: [null, Validators.required],
       variantAttributeValues: attributeValuesArray,
-      variantImages: this.fb.array([])
+      variantImages: this.fb.array([]),
     });
   }
 
   private addFormListeners() {
     this.productForm.get('productAttributes')?.valueChanges.subscribe(attributes => {
       this.onAttributeSelectionChange(attributes);
-    })
+    });
   }
 
   onAttributeSelectionChange(selectedAttributes: IProductAttribute[]): void {
@@ -343,29 +347,29 @@ export class ProductAddComponent implements OnInit {
       for (let seqIndex = 0; seqIndex < imagesForVariant.length; seqIndex++) {
         const sequencedImage = {
           sequence: seqIndex + 1,
-          imageUrl: imagesForVariant[seqIndex]
+          imageUrl: imagesForVariant[seqIndex],
         };
         sequencedImages.push(sequencedImage);
       }
       this.getProductVariantImages(variantIndex).clear();
       sequencedImages.forEach(img => {
-        this.getProductVariantImages(variantIndex).push(this.fb.group({
-          sequence: img.sequence,
-          ref: img.imageUrl
-        }));
+        this.getProductVariantImages(variantIndex).push(
+          this.fb.group({
+            sequence: img.sequence,
+            ref: img.imageUrl,
+          })
+        );
       });
     }
   }
 
-
   goBack() {
     if (this.fromAttributes) {
-      this.router.navigate(["store-admin/products/attributes"]).then();
+      this.router.navigate(['store-admin/products/attributes']).then();
     } else {
-      this.router.navigate(["store-admin/products"]).then();
+      this.router.navigate(['store-admin/products']).then();
     }
   }
-
 
   get productVariants(): FormArray {
     return this.productForm.get('productVariants') as FormArray;

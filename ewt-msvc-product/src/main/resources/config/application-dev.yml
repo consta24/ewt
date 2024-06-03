@@ -45,12 +45,17 @@ spring:
       label: main
   liquibase:
     contexts: dev, faker
-    url: jdbc:postgresql://localhost:5432/ewt_product
+    url: jdbc:postgresql://localhost:5432/ewt
     default-schema: ewt_product
   messages:
     cache-duration: PT1S
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ewt
+    username: ewt
+    password: ewt
+    driver-class-name: org.postgresql.Driver
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/ewt_product
+    url: r2dbc:postgresql://localhost:5432/ewt
     username: ewt
     password: ewt
   thymeleaf:
@@ -83,8 +88,8 @@ jhipster:
       host: localhost
       port: 5000
       ring-buffer-size: 512
-# ===================================================================
-# Application specific properties
-# ===================================================================
 
-# application:
+gateway:
+  url: http://localhost:9002
+
+

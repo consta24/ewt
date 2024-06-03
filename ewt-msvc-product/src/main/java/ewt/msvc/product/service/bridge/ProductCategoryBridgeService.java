@@ -6,6 +6,7 @@ import ewt.msvc.product.repository.bridge.ProductCategoryBridgeRepository;
 import ewt.msvc.product.service.dto.ProductCategoryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -13,6 +14,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProductCategoryBridgeService {
 
     private final ProductCategoryRepository productCategoryRepository;

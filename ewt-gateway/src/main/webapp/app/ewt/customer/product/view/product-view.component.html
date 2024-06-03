@@ -5,12 +5,11 @@
     <div class="col-md-6 col-12 m-0 p-0">
       <div class="position-relative text-center" *ngIf="currentImage">
         <div class="square-image">
-          <img [src]="currentImage" [alt]="product.name">
+          <img [src]="currentImage" [alt]="product.name" />
         </div>
 
         <div *ngIf="images.length > 1">
-          <button class="position-absolute top-50 start-0 translate-middle-y btn btn-outline-dark"
-                  (click)="prevImage()">
+          <button class="position-absolute top-50 start-0 translate-middle-y btn btn-outline-dark" (click)="prevImage()">
             <fa-icon icon="caret-left" [fixedWidth]="true"></fa-icon>
           </button>
           <button class="position-absolute top-50 end-0 translate-middle-y btn btn-outline-dark" (click)="nextImage()">
@@ -18,38 +17,37 @@
           </button>
         </div>
       </div>
-
       <div class="d-flex mt-3" *ngIf="images.length > 1">
         <div *ngFor="let img of images; let i = index">
-          <div class="thumbnail-wrapper me-2 shadow" [ngClass]="{'selected-image': currentImage === img}">
-            <img [src]="img"
-                 [alt]="product.name + '-' + i"
-                 (click)="currentImage = img"
-                 class="thumbnail-img"
-            >
+          <div class="thumbnail-wrapper me-2 shadow" [ngClass]="{ 'selected-image': currentImage === img }">
+            <img [src]="img" [alt]="product.name + '-' + i" (click)="currentImage = img" class="thumbnail-img" />
           </div>
         </div>
       </div>
     </div>
-    <div class="col-md-6 col-12">
+    <div class="col-12" [ngClass]="images.length ? 'col-md-6' : 'col-md-12'">
       <div class="row">
-        <h3 class="mt-2"><strong>{{product.name}}</strong></h3>
-        <h5 class="text-danger">{{product.productVariants[0].price}} €</h5>
-        <div class="d-flex align-items-baseline" *ngIf="reviewInfo">
-          <ewt-display-star-rating [value]="reviewInfo.score" [fontSize]="'15px'"></ewt-display-star-rating>
-          <p class="ms-2 no-font-space">{{reviewInfo.count}} reviews</p>
+        <h3 class="mt-2">
+          <strong>{{ product.name }}</strong>
+        </h3>
+        <h5 class="text-danger">{{ product.productVariants[0].price }} €</h5>
+        <div class="d-flex align-items-baseline" *ngIf="product.feedbackReviewInfo">
+          <ewt-display-star-rating [value]="product.feedbackReviewInfo.score" [fontSize]="'15px'"></ewt-display-star-rating>
+          <p class="ms-2 no-font-space">{{ product.feedbackReviewInfo.count }} reviews</p>
         </div>
         <div>
-          <hr/>
+          <hr />
         </div>
         <div *ngFor="let attribute of product.productAttributes" class="mt-2">
-          <h6>{{attribute.name}}</h6>
+          <h6>{{ attribute.name }}</h6>
           <div class="d-flex">
-            <button *ngFor="let value of attributeValuesMap[attribute.id]"
-                    class="btn btn-lg btn-outline-dark me-2 shadow"
-                    [class.active]="selectedAttributes[attribute.id] === value"
-                    (click)="selectAttributeValue(attribute.id, value)">
-              {{value}}
+            <button
+              *ngFor="let value of attributeValuesMap[attribute.id]"
+              class="btn btn-lg btn-outline-dark me-2 shadow"
+              [class.active]="selectedAttributes[attribute.id] === value"
+              (click)="selectAttributeValue(attribute.id, value)"
+            >
+              {{ value }}
             </button>
           </div>
         </div>
@@ -61,9 +59,7 @@
               <button (click)="decrementQuantity()" class="quantity-control">
                 <fa-icon icon="minus" [fixedWidth]="true"></fa-icon>
               </button>
-              <input type="number" class="quantity-input" id="quantity"
-                     [value]="quantity"
-                     min="1" readonly>
+              <input type="number" class="quantity-input" id="quantity" [value]="quantity" min="1" readonly />
               <button (click)="incrementQuantity()" class="quantity-control">
                 <fa-icon icon="plus" [fixedWidth]="true"></fa-icon>
               </button>
@@ -81,18 +77,13 @@
           </div>
         </div>
         <div *ngIf="currentVariant.stock === 0" class="mt-2">
-          <button class="btn btn-outline-dark w-100 shadow" disabled>
-            Sold Out
-          </button>
-          <button class="btn btn-dark w-100 shadow mt-2" (click)="toggleNotify()">
-            Notify me when back in stock
-          </button>
+          <button class="btn btn-outline-dark w-100 shadow" disabled>Sold Out</button>
+          <button class="btn btn-dark w-100 shadow mt-2" (click)="toggleNotify()">Notify me when back in stock</button>
           <div *ngIf="isNotifyExpanded" class="mt-2 d-flex">
-            <input type="email" class="form-control shadow" placeholder="Your Email" [(ngModel)]="notifyEmailInput"/>
+            <input type="email" class="form-control shadow" placeholder="Your Email" [(ngModel)]="notifyEmailInput" />
             <button class="btn btn-dark shadow" (click)="submitNotify()">Notify</button>
           </div>
         </div>
-
 
         <div class="mt-4" *ngIf="product.description">
           <div class="cursor-pointer" (click)="toggleDescription()">
@@ -102,8 +93,8 @@
             </h5>
           </div>
 
-          <div *ngIf="isDescriptionExpanded">
-            <span>{{product.description}}</span>
+          <div [@expandFadeAnimation]="isDescriptionExpanded ? 'expanded' : 'collapsed'">
+            <span [innerHTML]="product.description"></span>
           </div>
         </div>
 
@@ -115,20 +106,22 @@
             </h5>
           </div>
 
-          <div *ngIf="isDeliveryAndReturnsExpanded">
+          <div [@expandFadeAnimation]="isDeliveryAndReturnsExpanded ? 'expanded' : 'collapsed'">
             <a class="text-underline"><strong>DELIVERY</strong></a>
-            <p>We are committed to delivering your EWT item as swiftly and securely as possible. We understand the
-              anticipation of wearing our thoughtfully designed piece, which is why we collaborate with reliable
-              delivery partners to ensure it reaches you on time. All our packages are inspected and packed with care,
-              ensuring they arrive in impeccable condition. We offer various delivery options, tailored to your needs,
-              and you can track your package every step of the way. Experience the joy of unwrapping an EWT piece,
-              knowing it has been delivered with love and care.</p>
+            <p>
+              We are committed to delivering your EWT item as swiftly and securely as possible. We understand the anticipation of wearing
+              our thoughtfully designed piece, which is why we collaborate with reliable delivery partners to ensure it reaches you on time.
+              All our packages are inspected and packed with care, ensuring they arrive in impeccable condition. We offer various delivery
+              options, tailored to your needs, and you can track your package every step of the way. Experience the joy of unwrapping an EWT
+              piece, knowing it has been delivered with love and care.
+            </p>
             <a class="text-underline"><strong>RETURNS</strong></a>
-            <p>We want you to love your EWT item as much as we loved designing, creating & wearing it. That’s why, if
-              you’re not completely happy with it, we'll exchange it or give you a refund. All we ask is that that it’s
-              returned to us in its original condition with all original packaging, within 28 days of delivery.
-              To allow us to refund you as quick as possible, we’ve implemented a quick & simple returns process
-              online.</p>
+            <p>
+              We want you to love your EWT item as much as we loved designing, creating & wearing it. That’s why, if you’re not completely
+              happy with it, we'll exchange it or give you a refund. All we ask is that that it’s returned to us in its original condition
+              with all original packaging, within 28 days of delivery. To allow us to refund you as quick as possible, we’ve implemented a
+              quick & simple returns process online.
+            </p>
           </div>
         </div>
       </div>

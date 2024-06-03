@@ -1,39 +1,54 @@
-import {Injectable} from "@angular/core";
-import {ApplicationConfigService} from "../../../../core/config/application-config.service";
-import {MSVC_PRODUCT} from "../../../../config/msvc.constants";
-import {HttpClient, HttpParams} from "@angular/common/http";
-import {IProduct} from "../model/product.model";
-import {IProductCategory} from "../model/product-category.model";
-import {IProductAttribute} from "../model/product-attribute.model";
-import {IProductAttributeValue} from "../model/product-attribute-value.model";
-import {Observable} from "rxjs";
-import {IProductVariant} from "../model/product-variant.model";
-import {createRequestOption} from "../../../../core/request/request-util";
+import { Injectable } from '@angular/core';
+import { ApplicationConfigService } from '../../../../core/config/application-config.service';
+import { MSVC_PRODUCT } from '../../../../config/msvc.constants';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { IProduct } from '../model/product.model';
+import { IProductCategory } from '../model/product-category.model';
+import { IProductAttribute } from '../model/product-attribute.model';
+import { IProductAttributeValue } from '../model/product-attribute-value.model';
+import { Observable } from 'rxjs';
+import { IProductVariant } from '../model/product-variant.model';
+import { createRequestOption } from '../../../../core/request/request-util';
+import { DomSanitizer } from '@angular/platform-browser';
+import { map, tap } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProductService {
-  private productUrl = this.applicationConfigService.getEndpointFor('api/store-admin/product', MSVC_PRODUCT)
-  private productCategoryUrl = this.applicationConfigService.getEndpointFor('api/store-admin/product-category', MSVC_PRODUCT)
-  private productAttributeUrl = this.applicationConfigService.getEndpointFor('api/store-admin/product-attribute', MSVC_PRODUCT)
+  private productUrl = this.applicationConfigService.getEndpointFor('api/store-admin/product', MSVC_PRODUCT);
+  private productCategoryUrl = this.applicationConfigService.getEndpointFor('api/store-admin/product-category', MSVC_PRODUCT);
+  private productAttributeUrl = this.applicationConfigService.getEndpointFor('api/store-admin/product-attribute', MSVC_PRODUCT);
 
-  constructor(private applicationConfigService: ApplicationConfigService, private httpClient: HttpClient) {
-  }
-
+  constructor(
+    private applicationConfigService: ApplicationConfigService,
+    private httpClient: HttpClient,
+    private sanitizer: DomSanitizer
+  ) {}
 
   //PRODUCTS
   public getProduct(productId: number) {
-    return this.httpClient.get<IProduct>(`${this.productUrl}/${productId}`);
+    return this.httpClient.get<IProduct>(`${this.productUrl}/${productId}`).pipe(map(product => this.sanitizeProduct(product)));
   }
 
   public getProductForSku(sku: string) {
-    return this.httpClient.get<IProduct>(`${this.productUrl}/sku/${sku}`);
+    return this.httpClient.get<IProduct>(`${this.productUrl}/sku/${sku}`).pipe(map(product => this.sanitizeProduct(product)));
   }
 
   public getProductsPage(pageable: any) {
     let options = createRequestOption(pageable);
-    return this.httpClient.get<IProduct[]>(`${this.productUrl}`, {params: options, observe: "response"});
+    return this.httpClient
+      .get<IProduct[]>(`${this.productUrl}`, {
+        params: options,
+        observe: 'response',
+      })
+      .pipe(
+        tap(products => {
+          if (products.body?.length) {
+            products.body.map(product => this.sanitizeProduct(product));
+          }
+        })
+      );
   }
 
   public addProduct(product: IProduct) {
@@ -51,14 +66,14 @@ export class ProductService {
   //VARIANTS
   public getProductVariant(sku: string) {
     const productId = this.extractProductIdFromSku(sku);
-    return this.httpClient.get<IProductVariant>(`${this.productUrl}/${productId}/variant/${sku}`)
+    return this.httpClient.get<IProductVariant>(`${this.productUrl}/${productId}/variant/${sku}`);
   }
 
   public getProductVariantImageByRef(productId: number, sku: string, ref: string): Observable<Blob> {
     const params = new HttpParams().set('ref', ref);
     return this.httpClient.get(`${this.productUrl}/${productId}/variant/${sku}/image`, {
       params: params,
-      responseType: "blob"
+      responseType: 'blob',
     });
   }
 
@@ -67,7 +82,7 @@ export class ProductService {
   }
 
   public deleteVariant(productId: number, sku: string) {
-    return this.httpClient.delete(`${this.productUrl}/${productId}/variant/${sku}`)
+    return this.httpClient.delete(`${this.productUrl}/${productId}/variant/${sku}`);
   }
 
   private extractProductIdFromSku(sku: string) {
@@ -96,7 +111,7 @@ export class ProductService {
   }
 
   public deleteCategory(categoryId: number) {
-    return this.httpClient.delete<void>(`${this.productCategoryUrl}/${categoryId}`)
+    return this.httpClient.delete<void>(`${this.productCategoryUrl}/${categoryId}`);
   }
 
   //ATTRIBUTES
@@ -121,7 +136,7 @@ export class ProductService {
   }
 
   public deleteAttribute(attributeId: number) {
-    return this.httpClient.delete<void>(`${this.productAttributeUrl}/${attributeId}`)
+    return this.httpClient.delete<void>(`${this.productAttributeUrl}/${attributeId}`);
   }
 
   //ATTRIBUTE VALUES
@@ -138,7 +153,10 @@ export class ProductService {
   }
 
   public updateAttributeValue(attributeValue: IProductAttributeValue) {
-    return this.httpClient.put<IProductAttributeValue>(`${this.productAttributeUrl}/${attributeValue.attributeId}/values/${attributeValue.id}`, attributeValue);
+    return this.httpClient.put<IProductAttributeValue>(
+      `${this.productAttributeUrl}/${attributeValue.attributeId}/values/${attributeValue.id}`,
+      attributeValue
+    );
   }
 
   public addAttributeValue(attributeId: number, value: IProductAttributeValue) {
@@ -147,5 +165,12 @@ export class ProductService {
 
   public deleteAttributeValue(attributeId: number, attributeValueId: number) {
     return this.httpClient.delete(`${this.productAttributeUrl}/${attributeId}/values/${attributeValueId}`);
+  }
+
+  private sanitizeProduct(product: IProduct) {
+    if (typeof product.description === 'string') {
+      product.description = this.sanitizer.bypassSecurityTrustHtml(product.description);
+    }
+    return product;
   }
 }

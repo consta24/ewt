@@ -77,7 +77,6 @@ public class CartService {
                 .map(cartItemMapper::toDTO);
     }
 
-
     public Mono<Void> addToCart(UUID guestUuid, CartItemDTO cartItemDTO) {
         return SecurityUtils.getCurrentUserLogin()
                 .flatMap(username -> cartRepository.findByUsername(username)
@@ -88,7 +87,6 @@ public class CartService {
                         .flatMap(cart -> updateOrAddCartItem(cart, cartItemDTO))))
                 .then();
     }
-
 
     private Mono<CartItem> updateOrAddCartItem(Cart cart, CartItemDTO cartItemDTO) {
         return getStockForProductVariant(cartItemDTO.getSku())

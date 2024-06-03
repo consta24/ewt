@@ -22,36 +22,36 @@
   border-radius: 50%;
   font-size: 14px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 2; /* Add a z-index to ensure the label stays on top */
+  z-index: 2;
 }
 
 img {
   border-radius: 6px;
   transition: transform 0.3s, opacity 0.3s;
-  z-index: 1; /* Set a lower z-index for the image */
+  z-index: 1;
 }
 
 .file-preview-container div:hover img {
   transform: scale(1.05);
-  opacity: 0.9; /* Add a slight fade to the image to make the number more visible */
+  opacity: 0.9;
 }
 
 .remove-image-btn {
   position: absolute;
   top: 5px;
   right: 5px;
-  background-color: rgba(255, 0, 0, 0.8); /* Red background */
+  background-color: red;
   color: white;
   padding: 3px 10px;
   cursor: pointer;
   border-radius: 50%;
-  font-size: 16px; /* Slightly larger font size */
-  z-index: 3; /* Higher z-index to make sure it's on top */
-  display: none; /* Initially hidden */
+  font-size: 16px;
+  z-index: 3;
+  display: none;
 }
 
 .image-container:hover .remove-image-btn {
-  display: block; /* Show on hover */
+  display: block;
 }
 
 .image-placeholder {

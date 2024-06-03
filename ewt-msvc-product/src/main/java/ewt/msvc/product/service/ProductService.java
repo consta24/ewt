@@ -11,11 +11,13 @@ import ewt.msvc.product.service.dto.ProductAttributeDTO;
 import ewt.msvc.product.service.dto.ProductCategoryDTO;
 import ewt.msvc.product.service.dto.ProductDTO;
 import ewt.msvc.product.service.dto.ProductVariantDTO;
+import ewt.msvc.product.service.http.FeedbackReviewHttpService;
+import ewt.msvc.product.service.http.dto.FeedbackReviewInfoDTO;
 import ewt.msvc.product.service.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.reactive.TransactionalOperator;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,9 +27,8 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProductService {
-
-    private final TransactionalOperator transactionalOperator;
 
     private final ProductMapper productMapper;
 
@@ -39,6 +40,8 @@ public class ProductService {
     private final ProductVariantService productVariantService;
     private final ProductCategoryBridgeService productCategoryBridgeService;
     private final ProductAttributeBridgeService productAttributeBridgeService;
+
+    private final FeedbackReviewHttpService feedbackReviewHttpService;
 
     public Mono<Long> count() {
         return productRepository.count();
@@ -95,8 +98,7 @@ public class ProductService {
                             savedProductDTO.setProductCategories(new HashSet<>(productDTO.getProductCategories()));
                             savedProductDTO.setProductAttributes(new HashSet<>(productDTO.getProductAttributes()));
                             return savedProductDTO;
-                        }))
-                .as(transactionalOperator::transactional);
+                        }));
     }
 
 
@@ -139,8 +141,7 @@ public class ProductService {
                         })
                 )
                 .then(productRepository.save(productMapper.toEntity(productDTO)))
-                .map(productMapper::toDTO)
-                .as(transactionalOperator::transactional);
+                .map(productMapper::toDTO);
     }
 
 
@@ -150,8 +151,7 @@ public class ProductService {
         Flux<Void> deleteVariants = productVariantService.deleteVariantsForProduct(id);
 
         return Flux.concat(deleteCategoryBridges, deleteAttributeBridges, deleteVariants)
-                .then(productRepository.deleteById(id))
-                .as(transactionalOperator::transactional);
+                .then(productRepository.deleteById(id));
     }
 
     private Mono<ProductDTO> populateProductDTOWithAssociations(Product product) {
@@ -166,12 +166,15 @@ public class ProductService {
                 .flatMap(bridge -> productAttributeService.getAttributeById(bridge.getAttributeId()))
                 .collect(Collectors.toSet());
 
-        return Mono.zip(categories, attributes, variants)
+        Mono<FeedbackReviewInfoDTO> feedbackReviewInfo = feedbackReviewHttpService.getReviewInfoForProduct(product.getId());
+
+        return Mono.zip(categories, attributes, variants, feedbackReviewInfo)
                 .map(tuple -> {
                     ProductDTO productDTO = productMapper.toDTO(product);
                     productDTO.setProductCategories(tuple.getT1());
                     productDTO.setProductAttributes(tuple.getT2());
                     productDTO.setProductVariants(tuple.getT3());
+                    productDTO.setFeedbackReviewInfo(tuple.getT4());
                     return productDTO;
                 });
     }

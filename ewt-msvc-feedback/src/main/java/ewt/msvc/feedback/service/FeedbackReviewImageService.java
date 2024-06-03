@@ -1,27 +1,35 @@
 package ewt.msvc.feedback.service;
 
 
-import ewt.msvc.config.utils.Base64Util;
 import ewt.msvc.feedback.domain.FeedbackReviewImage;
 import ewt.msvc.feedback.repository.FeedbackReviewImageRepository;
 import ewt.msvc.feedback.service.dto.FeedbackReviewImageDTO;
 import ewt.msvc.feedback.service.mapper.FeedbackReviewImageMapper;
-import io.minio.*;
+import io.minio.BucketExistsArgs;
+import io.minio.GetObjectArgs;
+import io.minio.GetObjectResponse;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioAsyncClient;
+import io.minio.ObjectWriteResponse;
+import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.compress.utils.IOUtils;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.util.Base64;
-import java.util.List;
-import java.util.Set;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +46,7 @@ public class FeedbackReviewImageService {
 
     public Mono<String> getFeedbackReviewImageByRef(String ref) {
         String[] parts = ref.split("/");
-        if(parts.length != 3) {
+        if (parts.length != 3) {
             return Mono.error(new RuntimeException("Invalid ref format"));
         }
 
@@ -76,49 +84,50 @@ public class FeedbackReviewImageService {
                 .map(feedbackReviewImageMapper::toDTO);
     }
 
-    public Mono<Void> saveFeedbackReviewImages(Long productId, Long feedbackReviewId, Set<FeedbackReviewImageDTO> feedbackReviewImages) {
-        List<Mono<Void>> monos = IntStream.range(0, feedbackReviewImages.size())
-                .mapToObj(index -> {
-                    FeedbackReviewImageDTO imageDTO = new ArrayList<>(feedbackReviewImages).get(index);
-                    imageDTO.setFeedbackReviewId(feedbackReviewId);
-                    String base64Data = imageDTO.getRef().split(",")[1];
-
-                    byte[] imageBytes = Base64.getDecoder().decode(base64Data);
-                    String contentType = Base64Util.getContentTypeFromBase64(imageDTO.getRef());
-                    String fileExtension = Base64Util.getFileExtensionFromBase64(imageDTO.getRef());
-                    String objectName = productId + "/" + feedbackReviewId + "/" + index + 1 + "." + fileExtension;
-
-                    imageDTO.setRef(objectName);
-
-                    FeedbackReviewImage feedbackReviewImage = feedbackReviewImageMapper.toEntity(imageDTO);
+    public Mono<Void> saveFeedbackReviewImages(Long productId, Long feedbackReviewId, Flux<FilePart> fileParts) {
+        return fileParts
+                .flatMap(filePart -> {
+                    String fileName = StringUtils.cleanPath(Objects.requireNonNull(filePart.filename()));
+                    String objectName = productId + "/" + feedbackReviewId + "/" + fileName;
+                    FeedbackReviewImage feedbackReviewImage = FeedbackReviewImage.builder()
+                            .feedbackReviewId(feedbackReviewId)
+                            .ref(objectName)
+                            .build();
                     return feedbackReviewImageRepository.save(feedbackReviewImage)
-                            .flatMap(savedImage -> asyncPutObject(imageBytes, minioBucketName, objectName, contentType));
+                            .flatMap(savedImage -> asyncPutObject(filePart, minioBucketName, objectName));
                 })
-                .toList();
-
-        return Mono.when(monos).then();
+                .then();
     }
 
-    private Mono<Void> asyncPutObject(byte[] imageBytes, String bucketName, String objectName, String contentType) {
+    private Mono<Void> asyncPutObject(FilePart file, String bucketName, String objectName) {
         return ensureBucketExists(bucketName)
-                .then(Mono.create(sink -> {
+                .then(file.content().collectList())
+                .flatMap(dataBuffers -> {
+                    InputStream is = new SequenceInputStream(
+                            Collections.enumeration(dataBuffers.stream()
+                                    .map(DataBuffer::asInputStream)
+                                    .toList())
+                    );
+                    int dataSize = dataBuffers.stream().mapToInt(DataBuffer::readableByteCount).sum();
+
                     try {
-                        minioAsyncClient.putObject(
-                                        PutObjectArgs.builder()
-                                                .bucket(bucketName)
-                                                .object(objectName)
-                                                .stream(new ByteArrayInputStream(imageBytes), imageBytes.length, -1)
-                                                .contentType(contentType)
-                                                .build()
-                                ).thenAccept(result -> sink.success())
-                                .exceptionally(ex -> {
-                                    sink.error(ex);
-                                    return null;
-                                });
+                        PutObjectArgs putObjectArgs = PutObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(objectName)
+                                .stream(is, dataSize, -1)
+                                .contentType(Objects.requireNonNull(file.headers().getContentType()).toString())
+                                .build();
+
+                        CompletableFuture<ObjectWriteResponse> putObjectFuture = minioAsyncClient.putObject(putObjectArgs);
+
+                        return Mono.fromFuture(() -> putObjectFuture)
+                                .then()
+                                .doFinally(signalType -> dataBuffers.forEach(DataBufferUtils::release));
                     } catch (Exception e) {
-                        sink.error(e);
+                        dataBuffers.forEach(DataBufferUtils::release);
+                        return Mono.error(e);
                     }
-                }));
+                });
     }
 
     private Mono<Void> ensureBucketExists(String bucketName) {

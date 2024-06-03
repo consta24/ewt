@@ -2,10 +2,9 @@ import {Component, OnInit} from "@angular/core";
 import {Router} from "@angular/router";
 import {IProduct} from "../../../store-admin/product/model/product.model";
 import {ProductService} from "../../../store-admin/product/service/product.service";
-import {ProductImageService} from "../../../../shared/image/product-image.service";
 import {CartDrawerService} from "../../cart/service/cart-drawer.service";
 import {CartService} from "../../cart/service/cart.service";
-import {of, switchMap} from "rxjs";
+import {finalize} from "rxjs/operators";
 
 
 @Component({
@@ -17,20 +16,17 @@ export class ProductListComponent implements OnInit {
 
   isLoading = true;
   products: IProduct[] = [];
-  skuImagesMap: Map<string, string[]> = new Map();
 
   productsPerPage = 12;
   currentPage = 1;
   totalProducts = 0;
 
-  hoveredProductSku: string | null = null;
-  hoveredImage: string | null = null;
+  hoveredProductId: number | null = null;
 
   constructor(private router: Router,
               private productService: ProductService,
               private cartService: CartService,
-              private cartDrawerService: CartDrawerService,
-              private productImageService: ProductImageService) {
+              private cartDrawerService: CartDrawerService) {
   }
 
   ngOnInit(): void {
@@ -43,38 +39,19 @@ export class ProductListComponent implements OnInit {
       size: this.productsPerPage,
       sort: ["id,desc"]
     }
-    this.productService.getProductsPage(pageable).pipe(
-      switchMap(res => {
-        if (res.body && res.body.length) {
-          this.products = res.body;
-          this.totalProducts = Number(res.headers.get('X-Total-Count'));
-          return this.productImageService.getImagesForProducts(res.body);
-        } else {
-          return of(null);
-        }
-      })
-    ).subscribe({
-      next: imagesToSkuMap => {
-        if (imagesToSkuMap) {
-          this.skuImagesMap = imagesToSkuMap;
-          this.isLoading = false;
-        } else {
-          this.isLoading = false;
+    this.productService.getProductsPage(pageable).pipe(finalize(() => this.isLoading = false)).subscribe({
+      next: res => {
+        if (res) {
+          if (res.body && res.body.length) {
+            this.products = res.body;
+            this.totalProducts = Number(res.headers.get('X-Total-Count'));
+          }
         }
       }, error: () => {
         //TODO:
       }
     });
   }
-
-
-  getFirstImage(sku: string): string {
-    if (this.hoveredProductSku === sku) {
-      return this.hoveredImage || this.skuImagesMap.get(sku)?.[0] || '';
-    }
-    return this.skuImagesMap.get(sku)?.[0] || '';
-  }
-
 
   addToCart(product: IProduct, quantity: number = 1) {
     if (product.productVariants.length > 1) {
@@ -98,39 +75,34 @@ export class ProductListComponent implements OnInit {
     this.router.navigate([`/products/${id}`]).then();
   }
 
-  onHover(product: IProduct): void {
-    this.hoveredProductSku = product.productVariants[0].sku;
-    this.hoveredImage = this.getNextVariantFirstImage(product);
-  }
-
   onMouseLeave(): void {
-    this.hoveredProductSku = null;
-    this.hoveredImage = null;
+    this.hoveredProductId = null;
   }
 
 
-  getNextVariantFirstImage(product: IProduct): string {
-    const currentVariantIndex = product.productVariants.findIndex(
-      variant => variant.sku === this.hoveredProductSku
-    );
+  getDefaultImageRef(product: IProduct): string {
+    if (product.productVariants && product.productVariants.length > 0 && product.productVariants[0].variantImages && product.productVariants[0].variantImages.length > 0) {
+      const ref = product.productVariants[0].variantImages[0].ref;
+      //todo fix
+      return `/services/ewt-msvc-product/api/store-admin/product/38/variant/38-heart-tennis-link-necklace-6mm-silver/image?ref=${ref}`;
+    }
+    return '/content/images/no-image.jpg';
+  }
 
-    if (currentVariantIndex === -1) {
-      return '';
+  getHoverImageRef(product: IProduct): string {
+    let ref: string | null = null;
+
+    if (product.productVariants && product.productVariants.length > 1 && product.productVariants[1].variantImages && product.productVariants[1].variantImages.length > 0) {
+      ref = product.productVariants[1].variantImages[0].ref;
+    } else if (product.productVariants && product.productVariants.length > 0 && product.productVariants[0].variantImages && product.productVariants[0].variantImages.length > 1) {
+      ref = product.productVariants[0].variantImages[1].ref;
     }
 
-    const currentVariant = product.productVariants[currentVariantIndex];
-
-    if (
-      currentVariantIndex + 1 < product.productVariants.length &&
-      product.productVariants[currentVariantIndex + 1].variantImages.length > 0
-    ) {
-      const nextSku = product.productVariants[currentVariantIndex + 1].sku;
-      return this.skuImagesMap.get(nextSku)?.[0] || '';
-    } else if ((this.skuImagesMap.get(currentVariant.sku)?.length ?? 0) > 1) {
-      return this.skuImagesMap.get(currentVariant.sku)?.[1] || '';
+    if (ref) {
+      return `/services/ewt-msvc-product/api/store-admin/product/38/variant/38-heart-tennis-link-necklace-6mm-silver/image?ref=${ref}`;
     }
 
-    return '';
+    return '/content/images/no-image.jpg';
   }
 }
 

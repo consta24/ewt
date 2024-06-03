@@ -35,5 +35,4 @@ public class ProductVariantImageResource {
                     return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
                 });
     }
-
 }

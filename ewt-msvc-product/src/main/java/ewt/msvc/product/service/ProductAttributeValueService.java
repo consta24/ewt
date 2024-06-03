@@ -13,7 +13,7 @@ import ewt.msvc.product.service.mapper.ProductVariantMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.reactive.TransactionalOperator;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,10 +21,10 @@ import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProductAttributeValueService {
 
     private final ApplicationContext context;
-    private final TransactionalOperator transactionalOperator;
 
     private final ProductAttributeValueMapper productAttributeValueMapper;
     private final ProductVariantMapper productVariantMapper;
@@ -79,8 +79,8 @@ public class ProductAttributeValueService {
                         .map(ProductVariantDTO::getProductId)
                         .distinct()
                         .flatMap(this::updateAssociatedProduct)
-                        .then(Mono.just(productAttributeValueMapper.toDTO(savedAttributeValue))))
-                .as(transactionalOperator::transactional);
+                        .then(Mono.just(productAttributeValueMapper.toDTO(savedAttributeValue))));
+
     }
 
     private Mono<Void> updateAssociatedProduct(Long productId) {

@@ -45,12 +45,12 @@ spring:
       label: main
   liquibase:
     contexts: dev, faker
-    url: jdbc:postgresql://localhost:5432/ewt_cart
+    url: jdbc:postgresql://localhost:5432/ewt
     default-schema: ewt_cart
   messages:
     cache-duration: PT1S
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/ewt_cart
+    url: r2dbc:postgresql://localhost:5432/ewt
     username: ewt
     password: ewt
   thymeleaf:

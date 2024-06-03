@@ -14,6 +14,6 @@ public interface FeedbackReviewRepository extends R2dbcRepository<FeedbackReview
 
     Mono<Long> countByProductId(Long productId);
 
-    @Query("SELECT AVG(score) FROM ewt_feedback.ewt_feedback.feedback_review WHERE product_id = :productId")
+    @Query("SELECT AVG(score) FROM ewt.ewt_feedback.feedback_review WHERE product_id = :productId")
     Mono<BigDecimal> averageScoreByProductId(@Param("productId") Long productId);
 }

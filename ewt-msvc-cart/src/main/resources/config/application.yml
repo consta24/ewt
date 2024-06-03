@@ -185,6 +185,14 @@ jhipster:
     license: unlicensed
     license-url:
 
+minio:
+  enabled: false
+  endpoint: http://localhost:9000
+  accessKey: minio-admin
+  secretKey: minio-admin
+  bucketName: ewt-cart
+
+
 # ===================================================================
 # Application specific properties
 # ===================================================================

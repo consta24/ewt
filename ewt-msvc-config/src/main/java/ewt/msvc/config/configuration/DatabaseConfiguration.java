@@ -22,7 +22,7 @@ import java.util.BitSet;
 import java.util.List;
 
 @Configuration
-@EnableR2dbcRepositories({ "ewt.msvc.identity" })
+@EnableR2dbcRepositories({ "ewt.msvc" })
 @EnableTransactionManagement
 public class DatabaseConfiguration {
 

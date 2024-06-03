@@ -12,11 +12,13 @@ import ewt.msvc.product.service.mapper.ProductAttributeMapper;
 import ewt.msvc.product.service.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ProductAttributeService {
 
     private final ProductAttributeMapper productAttributeMapper;

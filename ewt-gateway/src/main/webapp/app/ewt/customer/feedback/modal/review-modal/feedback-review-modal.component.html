@@ -7,9 +7,9 @@
 <div class="modal-body">
   <form [formGroup]="reviewForm">
     <div class="mb-2">
-      <label>Score</label>
+      <label for="star-rating">Score</label>
       <div>
-        <ewt-select-star-rating (ratingChange)="handleRatingChange($event)"></ewt-select-star-rating>
+        <ewt-select-star-rating (ratingChange)="handleRatingChange($event)" id="star-rating"></ewt-select-star-rating>
       </div>
     </div>
 
@@ -20,20 +20,17 @@
 
     <div class="mb-2">
       <label for="firstName">First Name</label>
-      <input id="firstName" type="text" class="form-control" placeholder="John.."
-             formControlName="firstName"/>
+      <input id="firstName" type="text" class="form-control" placeholder="John.." formControlName="firstName" />
     </div>
 
     <div class="mb-2">
       <label for="lastName">Last Name</label>
-      <input id="lastName" type="text" class="form-control" placeholder="Doe.."
-             formControlName="lastName"/>
+      <input id="lastName" type="text" class="form-control" placeholder="Doe.." formControlName="lastName" />
     </div>
 
     <div class="mb-2">
       <label for="email">Email</label>
-      <input id="email" type="email" class="form-control" placeholder="john.doe@gmail.com.."
-             formControlName="email"/>
+      <input id="email" type="email" class="form-control" placeholder="john.doe@gmail.com.." formControlName="email" />
     </div>
 
     <div class="file-drop p-5" (dragover)="onImageDragOver($event)" (drop)="onImageDrop($event)">
@@ -42,20 +39,17 @@
         <span>Drag and drop pictures here, or use the</span>
         <a (click)="imageInput.click()">link</a>
       </div>
-      <input #imageInput type="file" accept="image/*" style="display: none;" multiple
-             (change)="onImagesSelected($event)"/>
+      <input #imageInput type="file" accept="image/*" style="display: none" multiple (change)="onImagesSelected($event)" />
     </div>
 
     <div class="file-preview-container">
-      <div class="image-container" *ngFor="let img of images; let imageIndex = index">
-        <span class="remove-image-btn" (click)="removeImage(imageIndex)">&times;</span>
-        <img [src]="img" alt="Preview" height="100" width="100">
+      <div class="image-container" *ngFor="let imagePreview of imagesPreviews; let imageIndex = index">
+        <span class="remove-image-btn" (click)="removeImage(imageIndex)"><fa-icon icon="xmark" [fixedWidth]="true"></fa-icon></span>
+        <img [attr.src]="imagePreview" [alt]="imageIndex" height="100" width="100" />
       </div>
     </div>
   </form>
 </div>
 <div class="modal-footer">
-  <button type="submit" class="btn btn-dark" (click)="submitReview()" [disabled]="reviewForm.invalid">
-    POST
-  </button>
+  <button type="submit" class="btn btn-dark" (click)="submitReview()" [disabled]="reviewForm.invalid">POST</button>
 </div>

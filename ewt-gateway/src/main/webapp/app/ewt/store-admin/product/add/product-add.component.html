@@ -2,11 +2,15 @@
 <div *ngIf="!isLoading">
   <div class="row my-3">
     <div class="col">
-      <h4 class="text-center" *ngIf="!editedProduct"><a><strong>Add product</strong></a></h4>
-      <h4 class="text-center" *ngIf="editedProduct"><a><strong>Update product</strong></a></h4>
+      <h4 class="text-center" *ngIf="!editedProduct">
+        <a><strong>Add product</strong></a>
+      </h4>
+      <h4 class="text-center" *ngIf="editedProduct">
+        <a><strong>Update product</strong></a>
+      </h4>
     </div>
     <div>
-      <hr class="hr-legal"/>
+      <hr class="hr-legal" />
     </div>
   </div>
   <form [formGroup]="productForm" (ngSubmit)="submitForm()">
@@ -25,13 +29,14 @@
         >
         </ng-select>
 
-        <label>Product Name</label>
-        <input type="text" formControlName="name"
-               class="form-control"/>
+        <label for="name">Product Name</label>
+        <input type="text" formControlName="name" id="name" class="form-control" />
 
-        <label>Product Description</label>
-        <textarea formControlName="description"
-                  class="form-control"></textarea>
+        <label for="description">Product Description</label>
+        <div class="border">
+          <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+          <ngx-editor formControlName="description" [editor]="editor" id="description"></ngx-editor>
+        </div>
 
         <label for="attributes">Attributes</label>
         <ng-select
@@ -47,23 +52,27 @@
         ></ng-select>
 
         <strong class="mt-2">Product Variants</strong>
-        <div class="border p-3 mb-2" formArrayName="productVariants"
-             *ngFor="let variant of productVariants.controls; let variantIndex = index" [class.ng-invalid]="false">
-          <p>Variant {{variantIndex + 1}}</p>
-          <hr class="hr-legal"/>
+        <div
+          class="border p-3 mb-2"
+          formArrayName="productVariants"
+          *ngFor="let variant of productVariants.controls; let variantIndex = index"
+          [class.ng-invalid]="false"
+        >
+          <p>Variant {{ variantIndex + 1 }}</p>
+          <hr class="hr-legal" />
           <div [formGroupName]="variantIndex" [class.ng-invalid]="false">
-
             <label for="price">Price</label>
-            <input id="price" type="number" formControlName="price" class="form-control"/>
+            <input id="price" type="number" formControlName="price" class="form-control" />
 
             <label for="stock">Stock</label>
-            <input id="stock" type="number" formControlName="stock" class="form-control mb-3"/>
+            <input id="stock" type="number" formControlName="stock" class="form-control mb-3" />
 
             <strong>Variant attribute values</strong>
             <div class="border p-3">
               <div *ngIf="!selectedAttributes.length">
-                <span class="d-flex justify-content-center align-items-center text-center text-danger">Please select attributes to choose their
-                  corresponding values.</span>
+                <span class="d-flex justify-content-center align-items-center text-center text-danger"
+                  >Please select attributes to choose their corresponding values.</span
+                >
               </div>
               <div *ngFor="let selectedAttribute of selectedAttributes; let attributeIndex = index">
                 <label>{{ selectedAttribute.name }}</label>
@@ -74,10 +83,10 @@
                   notFoundText="Could not find attribute values"
                   loadingText="Loading..."
                   placeholder="Select value"
-                  [formControl]="getAttributeValueControl(variantIndex, attributeIndex)">
+                  [formControl]="getAttributeValueControl(variantIndex, attributeIndex)"
+                >
                 </ng-select>
               </div>
-
             </div>
             <div class="file-drop p-5" (dragover)="onImageDragOver($event)" (drop)="onImageDrop($event, variantIndex)">
               <div class="text-center">
@@ -85,20 +94,24 @@
                 <span>Drag and drop pictures here, or use the</span>
                 <a (click)="imageInput.click()">link</a>
               </div>
-              <input #imageInput type="file" accept="image/*" style="display: none;" multiple
-                     (change)="onImagesSelected($event, variantIndex)"/>
+              <input
+                #imageInput
+                type="file"
+                accept="image/*"
+                style="display: none"
+                multiple
+                (change)="onImagesSelected($event, variantIndex)"
+              />
             </div>
 
             <div class="file-preview-container" cdkDropList (cdkDropListDropped)="onDrop($event, variantIndex)">
-              <div class="image-container" *ngFor="let img of variantImages[variantIndex]; let imageIndex = index"
-                   cdkDrag>
+              <div class="image-container" *ngFor="let img of variantImages[variantIndex]; let imageIndex = index" cdkDrag>
                 <div *cdkDragPlaceholder class="image-placeholder"></div>
-                <span class="sequence-label">{{imageIndex + 1}}</span>
+                <span class="sequence-label">{{ imageIndex + 1 }}</span>
                 <span class="remove-image-btn" (click)="removeImage(variantIndex, imageIndex)">&times;</span>
-                <img [src]="img" alt="Preview" height="100" width="100">
+                <img [src]="img" alt="Preview" height="100" width="100" />
               </div>
             </div>
-
           </div>
         </div>
         <div *ngIf="productForm.hasError('duplicateCombination')">
@@ -109,8 +122,7 @@
         <button type="button" class="btn btn-secondary" (click)="addVariant()">
           <fa-icon icon="plus" [fixedWidth]="true"></fa-icon>
         </button>
-        <button type="button" class="btn btn-secondary" *ngIf="productVariants.controls.length > 1"
-                (click)="removeVariant()">
+        <button type="button" class="btn btn-secondary" *ngIf="productVariants.controls.length > 1" (click)="removeVariant()">
           <fa-icon icon="minus" [fixedWidth]="true"></fa-icon>
         </button>
       </div>
@@ -118,12 +130,8 @@
 
     <div class="d-flex justify-content-end">
       <button type="button" class="btn btn-danger me-2" (click)="goBack()">Cancel</button>
-      <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid" *ngIf="!editedProduct">Add
-        product
-      </button>
-      <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid" *ngIf="editedProduct">Update
-        product
-      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid" *ngIf="!editedProduct">Add product</button>
+      <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid" *ngIf="editedProduct">Update product</button>
     </div>
   </form>
 </div>
